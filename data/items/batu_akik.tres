@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Batu Akik"
+description = "Batu bertuah, damage & hoki naik."
+price = 30
+color = Color(0.690, 0.125, 0.110, 1)
+stats = {"luck": 12, "damage": 4}
+rarity = 1
+tags = PackedStringArray("pusaka")
+special = ""
+special_value = 0.0

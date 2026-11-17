@@ -9,3 +9,5 @@ description = "Ramuan nenek. Pulihkan HP pelan-pelan."
 price = 20
 color = Color(0.878, 0.690, 0.290, 1)
 stats = {"hp_regen": 3}
+rarity = 0
+tags = PackedStringArray("kuliner")

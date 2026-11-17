@@ -9,3 +9,5 @@ description = "Melek dan lincah."
 price = 20
 color = Color(0.290, 0.165, 0.063, 1)
 stats = {"speed": 10}
+rarity = 0
+tags = PackedStringArray("kuliner")

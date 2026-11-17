@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Kentongan"
+description = "Tiap 6 detik: pukul mundur & lukai musuh di sekitar (10 damage)."
+price = 45
+color = Color(0.627, 0.376, 0.165, 1)
+stats = {}
+rarity = 2
+tags = PackedStringArray()
+special = "pulse"
+special_value = 10.0

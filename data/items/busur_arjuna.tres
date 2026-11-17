@@ -9,3 +9,5 @@ description = "Pusaka sang pemanah: semua senjata menembak satu peluru lebih ban
 price = 60
 color = Color(0.94, 0.75, 0.25, 1)
 stats = {"projectiles": 1, "damage": -5}
+rarity = 3
+tags = PackedStringArray("pusaka")

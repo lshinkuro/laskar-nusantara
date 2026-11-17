@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Teropong Rampasan"
+description = "Dirampas dari Kekaisaran Besi: lihat jauh, bidik lebih lama."
+price = 25
+color = Color(0.420, 0.451, 0.490, 1)
+stats = {"range": 20, "attack_speed": -3}
+rarity = 1
+tags = PackedStringArray()
+special = ""
+special_value = 0.0

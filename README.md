@@ -25,6 +25,12 @@ Rencana lengkap: [PLAN.md](PLAN.md).
 - **13 senjata** (jarak dekat/jauh/magis), masing-masing dengan efek saat kena: terbakar (Mantra Api), racun (Sumpit),
   berdarah (Keris, Kunai, Bambu Runcing), lambat (Ketapel), dorong (Tombak, Golok), ledakan (Meriam Lela),
   memantul (Shuriken, Kujang, Cakra). Senjata jarak dekat memunculkan efek tebasan.
+- **30 item** dengan kelangkaan Biasa/Langka/Epik/Legendaris (peluang naik dengan wave & Hoki), termasuk
+  item unik: Wayang Kulit (sekutu menembak), Kalung Taring (pulih saat kena), Obor Bambu (membakar),
+  Gelang Akar Bahar (balas damage), Kentongan (gelombang dorong), Jimat Rajah (selamat dari maut), Lumbung Padi.
+- **Sinergi:** Jurus Silat / Barisan Pemanah / Ilmu Kebatinan (3 senjata sejenis), Kuliner Nusantara &
+  Busana Adat (3 item berlabel), Pusaka Leluhur (2 item pusaka).
+- **Rangkuman run:** kill, damage per senjata, pukulan terkuat, rempah, waktu, sinergi.
 - **Senjata bertingkat:** beli senjata yang sama untuk menggabung (abu → biru → ungu → merah), tiap tier +1 peluru
   & damage x1.5. *Busur Arjuna* (item) dan *Hujan Panah* (ilmu) menambah peluru semua senjata.
 - **Jeda:** tombol *Jeda*, Esc, atau P. Di co-op, jeda berlaku untuk semua pemain.
@@ -46,7 +52,7 @@ scripts/  net (autoload lobby+signaling), sfx (autoload suara), map + obstacle (
 data/     characters/*.tres, items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
 assets/   sprites/ (tools/make_sprites.py), audio/ (tools/make_sounds.py, sintesis gamelan),
           fonts/ (Pixelify Sans, OFL), ui/theme.tres
-tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
+tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), item_test (item unik & sinergi), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
 ```
 
 ## Tes
@@ -55,6 +61,7 @@ godot --headless --fixed-fps 60 -s res://tests/smoke_test.gd
 godot --headless -s res://tests/level_test.gd
 godot --headless -s res://tests/character_test.gd
 godot --headless --fixed-fps 60 -s res://tests/weapon_test.gd
+godot --headless --fixed-fps 60 -s res://tests/item_test.gd
 godot --headless --fixed-fps 60 -s res://tests/boss_test.gd
 godot --headless -s res://tests/net_test.gd -- host &  godot --headless -s res://tests/net_test.gd -- client
 ```

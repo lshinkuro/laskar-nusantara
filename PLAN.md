@@ -99,7 +99,7 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 ### M3 · Minggu 5–6: Sistem data (Resource)
 - [x] `CharacterData`, `WeaponData`, `ItemData` sebagai file `.tres` (jenis musuh masih di `enemies.gd`)
 - [ ] Nambah konten cukup bikin file baru, tanpa ngoding
-- [x] 5 karakter, 13 senjata (+efek kena); item baru 13 dari target 30
+- [x] 5 karakter, 13 senjata (+efek kena), 30 item (7 item unik, kelangkaan, 6 sinergi)
 - [x] Pilih karakter di menu & lobby (5 karakter, terbuka sesuai wave tertinggi)
 
 ### M4 · Minggu 7–8: Musuh & Boss

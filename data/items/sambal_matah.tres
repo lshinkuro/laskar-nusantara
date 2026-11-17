@@ -9,3 +9,5 @@ description = "Pedas! Damage naik, tapi perut sakit."
 price = 25
 color = Color(0.878, 0.188, 0.188, 1)
 stats = {"damage": 15, "max_hp": -3}
+rarity = 0
+tags = PackedStringArray("kuliner")

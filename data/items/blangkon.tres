@@ -9,3 +9,5 @@ description = "Wibawa priyayi, pandangan lebih jauh."
 price = 20
 color = Color(0.231, 0.165, 0.102, 1)
 stats = {"range": 15}
+rarity = 0
+tags = PackedStringArray("busana")

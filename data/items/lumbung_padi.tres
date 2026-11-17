@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Lumbung Padi"
+description = "Setiap 6 rempah terkumpul memulihkan 1 HP."
+price = 30
+color = Color(0.851, 0.702, 0.549, 1)
+stats = {}
+rarity = 1
+tags = PackedStringArray()
+special = "rempah_heal"
+special_value = 6.0

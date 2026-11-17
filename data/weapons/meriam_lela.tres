@@ -19,3 +19,4 @@ pierce = 3
 category = "ranged"
 effect = "explode"
 effect_power = 40.0
+rarity = 2

@@ -20,3 +20,4 @@ pierce = 3
 spin = false
 effect = "knockback"
 effect_power = 30.0
+rarity = 1

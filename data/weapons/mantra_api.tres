@@ -19,3 +19,4 @@ pierce = 0
 category = "magic"
 effect = "burn"
 effect_power = 2.0
+rarity = 1

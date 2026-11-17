@@ -93,6 +93,7 @@ func _spawn_player(id: int, slot: int, total: int) -> void:
 	p.display_name = Net.name_of(id)
 	p.kerajaan = Net.kerajaan_of(id)
 	p.projectiles = projectiles
+	p.enemies = enemies
 	p.map = map
 	p.position = waves.arena_size / 2 + Vector2(slot - (total - 1) / 2.0, 0) * 30
 	p.died.connect(_check_all_dead)

@@ -7,6 +7,24 @@ const EFFECT_COLORS := {
 }
 
 
+## Gelombang lingkaran yang membesar lalu pudar.
+static func ring(parent: Node, pos: Vector2, radius: float, color: Color) -> void:
+	var l := Line2D.new()
+	l.width = 3.0
+	l.default_color = color
+	for i in 33:
+		l.add_point(Vector2.from_angle(TAU * i / 32) * radius)
+	l.position = pos
+	l.z_index = 6
+	l.scale = Vector2(0.2, 0.2)
+	parent.add_child(l)
+	var t := l.create_tween()
+	t.set_parallel()
+	t.tween_property(l, "scale", Vector2.ONE, 0.3)
+	t.tween_property(l, "modulate:a", 0.0, 0.35)
+	t.chain().tween_callback(l.queue_free)
+
+
 ## Busur tebasan putih untuk senjata jarak dekat.
 static func slash(parent: Node, pos: Vector2, angle: float) -> void:
 	var l := Line2D.new()

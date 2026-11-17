@@ -227,6 +227,24 @@ kRRk.dddddd.kRRk
 ....kkk..kkk....
 """
 
+WAYANG = """
+....kk....
+...kggk...
+..kgyygk..
+..kgkkgk..
+...kggk...
+..kRRRRk..
+.kRgRRgRk.
+kgkRRRRkgk
+kgkRgRRkgk
+.k.kRRk.k.
+...kRRk...
+...kRRk...
+..kgk.kgk.
+..kgk.kgk.
+...k...k..
+"""
+
 PELURU_MUSUH = """
 .kkk.
 krrrk
@@ -348,6 +366,14 @@ kkkkmmmmmmk.
 kbbkmmmmmmmk
 kkkkkkkkkkk.
 """,
+    "bintang": """
+...k...
+..kyk..
+kkyyykk
+.kyyyk.
+..kyk..
+.kk.kk.
+""",
     "api": """
 ..rr..
 .ryyr.
@@ -389,7 +415,7 @@ def main():
     for name, rows in {"anjing_pelacak": ANJING, "penembak": PENEMBAK, "serdadu_perisai": PERISAI,
                        "tukang_ranjau": TUKANG_RANJAU, "ranjau": RANJAU, "komandan_besi": KOMANDAN,
                        "mandor_kejam": MANDOR, "gubernur_jenderal": GUBERNUR,
-                       "peluru_musuh": PELURU_MUSUH}.items():
+                       "peluru_musuh": PELURU_MUSUH, "wayang": WAYANG}.items():
         png(os.path.join(OUT, f"{name}.png"), rows, BASE)
     png(os.path.join(OUT, "rempah.png"), REMPAH, BASE)
     png(os.path.join(OUT, "ketupat.png"), KETUPAT, {**BASE, "g": "6aa040", "y": "c8d870"})

@@ -9,3 +9,5 @@ description = "Selendang panjang, rempah lebih mudah diraih."
 price = 15
 color = Color(0.690, 0.125, 0.110, 1)
 stats = {"pickup_range": 30}
+rarity = 0
+tags = PackedStringArray("busana")

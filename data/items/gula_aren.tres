@@ -9,3 +9,5 @@ description = "Tenaga cepat untuk serangan beruntun."
 price = 25
 color = Color(0.627, 0.376, 0.165, 1)
 stats = {"attack_speed": 12}
+rarity = 0
+tags = PackedStringArray("kuliner")

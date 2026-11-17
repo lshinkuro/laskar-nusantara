@@ -2,6 +2,7 @@ extends RefCounted
 ## Statistik satu run untuk pemain lokal + tampilannya di layar akhir.
 
 const GOLD := Color(0.88, 0.69, 0.29)
+const Synergy := preload("res://scripts/synergy.gd")
 
 var kills := 0
 var boss_kills := 0
@@ -44,6 +45,8 @@ func build(box: Container, player, wave: int, character: String) -> void:
 		["Pukulan terkuat", str(max_hit)],
 		["Rempah terkumpul", str(player.rempah_total)],
 		["Level", str(player.level)],
+		["Item", str(player.items.size())],
+		["Sinergi", ", ".join(Synergy.active(player).map(func(x): return x.name)) if not Synergy.active(player).is_empty() else "-"],
 	]
 	for r in rows:
 		left.add_child(_label(r[0], 8, Color(0.72, 0.62, 0.5)))

@@ -17,3 +17,4 @@ projectile_count = 1
 spread = 0.0
 pierce = 1
 category = "ranged"
+rarity = 1

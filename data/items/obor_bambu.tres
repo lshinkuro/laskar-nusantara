@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Obor Bambu"
+description = "15% seranganmu membuat musuh terbakar."
+price = 35
+color = Color(0.878, 0.478, 0.125, 1)
+stats = {}
+rarity = 1
+tags = PackedStringArray()
+special = "burn_chance"
+special_value = 15.0

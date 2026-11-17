@@ -9,3 +9,5 @@ description = "Murah, bergizi, mengenyangkan."
 price = 15
 color = Color(0.851, 0.702, 0.549, 1)
 stats = {"max_hp": 2, "hp_regen": 1}
+rarity = 0
+tags = PackedStringArray("kuliner")

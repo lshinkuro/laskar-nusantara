@@ -20,3 +20,4 @@ pierce = 2
 spin = true
 effect = "bounce"
 effect_power = 0.0
+rarity = 2

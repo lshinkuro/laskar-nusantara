@@ -10,6 +10,12 @@ signal leveled_up(level: int)
 signal died
 
 const Weapon := preload("res://scripts/weapon.gd")
+const Synergy := preload("res://scripts/synergy.gd")
+const Fx := preload("res://scripts/fx.gd")
+const WAYANG := preload("res://data/allies/wayang.tres")
+const WAYANG_ICON := preload("res://assets/sprites/wayang.png")
+const PULSE_INTERVAL := 6.0
+const KENTONGAN_HIT := preload("res://data/allies/kentongan_hit.tres")
 const DamageNumber := preload("res://scripts/damage_number.gd")
 const OBJECT_SCALE := 1.5
 const MAX_TIER := 4
@@ -52,6 +58,13 @@ var pending_levels := 0
 var items: Array[ItemData] = []
 var weapons: Array[WeaponData] = []  # satu entri per slot; tier ada di node senjata
 var projectiles: Node  # World/Projectiles, diisi main
+var enemies: Node  # World/Enemies, diisi main
+## Efek khusus dari item: nama -> nilai (ditumpuk kalau punya lebih dari satu).
+var specials := {}
+var _synergy_applied := {}
+var _pulse := PULSE_INTERVAL
+var _death_save_ready := true
+var _rempah_heal_count := 0
 var map: Node2D  # World/Map, diisi main
 
 var _invuln := 0.0
@@ -86,6 +99,12 @@ func shake(amount: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if is_local() and alive and specials.has("pulse"):
+		_pulse -= delta
+		if _pulse <= 0:
+			_pulse = PULSE_INTERVAL
+			Sfx.play("hit", -2.0, 0.0)
+			_hit_around(90.0, int(specials.pulse), KENTONGAN_HIT)
 	if _shake > 0:
 		_shake = maxf(_shake - delta * 25.0, 0.0)
 		$Camera2D.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * _shake
@@ -149,6 +168,15 @@ func _sync_state(pos: Vector2, new_hp: int, max_hp: int) -> void:
 func take_damage(amount: int) -> void:
 	if not alive or _invuln > 0:
 		return
+	if hp - amount <= 0 and _death_save_ready and specials.has("death_save") and alive:
+		# Jimat Rajah: selamat dengan 1 HP sekali tiap wave.
+		_death_save_ready = false
+		hp = 1
+		_invuln = invuln_time * 2
+		hp_changed.emit(hp, stats.max_hp)
+		DamageNumber.spawn(get_parent(), position + Vector2(0, -24), 0, Color(1, 0.9, 0.4), "Jimat! ")
+		Fx.ring(get_parent().get_parent(), position, 40.0, Color(1, 0.9, 0.4))
+		return
 	if randf() * 100.0 < minf(stats.dodge, 60.0):
 		_invuln = invuln_time * 0.5
 		DamageNumber.spawn(get_parent(), position + Vector2(0, -24), 0, Color(0.7, 0.9, 1), "Hindar! ")
@@ -158,6 +186,8 @@ func take_damage(amount: int) -> void:
 	hp = maxi(hp - maxi(1, roundi(amount * factor)), 0)
 	_invuln = invuln_time
 	shake(3.0)
+	if specials.has("thorns"):
+		_hit_around(55.0, int(specials.thorns), null)
 	hp_changed.emit(hp, stats.max_hp)
 	Sfx.play("hurt", -4.0)
 	if hp == 0:
@@ -166,6 +196,7 @@ func take_damage(amount: int) -> void:
 
 ## Dipanggil pemilik di awal wave: hidup lagi dengan HP penuh.
 func revive() -> void:
+	_death_save_ready = true
 	if is_local():
 		_set_alive.rpc(true, stats.max_hp)
 
@@ -195,6 +226,12 @@ func collect_rempah(value: int) -> void:
 	value = maxi(0, value + int(bonus) + (1 if randf() < bonus - int(bonus) else 0))
 	rempah += value
 	rempah_total += value
+	if specials.has("rempah_heal"):
+		_rempah_heal_count += value
+		var every := maxi(1, int(36.0 / specials.rempah_heal))  # 1 lumbung: tiap 6 rempah, 2: tiap 3
+		while _rempah_heal_count >= every:
+			_rempah_heal_count -= every
+			heal(1, false)
 	rempah_changed.emit(rempah)
 	gain_xp(value)
 
@@ -216,13 +253,38 @@ func gain_xp(amount: int) -> void:
 	xp_changed.emit(xp, xp_needed(), level)
 
 
-func heal(amount: int) -> void:
+func heal(amount: int, show := true) -> void:
 	if not alive:
 		return
 	var healed := mini(amount, stats.max_hp - hp)
+	if healed <= 0:
+		return
 	hp += healed
 	hp_changed.emit(hp, stats.max_hp)
-	DamageNumber.spawn(get_parent(), position + Vector2(0, -24), healed, Color(0.5, 1, 0.5), "+")
+	if show:
+		DamageNumber.spawn(get_parent(), position + Vector2(0, -24), healed, Color(0.5, 1, 0.5), "+")
+
+
+## Dipanggil Enemies saat serangan pemain lokal kena: efek item (obor, kalung taring).
+func modify_hit(effect: String, power: float) -> Array:
+	if effect == "" and specials.has("burn_chance") and randf() * 100.0 < specials.burn_chance:
+		return ["burn", 2.0]
+	return [effect, power]
+
+
+func on_hit(_amount: int) -> void:
+	if specials.has("lifesteal") and randf() * 100.0 < specials.lifesteal:
+		heal(1, false)
+
+
+## Lukai semua musuh dalam radius (gelang akar bahar, kentongan).
+func _hit_around(radius: float, amount: int, data: WeaponData) -> void:
+	if enemies == null:
+		return
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e.position.distance_to(position) < radius:
+			enemies.hit(e, amount, data, position.direction_to(e.position))
+	Fx.ring(get_parent().get_parent(), position, radius, Color(1, 0.85, 0.5))  # ke World, bukan daftar pemain
 
 
 func spend(amount: int) -> bool:
@@ -236,6 +298,42 @@ func spend(amount: int) -> bool:
 func apply_item(item: ItemData) -> void:
 	items.append(item)
 	apply_stats(item.stats)
+	if item.special != "":
+		specials[item.special] = specials.get(item.special, 0.0) + item.special_value
+		if item.special == "wayang":
+			_add_ally()
+	recompute_synergies()
+
+
+## Terapkan selisih bonus sinergi (yang baru aktif ditambah, yang hilang dikurangi).
+func recompute_synergies() -> void:
+	var target := {}
+	for s in Synergy.active(self):
+		for k in s.stats:
+			target[k] = target.get(k, 0) + s.stats[k]
+	var diff := {}
+	for k in target.keys() + _synergy_applied.keys():
+		var d: int = target.get(k, 0) - _synergy_applied.get(k, 0)
+		if d != 0:
+			diff[k] = d
+	_synergy_applied = target
+	if not diff.is_empty():
+		apply_stats(diff)
+
+
+func _add_ally() -> void:
+	var allies := get_node_or_null("Allies")
+	if allies == null:
+		allies = Node2D.new()
+		allies.name = "Allies"
+		add_child(allies)
+	var w := Weapon.new()
+	w.data = WAYANG
+	w.player = self
+	w.icon_texture = WAYANG_ICON
+	w.orbit = true
+	w.scale = Vector2.ONE * 1.2
+	allies.add_child(w)
 
 
 ## Tambah/kurangi stat (dari item atau upgrade level).
@@ -282,6 +380,8 @@ func add_weapon(data: WeaponData) -> bool:
 		merge.queue_redraw()
 		stats_changed.emit()
 		return true
+	if weapons.size() < MAX_WEAPONS:
+		call_deferred("recompute_synergies")  # setelah node senjata masuk ring
 	if weapons.size() >= MAX_WEAPONS:
 		return false
 	weapons.append(data)

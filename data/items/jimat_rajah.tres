@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Jimat Rajah"
+description = "Sekali tiap wave, selamat dari pukulan maut dengan 1 HP."
+price = 70
+color = Color(0.941, 0.847, 0.376, 1)
+stats = {}
+rarity = 3
+tags = PackedStringArray("pusaka")
+special = "death_save"
+special_value = 1.0

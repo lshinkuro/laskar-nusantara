@@ -97,6 +97,11 @@ const STATUS_DURATION := {"burn": 2.5, "poison": 3.5, "bleed": 2.0, "slow": 1.5}
 func hit(enemy: Node, amount: int, data: WeaponData = null, dir := Vector2.ZERO) -> void:
 	var effect := data.effect if data else ""
 	var power := data.effect_power if data else 0.0
+	if local_player:
+		var mod: Array = local_player.modify_hit(effect, power)
+		effect = mod[0]
+		power = mod[1]
+		local_player.on_hit(amount)
 	enemy.flash(amount)
 	Fx.spark(get_parent(), enemy.position + Vector2(0, -8), Fx.EFFECT_COLORS.get(effect, Color(1, 0.9, 0.5)))
 	if data and data.category == "melee":

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Kalung Taring"
+description = "8% peluang pulih 1 HP setiap seranganmu kena."
+price = 40
+color = Color(0.953, 0.890, 0.765, 1)
+stats = {}
+rarity = 1
+tags = PackedStringArray()
+special = "lifesteal"
+special_value = 8.0

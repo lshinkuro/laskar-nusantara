@@ -20,3 +20,4 @@ spin = true
 category = "magic"
 effect = "bounce"
 effect_power = 0.0
+rarity = 2

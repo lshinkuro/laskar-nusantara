@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Gelang Akar Bahar"
+description = "Saat terluka, musuh di dekatmu kena 6 damage."
+price = 35
+color = Color(0.102, 0.102, 0.102, 1)
+stats = {}
+rarity = 1
+tags = PackedStringArray("busana")
+special = "thorns"
+special_value = 6.0

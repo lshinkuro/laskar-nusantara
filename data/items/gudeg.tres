@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Gudeg"
+description = "Manis & mengenyangkan, tapi bikin malas lari."
+price = 20
+color = Color(0.541, 0.353, 0.165, 1)
+stats = {"max_hp": 6, "speed": -3}
+rarity = 0
+tags = PackedStringArray("kuliner")
+special = ""
+special_value = 0.0

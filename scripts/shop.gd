@@ -25,6 +25,9 @@ const STAT_NAMES := {
 	"harvest": "Panen %",
 }
 const GOLD := Color(0.88, 0.69, 0.29)
+const Synergy := preload("res://scripts/synergy.gd")
+const RARITY_NAMES := ["Biasa", "Langka", "Epik", "Legendaris"]
+const RARITY_COLORS := [Color(0.75, 0.7, 0.62), Color(0.4, 0.65, 1.0), Color(0.75, 0.45, 1.0), Color(1.0, 0.6, 0.2)]
 const WEAPON_COLOR := Color(0.95, 0.6, 0.45)
 
 var player
@@ -41,6 +44,7 @@ var _reroll: Button
 var _stats: Label
 var _weapons: HBoxContainer
 var _items: Label
+var _synergies: Label
 var _ready_label: Label
 var _ready_btn: Button
 
@@ -79,9 +83,32 @@ func _roll() -> void:
 	_offers.clear()
 	_offers.append_array(kept)
 	var choices := _pool.filter(func(d): return not _offers.any(func(o): return o.data == d))
-	choices.shuffle()
 	while _offers.size() < OFFER_COUNT and not choices.is_empty():
-		_offers.append({"data": choices.pop_back(), "locked": false, "sold": false})
+		var pick := _weighted_pick(choices)
+		choices.erase(pick)
+		_offers.append({"data": pick, "locked": false, "sold": false})
+
+
+## Barang langka makin sering muncul di wave akhir dan dengan Hoki tinggi.
+func _rarity_weight(rarity: int) -> float:
+	var luck: float = player.stats.luck if player else 0.0
+	match rarity:
+		1: return 25.0 + wave * 3.0 + luck
+		2: return 6.0 + wave * 2.0 + luck * 0.5
+		3: return 1.0 + wave * 0.8 + luck * 0.25
+	return 100.0
+
+
+func _weighted_pick(choices: Array) -> Resource:
+	var total := 0.0
+	for d in choices:
+		total += _rarity_weight(d.rarity)
+	var r := randf() * total
+	for d in choices:
+		r -= _rarity_weight(d.rarity)
+		if r <= 0:
+			return d
+	return choices.back()
 
 
 func _buy(i: int) -> void:
@@ -128,11 +155,14 @@ func _refresh() -> void:
 	for i in _offers.size():
 		_cards.add_child(_card(i))
 
-	var lines := PackedStringArray()
+	var shown := PackedStringArray()
 	for key in STAT_NAMES:
-		# Stat inti selalu tampil; sisanya hanya kalau ada bonus.
+		# Stat inti selalu tampil; sisanya hanya kalau ada bonus. Dua stat per baris.
 		if key in ["max_hp", "armor", "damage", "attack_speed", "speed"] or player.stats[key] != 0:
-			lines.append("%s: %d" % [STAT_NAMES[key], player.stats[key]])
+			shown.append("%s %d" % [STAT_NAMES[key].replace(" %", "%"), player.stats[key]])
+	var lines := PackedStringArray()
+	for i in range(0, shown.size(), 2):
+		lines.append("  ".join(shown.slice(i, i + 2)))
 	_stats.text = "\n".join(lines)
 
 	for c in _weapons.get_children():
@@ -154,6 +184,13 @@ func _refresh() -> void:
 		_weapons.add_child(slot)
 	var names: Array = player.items.map(func(it): return it.title)
 	_items.text = "-" if names.is_empty() else ", ".join(names)
+	var syn_lines := PackedStringArray()
+	for sdef in Synergy.LIST:
+		var n := Synergy.progress(sdef, player)
+		if n > 0:
+			syn_lines.append("%s %s %d/%d" % ["+" if n >= sdef.need else "-", sdef.name, mini(n, sdef.need), sdef.need])
+	_synergies.text = "-" if syn_lines.is_empty() else "\n".join(syn_lines)
+	_synergies.tooltip_text = "\n".join(Synergy.LIST.map(func(x): return "%s (%s): %s" % [x.name, x.desc, _effects_dict(x.stats)]))
 
 
 func _card(i: int) -> Control:
@@ -164,6 +201,14 @@ func _card(i: int) -> Control:
 
 	var card := PanelContainer.new()
 	card.theme_type_variation = &"CardLocked" if o.locked else &"Card"
+	if data.rarity > 0 and not o.locked:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.27, 0.18, 0.12)
+		style.border_color = RARITY_COLORS[data.rarity]
+		style.set_border_width_all(1 + int(data.rarity >= 2))
+		style.set_corner_radius_all(3)
+		style.set_content_margin_all(5)
+		card.add_theme_stylebox_override("panel", style)
 	card.custom_minimum_size = Vector2(104, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var box := VBoxContainer.new()
@@ -190,8 +235,11 @@ func _card(i: int) -> Control:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(title)
 
-	var kind := _label("Senjata" if is_weapon else "Item", 8)
-	kind.theme_type_variation = &"Muted"
+	var kind_text: String = ("Senjata" if is_weapon else "Item") + "  -  " + RARITY_NAMES[data.rarity]
+	if not is_weapon and not data.tags.is_empty():
+		kind_text += "  [" + ", ".join(data.tags).capitalize() + "]"
+	var kind := _label(kind_text, 8)
+	kind.modulate = RARITY_COLORS[data.rarity]
 	box.add_child(kind)
 
 	var merge = player.mergeable_weapon(data) if is_weapon else null
@@ -236,9 +284,13 @@ func _effects(data: Resource) -> String:
 		if effect_text != "":
 			s += "\nEfek: " + effect_text
 		return s
+	return _effects_dict(data.stats)
+
+
+func _effects_dict(stats: Dictionary) -> String:
 	var parts := PackedStringArray()
-	for key in data.stats:
-		parts.append("%+d %s" % [data.stats[key], STAT_NAMES.get(key, key)])
+	for key in stats:
+		parts.append("%+d %s" % [stats[key], STAT_NAMES.get(key, key)])
 	return ", ".join(parts)
 
 
@@ -301,7 +353,7 @@ func _build() -> void:
 
 	var right := PanelContainer.new()
 	right.theme_type_variation = &"Card"
-	right.custom_minimum_size = Vector2(130, 0)
+	right.custom_minimum_size = Vector2(150, 0)
 	body.add_child(right)
 	var info := VBoxContainer.new()
 	right.add_child(info)
@@ -320,8 +372,16 @@ func _build() -> void:
 	info.add_child(item_title)
 	_items = _label("", 8)
 	_items.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_items.custom_minimum_size = Vector2(118, 0)
+	_items.custom_minimum_size = Vector2(138, 0)
 	info.add_child(_items)
+	var syn_title := _label("Sinergi", 10)
+	syn_title.modulate = GOLD
+	syn_title.tooltip_text = "Kumpulkan senjata satu jenis atau item satu label untuk bonus."
+	syn_title.mouse_filter = Control.MOUSE_FILTER_STOP
+	info.add_child(syn_title)
+	_synergies = _label("", 8)
+	_synergies.mouse_filter = Control.MOUSE_FILTER_STOP
+	info.add_child(_synergies)
 
 	var footer := HBoxContainer.new()
 	root.add_child(footer)

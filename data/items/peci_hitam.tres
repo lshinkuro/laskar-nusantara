@@ -9,3 +9,5 @@ description = "Tegas dan berani."
 price = 25
 color = Color(0.102, 0.071, 0.043, 1)
 stats = {"armor": 1, "damage": 5}
+rarity = 1
+tags = PackedStringArray("busana")

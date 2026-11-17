@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Es Dawet"
+description = "Segar! Pulih pelan & tangan lebih panjang."
+price = 20
+color = Color(0.416, 0.627, 0.251, 1)
+stats = {"hp_regen": 2, "pickup_range": 15}
+rarity = 0
+tags = PackedStringArray("kuliner")
+special = ""
+special_value = 0.0

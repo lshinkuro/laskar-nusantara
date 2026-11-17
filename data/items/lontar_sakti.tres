@@ -9,3 +9,5 @@ description = "Mantra kuno: semua serangan lebih kuat."
 price = 40
 color = Color(0.941, 0.847, 0.376, 1)
 stats = {"damage": 10, "attack_speed": 5}
+rarity = 2
+tags = PackedStringArray("pusaka")

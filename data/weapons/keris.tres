@@ -19,3 +19,4 @@ pierce = 2
 category = "melee"
 effect = "bleed"
 effect_power = 3.0
+rarity = 1

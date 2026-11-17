@@ -62,6 +62,7 @@ func _save_name() -> void:
 
 
 func _refresh() -> void:
+	Net.expose_state()
 	main_panel.visible = not Net.online
 	lobby_panel.visible = Net.online
 	if not Net.online:
@@ -69,7 +70,6 @@ func _refresh() -> void:
 	code_label.text = "KODE ROOM:  %s" % Net.room_code if Net.room_code != "" else "Room lokal"
 	start_btn.visible = Net.is_room_host()
 	%CopyBtn.visible = Net.is_room_host() and Net.invite_link() != ""
-	Net.expose_state()
 	for c in player_list.get_children():
 		c.queue_free()
 	var ids := Net.players.keys()

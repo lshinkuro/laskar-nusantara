@@ -245,7 +245,7 @@ func _refresh_bag() -> void:
 		_sell_btn.disabled = false
 		_sell_btn.text = "Lepas +%d" % player.item_sell_value(i)
 	else:
-		_bag_detail.text = "[color=#b8a080]Klik senjata/item di tas untuk menggabung (2 sama -> naik level) atau melepasnya (dapat rempah).[/color]"
+		_bag_detail.text = "[color=#b8a080]Klik isi tas: gabung 2 yang sama, atau lepas jadi rempah.[/color]"
 		_sell_btn.text = "Lepas"
 
 
@@ -575,7 +575,7 @@ func _build() -> void:
 	_frame = margin
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 48 if side in ["left", "right"] else 30)
+		margin.add_theme_constant_override("margin_" + side, 48 if side in ["left", "right"] else 12)
 	add_child(margin)
 
 	var panel := PanelContainer.new()
@@ -628,11 +628,15 @@ func _build() -> void:
 	_weapons = HBoxContainer.new()
 	_weapons.add_theme_constant_override("separation", 2)
 	slots_row.add_child(_weapons)
+	# Item di baris sendiri supaya tas penuh tidak melebarkan panel melewati layar.
+	var items_row := HBoxContainer.new()
+	items_row.add_theme_constant_override("separation", 3)
+	bag_box.add_child(items_row)
 	_item_count = _label("", 8)
-	slots_row.add_child(_item_count)
+	items_row.add_child(_item_count)
 	_items = HBoxContainer.new()
 	_items.add_theme_constant_override("separation", 2)
-	slots_row.add_child(_items)
+	items_row.add_child(_items)
 	var action_row := HBoxContainer.new()
 	bag_box.add_child(action_row)
 	_bag_detail = RichTextLabel.new()

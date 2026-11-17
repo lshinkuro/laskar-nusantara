@@ -83,13 +83,18 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 - **Selesai kalau:** wave 1–5 sudah seru dimainkan meski grafisnya masih kotak-kotak.
 
 ### M2 · Minggu 3–4: Ekonomi
-- [ ] Musuh mendrop rempah yang otomatis tertarik ke pemain
+- [x] Musuh mendrop rempah yang otomatis tertarik ke pemain
 - [ ] Sistem XP dan level up, dengan pilihan upgrade stat
-- [ ] Toko antar-wave: beli, reroll, kunci item
-- [ ] Inventori dengan maksimal 6 slot senjata
+- [x] Toko antar-wave: beli, reroll, kunci item
+- [x] Inventori dengan maksimal 6 slot senjata
+
+### Tambahan (di luar rencana awal)
+- [x] Co-op online 2–4 pemain dengan kode room / link undangan (WebRTC + signaling MQTT publik)
+- [x] Prajurit 4 kerajaan (Majapahit, Sriwijaya, Mataram, Pajajaran) vs Serdadu Besi, sprite pixel art
+- [x] UI bertema batik (font Pixelify Sans), kontrol sentuh
 
 ### M3 · Minggu 5–6: Sistem data (Resource)
-- [ ] `CharacterData`, `WeaponData`, `ItemData`, `EnemyData` sebagai file `.tres`
+- [ ] `CharacterData`, `WeaponData`, `ItemData`, `EnemyData` sebagai file `.tres` (WeaponData & ItemData sudah)
 - [ ] Nambah konten cukup bikin file baru, tanpa ngoding
 - [ ] Masukkan 5 karakter, 12 senjata, 30 item
 - [ ] Layar pilih karakter
@@ -154,4 +159,4 @@ Meter yang terisi saat pemain menyelamatkan warga di map. Kalau penuh, bisa dipa
 - Map tambahan: hutan Kalimantan, pelataran candi, pelabuhan
 - Karakter tambahan
 - Tingkat kesulitan (Danger level)
-- Co-op lokal
+- Co-op lokal (co-op online sudah ada)

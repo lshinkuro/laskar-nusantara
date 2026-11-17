@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/peluru_api.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+title = "Mantra Api"
+description = "Semburan api pendek beruntun."
+price = 35
+texture = ExtResource("2")
+damage = 3
+fire_interval = 0.2
+attack_range = 110.0
+projectile_speed = 300.0
+projectile_count = 2
+spread = 15.0
+pierce = 0

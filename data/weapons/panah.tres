@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/peluru_panah.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+title = "Panah"
+description = "Jangkauan jauh, menembus 1 musuh."
+price = 35
+texture = ExtResource("2")
+damage = 9
+fire_interval = 0.9
+attack_range = 300.0
+projectile_speed = 520.0
+projectile_count = 1
+spread = 0.0
+pierce = 1

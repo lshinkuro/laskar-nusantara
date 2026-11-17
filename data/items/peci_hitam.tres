@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Peci Hitam"
+description = "Tegas dan berani."
+price = 25
+color = Color(0.102, 0.071, 0.043, 1)
+stats = {"armor": 1, "damage": 5}

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/peluru_keris.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+title = "Keris"
+description = "Tusukan jarak dekat, menembus 2."
+price = 30
+texture = ExtResource("2")
+damage = 12
+fire_interval = 0.55
+attack_range = 70.0
+projectile_speed = 380.0
+projectile_count = 1
+spread = 0.0
+pierce = 2

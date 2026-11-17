@@ -1,37 +1,39 @@
 extends Node2D
-## Senjata jarak jauh yang menembak otomatis ke musuh terdekat.
+## Satu senjata milik pemain lokal: menembak otomatis ke musuh terdekat dalam jangkauan.
 
-const Projectile := preload("res://scenes/projectile.tscn")
-
-@export var damage := 5
-@export var fire_interval := 0.6
-@export var attack_range := 220.0
-@export var projectile_speed := 400.0
+var data: WeaponData
+var player  # Player pemilik
 
 var _cooldown := 0.0
 
 
+func _draw() -> void:
+	var tex := data.texture
+	draw_texture(tex, -tex.get_size() / 2)
+
+
 func _process(delta: float) -> void:
+	if not player.alive:
+		return
 	_cooldown -= delta
 	if _cooldown > 0:
 		return
+	var stats: Dictionary = player.stats
+	var attack_range := data.attack_range * maxf(0.3, 1.0 + stats.range / 100.0)
 	# Cari target hanya saat siap menembak, bukan tiap frame.
-	var target := _nearest_enemy()
+	var target := _nearest_enemy(attack_range)
 	if target == null:
 		return
-	_cooldown = fire_interval
-
-	# shortcut: instantiate per tembakan, ganti ke object pool kalau peluru > ~100 di layar.
-	var p := Projectile.instantiate()
-	p.position = global_position
-	p.direction = global_position.direction_to(target.global_position)
-	p.speed = projectile_speed
-	p.damage = damage
-	p.lifetime = attack_range / projectile_speed * 1.5
-	owner.get_parent().add_child(p)  # owner = Player, parent-nya = World
+	_cooldown = data.fire_interval / maxf(0.2, 1.0 + stats.attack_speed / 100.0)
+	var damage := maxi(1, roundi(data.damage * maxf(0.1, 1.0 + stats.damage / 100.0)))
+	var dir := global_position.direction_to(target.global_position)
+	rotation = dir.angle()
+	for i in data.projectile_count:
+		var angle := deg_to_rad((i - (data.projectile_count - 1) / 2.0) * data.spread)
+		player.projectiles.fire(global_position, dir.rotated(angle), data, damage, attack_range)
 
 
-func _nearest_enemy() -> Node2D:
+func _nearest_enemy(attack_range: float) -> Node2D:
 	var best: Node2D = null
 	var best_d := attack_range * attack_range
 	for e: Node2D in get_tree().get_nodes_in_group("enemies"):

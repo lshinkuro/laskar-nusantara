@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Kain Ikat"
+description = "Selendang panjang, rempah lebih mudah diraih."
+price = 15
+color = Color(0.690, 0.125, 0.110, 1)
+stats = {"pickup_range": 30}

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Gula Aren"
+description = "Tenaga cepat untuk serangan beruntun."
+price = 25
+color = Color(0.627, 0.376, 0.165, 1)
+stats = {"attack_speed": 12}

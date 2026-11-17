@@ -10,7 +10,16 @@ var _origin := Vector2.ZERO
 var _knob := Vector2.ZERO
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree():
+		_touch = -1
+		_apply(Vector2.ZERO)
+		queue_redraw()
+
+
 func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
 	if event is InputEventScreenTouch:
 		if event.pressed and _touch == -1:
 			_touch = event.index

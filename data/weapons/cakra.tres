@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/peluru_cakra.png" id="2"]
+
+[resource]
+script = ExtResource("1")
+title = "Cakra"
+description = "Senjata dewa, tiga sekaligus menembus."
+price = 45
+texture = ExtResource("2")
+damage = 6
+fire_interval = 1.0
+attack_range = 190.0
+projectile_speed = 300.0
+projectile_count = 3
+spread = 20.0
+pierce = 2

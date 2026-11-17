@@ -1,0 +1,204 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/menu.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/sawah.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prajurit_majapahit.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prajurit_sriwijaya.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prajurit_mataram.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/prajurit_pajajaran.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/serdadu_besi.png" id="7"]
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Sawah" type="Node2D" parent="."]
+position = Vector2(-160, -90)
+script = ExtResource("2")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.08, 0.05, 0.03, 0.55)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Box" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Title" type="Label" parent="Center/Box"]
+layout_mode = 2
+theme_type_variation = &"Title"
+theme_override_font_sizes/font_size = 26
+text = "LASKAR NUSANTARA"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/Box"]
+layout_mode = 2
+theme_type_variation = &"Hud"
+text = "Bangkit, prajurit kerajaan! Usir Kekaisaran Besi."
+horizontal_alignment = 1
+
+[node name="Heroes" type="HBoxContainer" parent="Center/Box"]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="H1" type="TextureRect" parent="Center/Box/Heroes"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("3")
+stretch_mode = 5
+
+[node name="H2" type="TextureRect" parent="Center/Box/Heroes"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("4")
+stretch_mode = 5
+
+[node name="H3" type="TextureRect" parent="Center/Box/Heroes"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("5")
+stretch_mode = 5
+
+[node name="H4" type="TextureRect" parent="Center/Box/Heroes"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("6")
+stretch_mode = 5
+
+[node name="Vs" type="Label" parent="Center/Box/Heroes"]
+layout_mode = 2
+theme_type_variation = &"Title"
+theme_override_font_sizes/font_size = 12
+text = "  VS  "
+
+[node name="E1" type="TextureRect" parent="Center/Box/Heroes"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("7")
+stretch_mode = 5
+flip_h = true
+
+[node name="E2" type="TextureRect" parent="Center/Box/Heroes"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+texture = ExtResource("7")
+stretch_mode = 5
+flip_h = true
+
+[node name="MainPanel" type="PanelContainer" parent="Center/Box"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="V" type="VBoxContainer" parent="Center/Box/MainPanel"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="NameEdit" type="LineEdit" parent="Center/Box/MainPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Nama pejuang"
+max_length = 12
+
+[node name="SoloBtn" type="Button" parent="Center/Box/MainPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Main Sendiri"
+
+[node name="HostBtn" type="Button" parent="Center/Box/MainPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Buat Room Online"
+
+[node name="JoinRow" type="HBoxContainer" parent="Center/Box/MainPanel/V"]
+layout_mode = 2
+
+[node name="CodeEdit" type="LineEdit" parent="Center/Box/MainPanel/V/JoinRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "KODE ROOM"
+max_length = 5
+
+[node name="JoinBtn" type="Button" parent="Center/Box/MainPanel/V/JoinRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Gabung"
+
+[node name="LobbyPanel" type="PanelContainer" parent="Center/Box"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="V" type="VBoxContainer" parent="Center/Box/LobbyPanel"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="CodeLabel" type="Label" parent="Center/Box/LobbyPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Title"
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Center/Box/LobbyPanel/V"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Bagikan kode ini ke temanmu (maks 4 pejuang)"
+horizontal_alignment = 1
+
+[node name="PlayerList" type="VBoxContainer" parent="Center/Box/LobbyPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Box/LobbyPanel/V"]
+layout_mode = 2
+alignment = 1
+
+[node name="StartBtn" type="Button" parent="Center/Box/LobbyPanel/V/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mulai Perang!"
+
+[node name="CopyBtn" type="Button" parent="Center/Box/LobbyPanel/V/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Salin Link"
+
+[node name="LeaveBtn" type="Button" parent="Center/Box/LobbyPanel/V/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Keluar"
+
+[node name="Status" type="Label" parent="Center/Box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_type_variation = &"Hud"
+theme_override_colors/font_color = Color(0.94, 0.85, 0.38, 1)
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Help" type="Label" parent="Center/Box"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "WASD / panah, atau geser layar untuk bergerak. Senjata menembak otomatis."
+horizontal_alignment = 1
+autowrap_mode = 3
+custom_minimum_size = Vector2(280, 0)

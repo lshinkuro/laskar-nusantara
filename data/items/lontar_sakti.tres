@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Lontar Sakti"
+description = "Mantra kuno: semua serangan lebih kuat."
+price = 40
+color = Color(0.941, 0.847, 0.376, 1)
+stats = {"damage": 10, "attack_speed": 5}

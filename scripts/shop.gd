@@ -346,6 +346,9 @@ func _card(i: int) -> Control:
 	if not is_weapon and not data.tags.is_empty():
 		kind_text += " - " + ", ".join(data.tags).capitalize()
 	var kind := _label(kind_text, 7)
+	kind.clip_text = true
+	kind.custom_minimum_size.x = 50
+	kind.tooltip_text = kind_text
 	kind.add_theme_color_override("font_color", Color(0.7, 0.62, 0.52))
 	names.add_child(kind)
 
@@ -599,18 +602,30 @@ func _build() -> void:
 	_rempah.add_theme_color_override("font_color", Color(0.98, 0.8, 0.35))
 	header.add_child(_rempah)
 
+	# Isi tengah bisa digulir: kartu/tas yang tinggi tidak boleh mendorong tombol Siap keluar layar.
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	root.add_child(scroll)
 	var body := HBoxContainer.new()
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 8)
-	root.add_child(body)
+	scroll.add_child(body)
 
 	var left := VBoxContainer.new()
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(left)
+	# Kartu digulir ke samping kalau terlalu lebar, supaya panel Prajurit di kanan tidak terdorong.
+	var cards_scroll := ScrollContainer.new()
+	cards_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	cards_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	left.add_child(cards_scroll)
 	_cards = HBoxContainer.new()
+	_cards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_cards.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_cards.add_theme_constant_override("separation", 5)
-	left.add_child(_cards)
+	cards_scroll.add_child(_cards)
 	var bag := PanelContainer.new()
 	bag.theme_type_variation = &"Card"
 	left.add_child(bag)

@@ -33,6 +33,12 @@ func _process(_delta: float) -> bool:
 			en.spawn("perisai", spots[k], 500, 0.0, 1)
 			e[k] = en.get_child(en.get_child_count() - 1)
 			start[k] = spots[k]
+		# Dua senjata, dua musuh dalam jangkauan: masing-masing membidik musuh berbeda.
+		var p = main.local_player
+		p.add_weapon(_w("kunai"))
+		var t0 = p.weapon_ring.get_child(0).pick_target(2000.0)
+		var t1 = p.weapon_ring.get_child(1).pick_target(2000.0)
+		checks.spread_targets = t0 != null and t1 != null and t0 != t1
 		checks.new_weapons = ["kunai", "shuriken", "tombak", "bambu_runcing", "kujang", "golok"].all(func(n): return _w(n) != null)
 		return false
 	match frames - _first_frame():
@@ -50,7 +56,7 @@ func _process(_delta: float) -> bool:
 		90:
 			checks.burn_dot = e.burn.hp < 499 and e.burn.statuses.has("burn")
 			checks.bounce = e.b1.hp < 500 and e.b2.hp < 500
-			var ok := checks.size() == 6 and checks.values().all(func(v): return v)
+			var ok := checks.size() == 7 and checks.values().all(func(v): return v)
 			print(checks, " -> ", "OK" if ok else "FAIL")
 			quit(0 if ok else 1)
 			return true

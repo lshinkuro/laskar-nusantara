@@ -40,7 +40,7 @@ func _process(delta: float) -> void:
 	var stats: Dictionary = player.stats
 	var attack_range := data.attack_range * maxf(0.3, 1.0 + stats.range / 100.0)
 	# Cari target hanya saat siap menembak, bukan tiap frame.
-	var target := _nearest_enemy(attack_range)
+	var target := pick_target(attack_range)
 	if target == null:
 		return
 	_cooldown = data.fire_interval / maxf(0.2, 1.0 + stats.attack_speed / 100.0)
@@ -59,12 +59,16 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
-func _nearest_enemy(attack_range: float) -> Node2D:
-	var best: Node2D = null
-	var best_d := attack_range * attack_range
+## Tiap senjata membidik musuh berbeda: senjata ke-i mengambil musuh terdekat ke-i
+## (berputar kalau musuh dalam jangkauan lebih sedikit dari jumlah senjata).
+func pick_target(attack_range: float) -> Node2D:
+	var in_range := []
+	var max_d := attack_range * attack_range
 	for e: Node2D in get_tree().get_nodes_in_group("enemies"):
-		var d := global_position.distance_squared_to(e.global_position)
-		if d < best_d:
-			best_d = d
-			best = e
-	return best
+		var d: float = player.global_position.distance_squared_to(e.global_position)
+		if d < max_d:
+			in_range.append([d, e])
+	if in_range.is_empty():
+		return null
+	in_range.sort_custom(func(a, b): return a[0] < b[0])
+	return in_range[get_index() % in_range.size()][1]

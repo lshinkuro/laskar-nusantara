@@ -7,6 +7,8 @@ Rencana lengkap: [PLAN.md](PLAN.md).
 **Main:** https://lshinkuro.github.io/laskar-nusantara/
 
 ## Cara main
+Menu: **1. Pejuangmu** (baju & nama) → **2. Pilih Karakter** → **3. Mulai** (sendiri / online).
+Tombol **? Cara Main** (juga di layar jeda) menjelaskan semuanya dengan gambar; muncul otomatis saat pertama kali main.
 - **Gerak:** WASD / panah, atau sentuh & geser layar (HP). Senjata menembak otomatis.
 - **Karakter:** Pendekar Silat, Petani (terbuka dari awal), Dukun (capai wave 4), Pelaut Bugis (wave 8),
   Penari Jaipong (wave 12). Tiap karakter punya kelebihan, kekurangan, dan senjata awal sendiri;

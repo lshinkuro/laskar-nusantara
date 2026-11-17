@@ -41,7 +41,7 @@ var _title: Label
 var _rempah: Label
 var _cards: HBoxContainer
 var _reroll: Button
-var _stats: Label
+var _stats: RichTextLabel
 var _weapons: HBoxContainer
 var _items: Label
 var _synergies: Label
@@ -155,15 +155,7 @@ func _refresh() -> void:
 	for i in _offers.size():
 		_cards.add_child(_card(i))
 
-	var shown := PackedStringArray()
-	for key in STAT_NAMES:
-		# Stat inti selalu tampil; sisanya hanya kalau ada bonus. Dua stat per baris.
-		if key in ["max_hp", "armor", "damage", "attack_speed", "speed"] or player.stats[key] != 0:
-			shown.append("%s %d" % [STAT_NAMES[key].replace(" %", "%"), player.stats[key]])
-	var lines := PackedStringArray()
-	for i in range(0, shown.size(), 2):
-		lines.append("  ".join(shown.slice(i, i + 2)))
-	_stats.text = "\n".join(lines)
+	_show_stats({})
 
 	for c in _weapons.get_children():
 		c.queue_free()
@@ -244,10 +236,19 @@ func _card(i: int) -> Control:
 
 	var merge = player.mergeable_weapon(data) if is_weapon else null
 	var extra := "\nGABUNG -> Tier %d: +1 peluru, damage x%.1f" % [merge.tier + 1, 1.0 + 0.5 * merge.tier] if merge else ""
-	var desc := _label(data.description + "\n" + _effects(data) + extra, 8)
-	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var desc := RichTextLabel.new()
+	desc.bbcode_enabled = true
+	desc.fit_content = true
+	desc.scroll_active = false
+	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	desc.add_theme_font_size_override("normal_font_size", 8)
+	desc.text = data.description + "\n" + _effects(data) + ("[color=#f0d860]" + extra + "[/color]" if extra != "" else "")
 	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(desc)
+	# Sorot kartu: pratinjau perubahan stat di panel prajurit.
+	if not is_weapon:
+		card.mouse_entered.connect(func(): _show_stats(data.stats))
+		card.mouse_exited.connect(func(): _show_stats({}))
 
 	var buy := Button.new()
 	if o.sold:
@@ -258,7 +259,9 @@ func _card(i: int) -> Control:
 		buy.disabled = true
 	else:
 		buy.text = ("Gabung  %d" if merge else "Beli  %d") % price
-		buy.disabled = player.rempah < price
+		if player.rempah < price:
+			buy.text = "Kurang %d rempah" % (price - player.rempah)
+			buy.disabled = true
 	buy.pressed.connect(_buy.bind(i))
 	box.add_child(buy)
 
@@ -269,6 +272,27 @@ func _card(i: int) -> Control:
 	lock.pressed.connect(_toggle_lock.bind(i))
 	box.add_child(lock)
 	return card
+
+
+## Tampilkan stat prajurit; `preview` = perubahan dari kartu yang sedang disorot
+## (ditulis "lama>baru", hijau kalau naik, merah kalau turun).
+func _show_stats(preview: Dictionary) -> void:
+	var shown := PackedStringArray()
+	for key in STAT_NAMES:
+		# Stat inti selalu tampil; sisanya hanya kalau ada bonus/perubahan. Dua stat per baris.
+		var now: int = player.stats[key]
+		if not (key in ["max_hp", "armor", "damage", "attack_speed", "speed"] or now != 0 or preview.has(key)):
+			continue
+		var name: String = STAT_NAMES[key].replace(" %", "%")
+		if preview.has(key):
+			var after: int = now + preview[key]
+			shown.append("[color=%s]%s %d>%d[/color]" % ["#7fe07f" if after > now else "#ff7a6a", name, now, after])
+		else:
+			shown.append("%s %d" % [name, now])
+	var lines := PackedStringArray()
+	for i in range(0, shown.size(), 2):
+		lines.append("  ".join(shown.slice(i, i + 2)))
+	_stats.text = "\n".join(lines)
 
 
 func _effects(data: Resource) -> String:
@@ -284,13 +308,16 @@ func _effects(data: Resource) -> String:
 		if effect_text != "":
 			s += "\nEfek: " + effect_text
 		return s
-	return _effects_dict(data.stats)
+	return _effects_dict(data.stats, true)
 
 
-func _effects_dict(stats: Dictionary) -> String:
+func _effects_dict(stats: Dictionary, colored := false) -> String:
 	var parts := PackedStringArray()
 	for key in stats:
-		parts.append("%+d %s" % [stats[key], STAT_NAMES.get(key, key)])
+		var t := "%+d %s" % [stats[key], STAT_NAMES.get(key, key)]
+		if colored:
+			t = "[color=%s]%s[/color]" % ["#7fe07f" if stats[key] > 0 else "#ff7a6a", t]
+		parts.append(t)
 	return ", ".join(parts)
 
 
@@ -360,7 +387,11 @@ func _build() -> void:
 	var stat_title := _label("Prajurit", 10)
 	stat_title.modulate = GOLD
 	info.add_child(stat_title)
-	_stats = _label("", 8)
+	_stats = RichTextLabel.new()
+	_stats.bbcode_enabled = true
+	_stats.fit_content = true
+	_stats.scroll_active = false
+	_stats.add_theme_font_size_override("normal_font_size", 8)
 	info.add_child(_stats)
 	var weapon_title := _label("Senjata", 10)
 	weapon_title.modulate = GOLD

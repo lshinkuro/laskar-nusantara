@@ -1,9 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/menu_backdrop.gd" id="2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/prajurit_majapahit.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/serdadu_besi.png" id="7"]
 
 [node name="Menu" type="Control"]
 layout_mode = 3
@@ -22,213 +20,211 @@ anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("2")
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
 
-[node name="Box" type="VBoxContainer" parent="Center"]
-custom_minimum_size = Vector2(280, 0)
+[node name="Root" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="Center/Box"]
+[node name="Title" type="Label" parent="Margin/Root"]
 layout_mode = 2
 theme_type_variation = &"Title"
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 24
 text = "LASKAR NUSANTARA"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Center/Box"]
+[node name="Subtitle" type="Label" parent="Margin/Root"]
 layout_mode = 2
 theme_type_variation = &"Hud"
-text = "Bangkit, prajurit kerajaan! Usir Kekaisaran Besi."
+theme_override_font_sizes/font_size = 9
+text = "Bangkit, prajurit kerajaan! Usir Kekaisaran Besi dari Nusantara."
 horizontal_alignment = 1
 
-[node name="Outfit" type="HBoxContainer" parent="Center/Box"]
+[node name="Columns" type="HBoxContainer" parent="Margin/Root"]
 layout_mode = 2
 theme_override_constants/separation = 6
 alignment = 1
 
-[node name="PrevBtn" type="Button" parent="Center/Box/Outfit"]
-unique_name_in_owner = true
+[node name="LeftPanel" type="PanelContainer" parent="Margin/Root/Columns"]
+custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
-size_flags_vertical = 4
-text = "<"
 
-[node name="OutfitIcon" type="TextureRect" parent="Center/Box/Outfit"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(40, 40)
+[node name="V" type="VBoxContainer" parent="Margin/Root/Columns/LeftPanel"]
 layout_mode = 2
-texture = ExtResource("3")
+theme_override_constants/separation = 4
+
+[node name="Head" type="Label" parent="Margin/Root/Columns/LeftPanel/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.69, 0.29, 1)
+text = "1. PEJUANGMU"
+
+[node name="Preview" type="TextureRect" parent="Margin/Root/Columns/LeftPanel/V"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
 stretch_mode = 5
 
-[node name="OutfitName" type="Label" parent="Center/Box/Outfit"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(120, 0)
-layout_mode = 2
-size_flags_vertical = 4
-theme_type_variation = &"Hud"
-text = "Prajurit Majapahit"
-horizontal_alignment = 1
-
-[node name="NextBtn" type="Button" parent="Center/Box/Outfit"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_vertical = 4
-text = ">"
-
-[node name="Vs" type="Label" parent="Center/Box/Outfit"]
-layout_mode = 2
-size_flags_vertical = 4
-theme_type_variation = &"Title"
-theme_override_font_sizes/font_size = 12
-text = " VS "
-
-[node name="E1" type="TextureRect" parent="Center/Box/Outfit"]
-custom_minimum_size = Vector2(40, 40)
-layout_mode = 2
-texture = ExtResource("7")
-stretch_mode = 5
-flip_h = true
-
-[node name="CharRow" type="HBoxContainer" parent="Center/Box"]
-layout_mode = 2
-theme_override_constants/separation = 6
-alignment = 1
-
-[node name="CharPrev" type="Button" parent="Center/Box/CharRow"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_vertical = 4
-text = "<"
-
-[node name="CharInfo" type="VBoxContainer" parent="Center/Box/CharRow"]
-custom_minimum_size = Vector2(250, 0)
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="CharName" type="Label" parent="Center/Box/CharRow/CharInfo"]
+[node name="OutfitName" type="Label" parent="Margin/Root/Columns/LeftPanel/V"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"Hud"
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 
-[node name="CharDesc" type="Label" parent="Center/Box/CharRow/CharInfo"]
+[node name="OutfitHint" type="Label" parent="Margin/Root/Columns/LeftPanel/V"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Pilih seragam kerajaan:"
+
+[node name="OutfitGrid" type="GridContainer" parent="Margin/Root/Columns/LeftPanel/V"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_type_variation = &"Hud"
-theme_override_font_sizes/font_size = 8
-horizontal_alignment = 1
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 4
 
-[node name="CharNext" type="Button" parent="Center/Box/CharRow"]
-unique_name_in_owner = true
+[node name="NameHint" type="Label" parent="Margin/Root/Columns/LeftPanel/V"]
 layout_mode = 2
-size_flags_vertical = 4
-text = ">"
+theme_type_variation = &"Muted"
+text = "Nama:"
 
-[node name="MainPanel" type="PanelContainer" parent="Center/Box"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="V" type="VBoxContainer" parent="Center/Box/MainPanel"]
-layout_mode = 2
-theme_override_constants/separation = 5
-
-[node name="NameEdit" type="LineEdit" parent="Center/Box/MainPanel/V"]
+[node name="NameEdit" type="LineEdit" parent="Margin/Root/Columns/LeftPanel/V"]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Nama pejuang"
 max_length = 12
 
-[node name="SoloBtn" type="Button" parent="Center/Box/MainPanel/V"]
+[node name="CharPanel" type="PanelContainer" parent="Margin/Root/Columns"]
+custom_minimum_size = Vector2(232, 0)
+layout_mode = 2
+
+[node name="V" type="VBoxContainer" parent="Margin/Root/Columns/CharPanel"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Head" type="Label" parent="Margin/Root/Columns/CharPanel/V"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.69, 0.29, 1)
+text = "2. PILIH KARAKTER"
+
+[node name="CharList" type="VBoxContainer" parent="Margin/Root/Columns/CharPanel/V"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="RightPanel" type="PanelContainer" parent="Margin/Root/Columns"]
+custom_minimum_size = Vector2(176, 0)
+layout_mode = 2
+
+[node name="V" type="VBoxContainer" parent="Margin/Root/Columns/RightPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MainPanel" type="VBoxContainer" parent="Margin/Root/Columns/RightPanel/V"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Head" type="Label" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.69, 0.29, 1)
+text = "3. MULAI BERPERANG"
+
+[node name="SoloBtn" type="Button" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
 text = "Main Sendiri"
 
-[node name="HostBtn" type="Button" parent="Center/Box/MainPanel/V"]
+[node name="OnlineHint" type="Label" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Main bersama teman (2-4 orang):"
+autowrap_mode = 3
+
+[node name="HostBtn" type="Button" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Buat Room Online"
 
-[node name="JoinRow" type="HBoxContainer" parent="Center/Box/MainPanel/V"]
+[node name="JoinRow" type="HBoxContainer" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
 layout_mode = 2
 
-[node name="CodeEdit" type="LineEdit" parent="Center/Box/MainPanel/V/JoinRow"]
+[node name="CodeEdit" type="LineEdit" parent="Margin/Root/Columns/RightPanel/V/MainPanel/JoinRow"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "KODE ROOM"
+placeholder_text = "KODE"
 max_length = 5
 
-[node name="JoinBtn" type="Button" parent="Center/Box/MainPanel/V/JoinRow"]
+[node name="JoinBtn" type="Button" parent="Margin/Root/Columns/RightPanel/V/MainPanel/JoinRow"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Gabung"
 
-[node name="LobbyPanel" type="PanelContainer" parent="Center/Box"]
+[node name="HowBtn" type="Button" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "? Cara Main"
+
+[node name="LobbyPanel" type="VBoxContainer" parent="Margin/Root/Columns/RightPanel/V"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+theme_override_constants/separation = 4
 
-[node name="V" type="VBoxContainer" parent="Center/Box/LobbyPanel"]
-layout_mode = 2
-theme_override_constants/separation = 5
-
-[node name="CodeLabel" type="Label" parent="Center/Box/LobbyPanel/V"]
+[node name="CodeLabel" type="Label" parent="Margin/Root/Columns/RightPanel/V/LobbyPanel"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"Title"
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 
-[node name="Hint" type="Label" parent="Center/Box/LobbyPanel/V"]
+[node name="Hint" type="Label" parent="Margin/Root/Columns/RightPanel/V/LobbyPanel"]
 layout_mode = 2
 theme_type_variation = &"Muted"
-text = "Bagikan kode ini ke temanmu (maks 4 pejuang)"
+text = "Bagikan kode atau link ini ke temanmu."
 horizontal_alignment = 1
+autowrap_mode = 3
 
-[node name="PlayerList" type="VBoxContainer" parent="Center/Box/LobbyPanel/V"]
+[node name="PlayerList" type="VBoxContainer" parent="Margin/Root/Columns/RightPanel/V/LobbyPanel"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Center/Box/LobbyPanel/V"]
-layout_mode = 2
-alignment = 1
-
-[node name="StartBtn" type="Button" parent="Center/Box/LobbyPanel/V/Buttons"]
+[node name="StartBtn" type="Button" parent="Margin/Root/Columns/RightPanel/V/LobbyPanel"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
+theme_override_font_sizes/font_size = 12
 text = "Mulai Perang!"
 
-[node name="CopyBtn" type="Button" parent="Center/Box/LobbyPanel/V/Buttons"]
+[node name="CopyBtn" type="Button" parent="Margin/Root/Columns/RightPanel/V/LobbyPanel"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Salin Link"
+text = "Salin Link Undangan"
 
-[node name="LeaveBtn" type="Button" parent="Center/Box/LobbyPanel/V/Buttons"]
+[node name="LeaveBtn" type="Button" parent="Margin/Root/Columns/RightPanel/V/LobbyPanel"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Keluar"
+text = "Keluar Room"
 
-[node name="Status" type="Label" parent="Center/Box"]
+[node name="Status" type="Label" parent="Margin/Root/Columns/RightPanel/V"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 theme_type_variation = &"Hud"
 theme_override_colors/font_color = Color(0.94, 0.85, 0.38, 1)
+theme_override_font_sizes/font_size = 8
 horizontal_alignment = 1
 autowrap_mode = 3
-
-[node name="Help" type="Label" parent="Center/Box"]
-layout_mode = 2
-theme_type_variation = &"Muted"
-text = "WASD / panah atau geser layar untuk bergerak."
-horizontal_alignment = 1
-autowrap_mode = 3
-custom_minimum_size = Vector2(280, 0)
 
 [node name="SettingsBtn" type="Button" parent="."]
 unique_name_in_owner = true

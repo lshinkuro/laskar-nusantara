@@ -121,6 +121,11 @@ func _process(delta: float) -> void:
 		$HUD/Boss/Bar.max_value = _boss.max_hp
 		$HUD/Boss/Bar.value = _boss.hp
 	_update_team_list()
+	# HP kritis: tepi layar berdenyut merah & bar HP berkedip.
+	var critical: bool = state == State.PLAYING and local_player.alive and local_player.hp <= local_player.stats.max_hp * 0.3
+	hp_bar.modulate = Color(1, 0.6, 0.6) if critical and fmod(run.time, 0.6) < 0.3 else Color.WHITE
+	if critical and $HUD/HurtFlash.color.a < 0.12:
+		$HUD/HurtFlash.color.a = 0.06 + 0.06 * sin(run.time * 6.0)
 	# Client mengulang laporan "siap" sampai host memulai (RPC pertama bisa datang
 	# sebelum scene host selesai dimuat).
 	if state == State.WAITING and not multiplayer.is_server():
@@ -204,6 +209,7 @@ func _on_wave_started(wave: int) -> void:
 		title += "\nKarakter baru terbuka: " + c.title + "!"
 	_show_message(title, 2.2 if title.contains("terbuka") else 1.6)
 	Sfx.play("wave_start", -2.0, 0.0)
+	$HUD/ControlsHint.visible = wave <= 2
 
 
 func _on_wave_ended(wave: int) -> void:
@@ -268,6 +274,10 @@ func _finish(won: bool, wave: int) -> void:
 # --- HUD ----------------------------------------------------------------------
 
 func _on_hp_changed(hp: int, max_hp: int) -> void:
+	if hp < hp_bar.value and state == State.PLAYING:
+		var flash: ColorRect = $HUD/HurtFlash
+		flash.color.a = 0.3
+		create_tween().tween_property(flash, "color:a", 0.0, 0.35)
 	hp_bar.max_value = max_hp
 	hp_bar.value = hp
 	hp_label.text = "%d / %d" % [hp, max_hp]
@@ -362,6 +372,9 @@ func _show_message(text: String, duration := 0.0) -> void:
 	message.text = text
 	message.show()
 	message.modulate.a = 1.0
+	message.pivot_offset = message.size / 2
+	message.scale = Vector2(1.4, 1.4)
+	create_tween().tween_property(message, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if duration > 0:
 		var t := create_tween()
 		t.tween_interval(duration)

@@ -264,6 +264,36 @@ WARGA = """
 ................
 """
 
+IKON_HATI = """
+.kk.kk.
+krrkrrk
+krwrrrk
+krrrrrk
+.krrrk.
+..krk..
+...k...
+"""
+
+IKON_BENDERA = """
+kkkkkkk.
+krrrrrrk
+krrrrrrk
+kwwwwwwk
+kwwwwwwk
+kkkkkkk.
+k.......
+k.......
+"""
+
+IKON_BINTANG = """
+...k...
+..kyk..
+kkyyykk
+.kyyyk.
+..kyk..
+.kk.kk.
+"""
+
 PELURU_MUSUH = """
 .kkk.
 krrrk
@@ -434,7 +464,8 @@ def main():
     for name, rows in {"anjing_pelacak": ANJING, "penembak": PENEMBAK, "serdadu_perisai": PERISAI,
                        "tukang_ranjau": TUKANG_RANJAU, "ranjau": RANJAU, "komandan_besi": KOMANDAN,
                        "mandor_kejam": MANDOR, "gubernur_jenderal": GUBERNUR,
-                       "peluru_musuh": PELURU_MUSUH, "wayang": WAYANG, "warga": WARGA}.items():
+                       "peluru_musuh": PELURU_MUSUH, "wayang": WAYANG, "warga": WARGA,
+                       "ikon_hati": IKON_HATI, "ikon_bendera": IKON_BENDERA, "ikon_bintang": IKON_BINTANG}.items():
         png(os.path.join(OUT, f"{name}.png"), rows, BASE)
     png(os.path.join(OUT, "rempah.png"), REMPAH, BASE)
     png(os.path.join(OUT, "ketupat.png"), KETUPAT, {**BASE, "g": "6aa040", "y": "c8d870"})

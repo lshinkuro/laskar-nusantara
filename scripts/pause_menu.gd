@@ -4,6 +4,7 @@ extends CanvasLayer
 signal resume_pressed
 
 const AudioSettings := preload("res://scripts/audio_settings.gd")
+const HowToPlay := preload("res://scripts/how_to_play.gd")
 
 var _by: Label
 
@@ -39,6 +40,13 @@ func _ready() -> void:
 	resume.text = "Lanjut Berperang"
 	resume.pressed.connect(func(): resume_pressed.emit())
 	box.add_child(resume)
+	var how := Button.new()
+	how.text = "? Cara Main"
+	how.pressed.connect(func():
+		var h := HowToPlay.new()
+		h.closed.connect(h.queue_free)
+		add_child(h))
+	box.add_child(how)
 	var quit := Button.new()
 	quit.text = "Keluar ke Menu"
 	quit.pressed.connect(func(): Net.leave())

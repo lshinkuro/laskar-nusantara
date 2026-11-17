@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/map.gd" id="2"]
@@ -13,6 +13,9 @@
 [ext_resource type="Script" path="res://scripts/level_up.gd" id="10"]
 [ext_resource type="Script" path="res://scripts/villagers.gd" id="11"]
 [ext_resource type="Script" path="res://scripts/warga_pointer.gd" id="12"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ikon_hati.png" id="13"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ikon_bintang.png" id="14"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ikon_bendera.png" id="15"]
 
 [sub_resource type="StyleBoxFlat" id="semangat_fill"]
 bg_color = Color(0.85, 0.15, 0.12, 1)
@@ -106,6 +109,15 @@ theme_override_font_sizes/font_size = 8
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="Icon" type="TextureRect" parent="HUD/TopLeft/HPBar"]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 2.5
+offset_right = 10.0
+offset_bottom = 10.5
+texture = ExtResource("13")
+stretch_mode = 3
+
 [node name="XPBar" type="ProgressBar" parent="HUD/TopLeft"]
 custom_minimum_size = Vector2(120, 9)
 layout_mode = 2
@@ -123,6 +135,15 @@ theme_override_font_sizes/font_size = 7
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="Icon" type="TextureRect" parent="HUD/TopLeft/XPBar"]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 0.5
+offset_right = 10.0
+offset_bottom = 8.5
+texture = ExtResource("14")
+stretch_mode = 3
+
 [node name="SemangatBar" type="ProgressBar" parent="HUD/TopLeft"]
 custom_minimum_size = Vector2(120, 9)
 layout_mode = 2
@@ -139,6 +160,15 @@ theme_override_font_sizes/font_size = 7
 text = "Semangat"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="HUD/TopLeft/SemangatBar"]
+layout_mode = 1
+offset_left = 2.0
+offset_top = 0.5
+offset_right = 10.0
+offset_bottom = 8.5
+texture = ExtResource("15")
+stretch_mode = 3
 
 [node name="Rempah" type="HBoxContainer" parent="HUD/TopLeft"]
 layout_mode = 2
@@ -216,6 +246,26 @@ offset_top = 8.0
 offset_right = -8.0
 offset_bottom = 60.0
 grow_horizontal = 0
+
+[node name="HurtFlash" type="ColorRect" parent="HUD"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.8, 0.05, 0.05, 0)
+
+[node name="ControlsHint" type="Label" parent="HUD"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -46.0
+offset_right = 300.0
+offset_bottom = -34.0
+grow_vertical = 0
+theme_type_variation = &"Hud"
+theme_override_font_sizes/font_size = 8
+text = "WASD / geser layar: gerak   |   Spasi: Pekik Merdeka   |   Esc: jeda"
 
 [node name="WargaPointer" type="Control" parent="HUD"]
 anchors_preset = 15

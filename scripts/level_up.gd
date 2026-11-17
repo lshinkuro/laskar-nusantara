@@ -45,15 +45,30 @@ func choose(upgrade: Dictionary) -> void:
 		finished.emit()
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	# Tombol angka 1-4 memilih kartu ilmu.
+	if not visible or not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	var n: int = event.physical_keycode - KEY_1
+	if n >= 0 and n < _choices.size():
+		get_viewport().set_input_as_handled()
+		choose(_choices[n])
+
+
+var _choices := []
+
+
 func _show_choices() -> void:
 	_title.text = "NAIK LEVEL %d!  Pilih ilmu baru%s" % [
 		player.level - player.pending_levels + 1,
 		"  (%d tersisa)" % player.pending_levels if player.pending_levels > 1 else ""]
-	for c in _cards.get_children():
-		c.queue_free()
 	var options := UPGRADES.duplicate()
 	options.shuffle()
-	for u in options.slice(0, CHOICES):
+	_choices = options.slice(0, CHOICES)
+	for c in _cards.get_children():
+		_cards.remove_child(c)
+		c.queue_free()
+	for u in _choices:
 		_cards.add_child(_card(u))
 
 
@@ -79,7 +94,7 @@ func _card(u: Dictionary) -> Control:
 	effect.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(effect)
 	var btn := Button.new()
-	btn.text = "Pilih"
+	btn.text = "[%d] Pilih" % (_cards.get_child_count() + 1)
 	btn.pressed.connect(choose.bind(u))
 	box.add_child(btn)
 	return card

@@ -54,7 +54,8 @@ func _ready() -> void:
 	# Semua tombol berbunyi "klik" tanpa perlu disambung satu per satu.
 	get_tree().node_added.connect(func(n):
 		if n is BaseButton:
-			n.pressed.connect(play.bind("click", -6.0, 0.0)))
+			n.pressed.connect(play.bind("click", -6.0, 0.0))
+			_juice(n))
 
 
 func play(sound: String, volume_db := 0.0, pitch_variation := 0.08) -> void:
@@ -102,3 +103,16 @@ func _save() -> void:
 	cfg.set_value("audio", "music", music_volume)
 	cfg.set_value("audio", "sfx", sfx_volume)
 	cfg.save(SETTINGS)
+
+
+## Tombol membesar sedikit saat disorot dan "memantul" saat ditekan (semua layar).
+func _juice(b: BaseButton) -> void:
+	var to := func(target: float, time: float):
+		if not b.is_inside_tree() or b.disabled:
+			return
+		b.pivot_offset = b.size / 2
+		b.create_tween().tween_property(b, "scale", Vector2.ONE * target, time).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	b.mouse_entered.connect(func(): to.call(1.05, 0.12))
+	b.mouse_exited.connect(func(): to.call(1.0, 0.12))
+	b.button_down.connect(func(): to.call(0.94, 0.06))
+	b.button_up.connect(func(): to.call(1.05 if b.is_hovered() else 1.0, 0.15))

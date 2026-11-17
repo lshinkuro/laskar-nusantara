@@ -93,6 +93,42 @@ texture = ExtResource("7")
 stretch_mode = 5
 flip_h = true
 
+[node name="CharRow" type="HBoxContainer" parent="Center/Box"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="CharPrev" type="Button" parent="Center/Box/CharRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+text = "<"
+
+[node name="CharInfo" type="VBoxContainer" parent="Center/Box/CharRow"]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="CharName" type="Label" parent="Center/Box/CharRow/CharInfo"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Hud"
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+
+[node name="CharDesc" type="Label" parent="Center/Box/CharRow/CharInfo"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Hud"
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+
+[node name="CharNext" type="Button" parent="Center/Box/CharRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+text = ">"
+
 [node name="MainPanel" type="PanelContainer" parent="Center/Box"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -189,7 +225,7 @@ autowrap_mode = 3
 [node name="Help" type="Label" parent="Center/Box"]
 layout_mode = 2
 theme_type_variation = &"Muted"
-text = "WASD / panah, atau geser layar untuk bergerak. Senjata menembak otomatis."
+text = "WASD / panah atau geser layar untuk bergerak."
 horizontal_alignment = 1
 autowrap_mode = 3
 custom_minimum_size = Vector2(280, 0)

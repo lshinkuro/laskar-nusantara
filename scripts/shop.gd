@@ -18,6 +18,11 @@ const STAT_NAMES := {
 	"luck": "Hoki %",
 	"pickup_range": "Jarak Ambil",
 	"projectiles": "Peluru Ekstra",
+	"melee_damage": "Dmg Dekat %",
+	"ranged_damage": "Dmg Jauh %",
+	"magic_damage": "Dmg Magis %",
+	"dodge": "Menghindar %",
+	"harvest": "Panen %",
 }
 const GOLD := Color(0.88, 0.69, 0.29)
 const WEAPON_COLOR := Color(0.95, 0.6, 0.45)
@@ -125,7 +130,9 @@ func _refresh() -> void:
 
 	var lines := PackedStringArray()
 	for key in STAT_NAMES:
-		lines.append("%s: %d" % [STAT_NAMES[key], player.stats[key]])
+		# Stat inti selalu tampil; sisanya hanya kalau ada bonus.
+		if key in ["max_hp", "armor", "damage", "attack_speed", "speed"] or player.stats[key] != 0:
+			lines.append("%s: %d" % [STAT_NAMES[key], player.stats[key]])
 	_stats.text = "\n".join(lines)
 
 	for c in _weapons.get_children():
@@ -218,7 +225,8 @@ func _card(i: int) -> Control:
 
 func _effects(data: Resource) -> String:
 	if data is WeaponData:
-		var s := "Dmg %d  |  %.1f/dtk  |  Jarak %d" % [data.damage, 1.0 / data.fire_interval, data.attack_range]
+		var kind_name: String = {"melee": "Dekat", "ranged": "Jauh", "magic": "Magis"}[data.category]
+		var s := "%s  |  Dmg %d  |  %.1f/dtk  |  Jarak %d" % [kind_name, data.damage, 1.0 / data.fire_interval, data.attack_range]
 		if data.projectile_count > 1:
 			s += "  |  x%d" % data.projectile_count
 		if data.pierce > 0:

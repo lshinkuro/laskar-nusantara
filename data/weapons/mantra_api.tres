@@ -16,3 +16,4 @@ projectile_speed = 300.0
 projectile_count = 2
 spread = 15.0
 pierce = 0
+category = "magic"

@@ -23,10 +23,10 @@ func _process(_delta: float) -> bool:
 	var p = main.local_player
 	match frames:
 		30:
-			# Gabung senjata: sumpit awal + 2 sumpit = 1 slot tier 3, 3 peluru per tembakan.
-			var sumpit := load("res://data/weapons/sumpit.tres")
-			p.add_weapon(sumpit)
-			p.add_weapon(sumpit)
+			# Gabung senjata: senjata awal karakter + 2 yang sama = 1 slot tier 3.
+			var start_weapon = p.weapon_ring.get_child(0).data
+			p.add_weapon(start_weapon)
+			p.add_weapon(start_weapon)
 			var w = p.weapon_ring.get_child(0)
 			checks.merge_tier = p.weapons.size() == 1 and w.tier == 3
 			p.position = Vector2(150, 270)

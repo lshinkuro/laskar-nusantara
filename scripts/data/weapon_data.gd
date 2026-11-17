@@ -5,6 +5,8 @@ extends Resource
 @export var title := ""
 @export_multiline var description := ""
 @export var price := 30
+## "melee" (jarak dekat), "ranged" (jarak jauh), atau "magic" (magis): bonus damage karakter.
+@export_enum("melee", "ranged", "magic") var category := "ranged"
 @export var texture: Texture2D
 @export var damage := 5
 @export var fire_interval := 0.6

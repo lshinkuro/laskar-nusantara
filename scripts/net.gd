@@ -18,6 +18,8 @@ const MAX_PLAYERS := 4
 const JOIN_TIMEOUT := 12.0
 const ICE_CONFIG := {"iceServers": [{"urls": ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"]}]}
 const GAME_SCENE := "res://scenes/main.tscn"
+const CHARACTER_DIR := "res://data/characters/"
+const SETTINGS := "user://settings.cfg"
 const MENU_SCENE := "res://scenes/menu.tscn"
 
 ## Seragam yang bisa dipilih pemain ("ganti baju").
@@ -32,10 +34,15 @@ const KERAJAAN := [
 	{"name": "Ternate", "texture": preload("res://assets/sprites/prajurit_ternate.png"), "color": Color(0.3, 0.75, 0.75)},
 ]
 
-var players := {}  # peer_id -> {"name": String, "outfit": int}
+var players := {}  # peer_id -> {"name": String, "outfit": int, "char": int}
 var room_code := ""
 var my_name := "Pejuang"
 var my_outfit := 0
+var my_character := 0
+## Karakter dari data/characters/, urut sesuai `order`.
+var characters: Array[CharacterData] = []
+## Wave tertinggi yang pernah dicapai (membuka karakter baru), disimpan di settings.
+var best_wave := 0
 var in_game := false
 var online := false
 ## Pesan yang ditampilkan menu setelah kembali (misal "Host keluar").
@@ -57,6 +64,13 @@ var _join_timer := 0.0
 
 
 func _ready() -> void:
+	for file in ResourceLoader.list_directory(CHARACTER_DIR):
+		if file.ends_with(".tres"):
+			characters.append(load(CHARACTER_DIR + file))
+	characters.sort_custom(func(a, b): return a.order < b.order)
+	var cfg := ConfigFile.new()
+	if cfg.load(SETTINGS) == OK:
+		best_wave = cfg.get_value("progress", "best_wave", 0)
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -103,7 +117,52 @@ func _request_outfit(outfit: int) -> void:
 
 
 func _me() -> Dictionary:
-	return {"name": my_name, "outfit": my_outfit}
+	return {"name": my_name, "outfit": my_outfit, "char": my_character}
+
+
+func character_of(peer_id: int) -> CharacterData:
+	return characters[int(players.get(peer_id, {}).get("char", 0)) % characters.size()]
+
+
+## Ganti karakter (hanya yang sudah terbuka). Di lobby online diteruskan lewat host.
+func set_character(index: int) -> void:
+	my_character = posmod(index, characters.size())
+	var me := multiplayer.get_unique_id()
+	if players.has(me):
+		if is_host():
+			players[me].char = my_character
+			_set_players.rpc(players)
+		else:
+			_request_character.rpc_id(1, my_character)
+	players_changed.emit()
+
+
+@rpc("any_peer", "reliable")
+func _request_character(index: int) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	if is_host() and players.has(id) and not in_game:
+		players[id].char = posmod(index, characters.size())
+		_set_players.rpc(players)
+
+
+func is_unlocked(c: CharacterData) -> bool:
+	return best_wave >= c.unlock_wave
+
+
+## Catat wave yang dicapai; kembalikan karakter yang baru terbuka karenanya.
+func record_wave(wave: int) -> Array[CharacterData]:
+	var newly: Array[CharacterData] = []
+	if wave <= best_wave:
+		return newly
+	for c in characters:
+		if not is_unlocked(c) and wave >= c.unlock_wave:
+			newly.append(c)
+	best_wave = wave
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS)
+	cfg.set_value("progress", "best_wave", best_wave)
+	cfg.save(SETTINGS)
+	return newly
 
 
 # --- Mulai / keluar -----------------------------------------------------------
@@ -206,18 +265,19 @@ func _status(text: String) -> void:
 
 func _on_connected_to_server() -> void:
 	_join_timer = 0.0
-	_register.rpc_id(1, my_name, my_outfit)
+	_register.rpc_id(1, my_name, my_outfit, my_character)
 
 
 @rpc("any_peer", "reliable")
-func _register(player_name: String, outfit: int) -> void:
+func _register(player_name: String, outfit: int, character: int) -> void:
 	if not is_host():
 		return
 	var id := multiplayer.get_remote_sender_id()
 	if in_game or players.size() >= MAX_PLAYERS:
 		multiplayer.multiplayer_peer.disconnect_peer(id)
 		return
-	players[id] = {"name": player_name.substr(0, 12), "outfit": posmod(outfit, KERAJAAN.size())}
+	players[id] = {"name": player_name.substr(0, 12), "outfit": posmod(outfit, KERAJAAN.size()),
+		"char": posmod(character, characters.size())}
 	_set_players.rpc(players)
 
 

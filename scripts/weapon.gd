@@ -44,7 +44,7 @@ func _process(delta: float) -> void:
 	if target == null:
 		return
 	_cooldown = data.fire_interval / maxf(0.2, 1.0 + stats.attack_speed / 100.0)
-	var damage := maxi(1, roundi(data.damage * (1.0 + 0.5 * (tier - 1)) * maxf(0.1, 1.0 + stats.damage / 100.0)))
+	var damage := maxi(1, roundi(data.damage * (1.0 + 0.5 * (tier - 1)) * player.damage_multiplier(data.category)))
 	var dir := global_position.direction_to(target.global_position)
 	rotation = dir.angle()
 	var count: int = data.projectile_count + (tier - 1) + stats.projectiles

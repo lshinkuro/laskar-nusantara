@@ -4,7 +4,7 @@ extends RefCounted
 
 static func spawn(parent: Node, pos: Vector2, amount: int, color := Color(1, 0.9, 0.5), prefix := "") -> void:
 	var n := Label.new()
-	n.text = prefix + str(amount)
+	n.text = prefix + (str(amount) if amount != 0 else "")
 	n.theme_type_variation = &"Hud"
 	n.add_theme_font_size_override("font_size", 8)
 	n.add_theme_color_override("font_color", color)

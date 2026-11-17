@@ -28,6 +28,11 @@ const BASE_STATS := {
 	"luck": 0,          # % peluang rempah dobel
 	"pickup_range": 0,  # piksel jangkauan ambil rempah
 	"projectiles": 0,   # peluru tambahan per tembakan, semua senjata
+	"melee_damage": 0,  # % damage senjata jarak dekat
+	"ranged_damage": 0, # % damage senjata jarak jauh
+	"magic_damage": 0,  # % damage senjata magis
+	"dodge": 0,         # % peluang menghindar (maks 60)
+	"harvest": 0,       # % rempah tambahan
 }
 
 @export var arena_size := Vector2(960, 540)
@@ -143,6 +148,10 @@ func _sync_state(pos: Vector2, new_hp: int, max_hp: int) -> void:
 func take_damage(amount: int) -> void:
 	if not alive or _invuln > 0:
 		return
+	if randf() * 100.0 < minf(stats.dodge, 60.0):
+		_invuln = invuln_time * 0.5
+		DamageNumber.spawn(get_parent(), position + Vector2(0, -24), 0, Color(0.7, 0.9, 1), "Hindar! ")
+		return
 	var armor: int = stats.armor
 	var factor := 10.0 / (10.0 + armor) if armor >= 0 else (10.0 - armor) / 10.0
 	hp = maxi(hp - maxi(1, roundi(amount * factor)), 0)
@@ -180,6 +189,9 @@ func pickup_range() -> float:
 func collect_rempah(value: int) -> void:
 	if randf() * 100.0 < stats.luck:
 		value *= 2
+	# Bonus panen pecahan dibulatkan secara acak (30% -> kadang +1).
+	var bonus: float = value * stats.harvest / 100.0
+	value = maxi(0, value + int(bonus) + (1 if randf() < bonus - int(bonus) else 0))
 	rempah += value
 	rempah_changed.emit(rempah)
 	gain_xp(value)
@@ -246,6 +258,19 @@ func mergeable_weapon(data: WeaponData) -> Node:
 
 func can_take_weapon(data: WeaponData) -> bool:
 	return mergeable_weapon(data) != null or weapons.size() < MAX_WEAPONS
+
+
+## Terapkan karakter yang dipilih: stat awal + senjata awal.
+func apply_character(c: CharacterData) -> void:
+	apply_stats(c.stats)
+	hp = stats.max_hp
+	hp_changed.emit(hp, stats.max_hp)
+	add_weapon(c.start_weapon)
+
+
+## Pengali damage senjata: damage umum + bonus kategori (melee/ranged/magic).
+func damage_multiplier(category: String) -> float:
+	return maxf(0.1, 1.0 + (stats.damage + stats.get(category + "_damage", 0)) / 100.0)
 
 
 func add_weapon(data: WeaponData) -> bool:

@@ -97,10 +97,10 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 - [x] 3 medan berganti per wave: Lembah Sungai, Hutan Kalimantan, Desa & Candi (pohon/bangunan sebagai penghalang)
 
 ### M3 · Minggu 5–6: Sistem data (Resource)
-- [ ] `CharacterData`, `WeaponData`, `ItemData`, `EnemyData` sebagai file `.tres` (WeaponData & ItemData sudah)
+- [x] `CharacterData`, `WeaponData`, `ItemData` sebagai file `.tres` (jenis musuh masih di `enemies.gd`)
 - [ ] Nambah konten cukup bikin file baru, tanpa ngoding
 - [ ] Masukkan 5 karakter, 12 senjata, 30 item
-- [ ] Layar pilih karakter
+- [x] Pilih karakter di menu & lobby (5 karakter, terbuka sesuai wave tertinggi)
 
 ### M4 · Minggu 7–8: Musuh & Boss
 - [x] 4 jenis musuh biasa (+ Serdadu Perisai)
@@ -117,7 +117,7 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 ### M6 · Minggu 11–12: Balancing & rilis
 - [ ] Playtest dengan 5–10 teman: catat di wave berapa mereka mati dan build apa yang terlalu kuat
 - [ ] Balancing
-- [ ] Simpan progres (karakter yang terbuka) di `user://`
+- [x] Simpan progres (karakter yang terbuka) di `user://`
 - [ ] Export Web, lalu upload ke itch.io (+ GitHub Pages otomatis via Actions)
 
 ---

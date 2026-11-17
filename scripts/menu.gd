@@ -13,6 +13,8 @@ const AudioSettings := preload("res://scripts/audio_settings.gd")
 @onready var start_btn: Button = %StartBtn
 @onready var status: Label = %Status
 
+var _char_view := 0  # karakter yang sedang dilihat (boleh yang masih terkunci)
+
 
 func _ready() -> void:
 	get_tree().paused = false
@@ -20,11 +22,17 @@ func _ready() -> void:
 	if cfg.load(SETTINGS) == OK:
 		Net.my_name = cfg.get_value("player", "name", Net.my_name)
 		Net.my_outfit = cfg.get_value("player", "outfit", Net.my_outfit)
+		Net.my_character = cfg.get_value("player", "character", Net.my_character)
+	if not Net.is_unlocked(Net.characters[Net.my_character % Net.characters.size()]):
+		Net.my_character = 0
+	_char_view = Net.my_character
 	name_edit.text = Net.my_name
 	status.text = Net.last_message
 
 	%PrevBtn.pressed.connect(func(): _change_outfit(-1))
 	%NextBtn.pressed.connect(func(): _change_outfit(1))
+	%CharPrev.pressed.connect(func(): _change_character(-1))
+	%CharNext.pressed.connect(func(): _change_character(1))
 	%SettingsPanel.add_child(AudioSettings.new())
 	%SettingsPanel.hide()
 	%SettingsBtn.pressed.connect(func(): %SettingsPanel.visible = not %SettingsPanel.visible)
@@ -65,8 +73,10 @@ func _save_name() -> void:
 	var n := name_edit.text.strip_edges().substr(0, 12)
 	Net.my_name = n if n != "" else "Pejuang"
 	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS)  # jangan hapus pengaturan lain (volume, progres)
 	cfg.set_value("player", "name", Net.my_name)
 	cfg.set_value("player", "outfit", Net.my_outfit)
+	cfg.set_value("player", "character", Net.my_character)
 	cfg.save(SETTINGS)
 
 
@@ -76,8 +86,23 @@ func _change_outfit(step: int) -> void:
 	_refresh()
 
 
+func _change_character(step: int) -> void:
+	_char_view = posmod(_char_view + step, Net.characters.size())
+	if Net.is_unlocked(Net.characters[_char_view]):
+		Net.set_character(_char_view)
+		_save_name()
+	_refresh()
+
+
 func _refresh() -> void:
 	Net.expose_state()
+	var ch: CharacterData = Net.characters[_char_view]
+	var unlocked := Net.is_unlocked(ch)
+	%CharName.text = ch.title if unlocked else ch.title + "  (terkunci)"
+	%CharName.modulate = Color(0.94, 0.85, 0.38) if unlocked else Color(0.6, 0.55, 0.5)
+	%CharDesc.text = "%s   |   %s" % [ch.pros, ch.cons] if unlocked else "Capai wave %d untuk membuka (terbaik: %d)" % [ch.unlock_wave, Net.best_wave]
+	for b in [%SoloBtn, %HostBtn, %JoinBtn]:
+		b.disabled = not unlocked
 	var outfit: Dictionary = Net.KERAJAAN[Net.my_outfit]
 	%OutfitIcon.texture = outfit.texture
 	%OutfitName.text = "Prajurit " + outfit.name
@@ -101,7 +126,7 @@ func _refresh() -> void:
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 		row.add_child(icon)
 		var l := Label.new()
-		l.text = "%s  -  Prajurit %s%s" % [Net.name_of(id), k.name, "  (host)" if id == 1 else ""]
+		l.text = "%s  -  %s (%s)%s" % [Net.name_of(id), Net.character_of(id).title, k.name, "  [host]" if id == 1 else ""]
 		l.modulate = k.color.lightened(0.4)
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(l)

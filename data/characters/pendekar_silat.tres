@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/character_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/weapons/keris.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+title = "Pendekar Silat"
+pros = "+50% damage jarak dekat"
+cons = "-30% damage jarak jauh"
+stats = {"melee_damage": 50, "ranged_damage": -30}
+start_weapon = ExtResource("2")
+unlock_wave = 0
+order = 0

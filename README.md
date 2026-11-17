@@ -8,6 +8,9 @@ Rencana lengkap: [PLAN.md](PLAN.md).
 
 ## Cara main
 - **Gerak:** WASD / panah, atau sentuh & geser layar (HP). Senjata menembak otomatis.
+- **Karakter:** Pendekar Silat, Petani (terbuka dari awal), Dukun (capai wave 4), Pelaut Bugis (wave 8),
+  Penari Jaipong (wave 12). Tiap karakter punya kelebihan, kekurangan, dan senjata awal sendiri;
+  progres tersimpan di `user://`.
 - **Ganti baju:** pilih seragam kerajaan (Majapahit, Sriwijaya, Mataram, Pajajaran, Samudra Pasai,
   Gowa, Kutai, Ternate) dengan tombol `<` `>` di menu/lobby.
 - **Rempah** dari musuh yang gugur = uang belanja di **Pasar Rakyat** antar-wave sekaligus XP.
@@ -37,16 +40,17 @@ Rencana lengkap: [PLAN.md](PLAN.md).
 scenes/   menu, main (game), player, enemy, projectile, rempah
 scripts/  net (autoload lobby+signaling), sfx (autoload suara), map + obstacle (medan), main, player, weapon, enemies, pickups,
           projectiles, wave_manager, shop, menu, touch_joystick
-data/     items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
+data/     characters/*.tres, items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
 assets/   sprites/ (tools/make_sprites.py), audio/ (tools/make_sounds.py, sintesis gamelan),
           fonts/ (Pixelify Sans, OFL), ui/theme.tres
-tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
+tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
 ```
 
 ## Tes
 ```sh
 godot --headless --fixed-fps 60 -s res://tests/smoke_test.gd
 godot --headless -s res://tests/level_test.gd
+godot --headless -s res://tests/character_test.gd
 godot --headless --fixed-fps 60 -s res://tests/boss_test.gd
 godot --headless -s res://tests/net_test.gd -- host &  godot --headless -s res://tests/net_test.gd -- client
 ```

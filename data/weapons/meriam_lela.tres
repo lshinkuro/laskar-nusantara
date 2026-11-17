@@ -16,3 +16,4 @@ projectile_speed = 260.0
 projectile_count = 1
 spread = 0.0
 pierce = 3
+category = "ranged"

@@ -6,7 +6,6 @@ enum State { WAITING, PLAYING, SHOP, OVER }
 
 const PlayerScene := preload("res://scenes/player.tscn")
 const PauseMenu := preload("res://scripts/pause_menu.gd")
-const START_WEAPON := preload("res://data/weapons/sumpit.tres")
 
 var state := State.WAITING
 var local_player
@@ -17,6 +16,7 @@ var _resend_loaded := 0.0
 var _paused := false
 var _pause_menu: CanvasLayer
 var _boss: Node
+var _unlocked_this_run: Array[String] = []
 
 @onready var map: Node2D = $World/Map
 @onready var players: Node2D = $World/Players
@@ -65,7 +65,7 @@ func _ready() -> void:
 	add_child(_pause_menu)
 	Sfx.play_music()
 	_on_xp_changed(0, local_player.xp_needed(), 1)
-	local_player.add_weapon(START_WEAPON)
+	local_player.apply_character(Net.character_of(multiplayer.get_unique_id()))
 	_on_hp_changed(local_player.hp, local_player.stats.max_hp)
 
 	waves.wave_started.connect(_on_wave_started)
@@ -182,7 +182,10 @@ func _on_wave_started(wave: int) -> void:
 	if map_index != map.map_index or wave == 1:
 		map.set_map(map_index)
 		title = map.map_name() + "\n" + title
-	_show_message(title, 1.6)
+	for c in Net.record_wave(wave):
+		_unlocked_this_run.append(c.title)
+		title += "\nKarakter baru terbuka: " + c.title + "!"
+	_show_message(title, 2.2 if title.contains("terbuka") else 1.6)
 	Sfx.play("wave_start", -2.0, 0.0)
 
 
@@ -235,6 +238,8 @@ func _finish(won: bool, wave: int) -> void:
 	$EndScreen/Panel/Box/Title.text = "MERDEKA!" if won else "GUGUR"
 	$EndScreen/Panel/Box/Sub.text = "Kekaisaran Besi mundur dari sawah!" if won \
 		else "Pasukan bertahan sampai wave %d dari %d." % [wave, waves.LAST_WAVE]
+	if not _unlocked_this_run.is_empty():
+		$EndScreen/Panel/Box/Sub.text += "\nKarakter baru: " + ", ".join(_unlocked_this_run)
 	var host := multiplayer.is_server()
 	$EndScreen/Panel/Box/Buttons/Again.visible = host
 	$EndScreen/Panel/Box/Wait.visible = not host

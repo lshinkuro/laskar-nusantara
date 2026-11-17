@@ -7,6 +7,7 @@ signal rempah_changed(amount: int)
 signal stats_changed
 signal xp_changed(xp: int, needed: int, level: int)
 signal leveled_up(level: int)
+signal semangat_changed(value: float)
 signal died
 
 const Weapon := preload("res://scripts/weapon.gd")
@@ -15,6 +16,9 @@ const Fx := preload("res://scripts/fx.gd")
 const WAYANG := preload("res://data/allies/wayang.tres")
 const WAYANG_ICON := preload("res://assets/sprites/wayang.png")
 const PULSE_INTERVAL := 6.0
+const SEMANGAT_MAX := 100.0
+const SEMANGAT_RADIUS := 170.0
+const SEMANGAT_HIT := preload("res://data/allies/semangat_hit.tres")
 const KENTONGAN_HIT := preload("res://data/allies/kentongan_hit.tres")
 const DamageNumber := preload("res://scripts/damage_number.gd")
 const OBJECT_SCALE := 1.5
@@ -65,6 +69,8 @@ var _synergy_applied := {}
 var _pulse := PULSE_INTERVAL
 var _death_save_ready := true
 var _rempah_heal_count := 0
+## Meter Semangat Rakyat (0..100), hanya di pemain lokal.
+var semangat := 0.0
 var map: Node2D  # World/Map, diisi main
 
 var _invuln := 0.0
@@ -251,6 +257,44 @@ func gain_xp(amount: int) -> void:
 		hp_changed.emit(hp, stats.max_hp)
 		leveled_up.emit(level)
 	xp_changed.emit(xp, xp_needed(), level)
+
+
+func add_semangat(value: float) -> void:
+	if not is_local():
+		return
+	semangat = minf(SEMANGAT_MAX, semangat + value)
+	semangat_changed.emit(semangat)
+
+
+func can_use_semangat() -> bool:
+	return alive and semangat >= SEMANGAT_MAX
+
+
+## Pekik Merdeka: gelombang merah putih yang melukai & mendorong semua musuh di sekitar,
+## memulihkan 30% HP, dan kebal sebentar.
+func use_semangat(wave: int) -> bool:
+	if not can_use_semangat():
+		return false
+	semangat = 0.0
+	semangat_changed.emit(semangat)
+	var dmg := roundi((20 + wave * 6) * damage_multiplier("magic"))
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e.position.distance_to(position) < SEMANGAT_RADIUS:
+			enemies.hit(e, dmg, SEMANGAT_HIT, position.direction_to(e.position))
+	heal(roundi(stats.max_hp * 0.3))
+	_invuln = 1.5
+	shake(8.0)
+	_semangat_fx.rpc()
+	return true
+
+
+@rpc("authority", "call_local", "reliable")
+func _semangat_fx() -> void:
+	var world := get_parent().get_parent()
+	Fx.ring(world, position, SEMANGAT_RADIUS, Color(0.9, 0.12, 0.12))
+	Fx.ring(world, position, SEMANGAT_RADIUS * 0.8, Color(1, 1, 1))
+	Fx.spark(world, position + Vector2(0, -10), Color(1, 0.9, 0.5), 40)
+	Sfx.play("wave_start", 2.0, 0.0)
 
 
 func heal(amount: int, show := true) -> void:

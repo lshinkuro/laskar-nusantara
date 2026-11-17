@@ -8,6 +8,7 @@ var kills := 0
 var boss_kills := 0
 var damage := 0
 var max_hit := 0
+var semangat_used := 0
 var time := 0.0
 ## Nama senjata -> {"damage": int, "texture": Texture2D}
 var by_weapon := {}
@@ -45,6 +46,7 @@ func build(box: Container, player, wave: int, character: String) -> void:
 		["Pukulan terkuat", str(max_hit)],
 		["Rempah terkumpul", str(player.rempah_total)],
 		["Level", str(player.level)],
+		["Pekik Merdeka", str(semangat_used)],
 		["Item", str(player.items.size())],
 		["Sinergi", ", ".join(Synergy.active(player).map(func(x): return x.name)) if not Synergy.active(player).is_empty() else "-"],
 	]

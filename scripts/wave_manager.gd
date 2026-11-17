@@ -14,6 +14,7 @@ const MIN_SPAWN_DISTANCE := 150.0
 @export var projectiles: Node
 @export var players: Node2D
 @export var map: Node2D
+@export var villagers: Node
 @export var arena_size := Vector2(960, 540)
 
 var wave := 0
@@ -76,6 +77,7 @@ func _process(delta: float) -> void:
 		running = false
 		enemies.clear()
 		pickups.clear()
+		villagers.clear()
 		_end.rpc(wave)
 		return
 	_spawn_cooldown -= delta

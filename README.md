@@ -13,6 +13,10 @@ Rencana lengkap: [PLAN.md](PLAN.md).
   progres tersimpan di `user://`.
 - **Ganti baju:** pilih seragam kerajaan (Majapahit, Sriwijaya, Mataram, Pajajaran, Samudra Pasai,
   Gowa, Kutai, Ternate) dengan tombol `<` `>` di menu/lobby.
+- **Semangat Rakyat:** selamatkan warga yang terkurung (berdiri di dekat kurungan ±1,5 dtk; panah "!" di
+  tepi layar menunjuk arahnya) dan kalahkan musuh untuk mengisi meter Semangat. Saat penuh, tekan **Spasi**
+  atau tombol *PEKIK MERDEKA!*: gelombang merah putih melukai & mendorong semua musuh di sekitar,
+  memulihkan 30% HP, dan kebal sebentar.
 - **Rempah** dari musuh yang gugur = uang belanja di **Pasar Rakyat** antar-wave sekaligus XP.
 - **Naik level:** HP Maks +1, lalu di akhir wave pilih 1 dari 4 *ilmu* (upgrade stat) per level.
 - **Ketupat** kadang jatuh dari musuh: +3 HP (tidak diambil kalau HP masih penuh).
@@ -52,7 +56,7 @@ scripts/  net (autoload lobby+signaling), sfx (autoload suara), map + obstacle (
 data/     characters/*.tres, items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
 assets/   sprites/ (tools/make_sprites.py), audio/ (tools/make_sounds.py, sintesis gamelan),
           fonts/ (Pixelify Sans, OFL), ui/theme.tres
-tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), item_test (item unik & sinergi), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
+tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), item_test (item unik & sinergi), semangat_test (warga & Pekik Merdeka), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
 ```
 
 ## Tes
@@ -62,6 +66,7 @@ godot --headless -s res://tests/level_test.gd
 godot --headless -s res://tests/character_test.gd
 godot --headless --fixed-fps 60 -s res://tests/weapon_test.gd
 godot --headless --fixed-fps 60 -s res://tests/item_test.gd
+godot --headless --fixed-fps 60 -s res://tests/semangat_test.gd
 godot --headless --fixed-fps 60 -s res://tests/boss_test.gd
 godot --headless -s res://tests/net_test.gd -- host &  godot --headless -s res://tests/net_test.gd -- client
 ```

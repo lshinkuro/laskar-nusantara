@@ -25,6 +25,8 @@ var run := RunSummary.new()
 @onready var enemies: Node2D = $World/Enemies
 @onready var pickups: Node2D = $World/Pickups
 @onready var projectiles: Node2D = $World/Projectiles
+@onready var villagers: Node2D = $World/Villagers
+@onready var semangat_bar: ProgressBar = $HUD/TopLeft/SemangatBar
 @onready var waves = $World/WaveManager
 @onready var shop = $Shop
 @onready var level_up = $LevelUp
@@ -54,7 +56,15 @@ func _ready() -> void:
 	enemies.local_player = local_player
 	enemies.boss_changed.connect(_on_boss_changed)
 	enemies.local_hit.connect(run.record_hit)
-	enemies.kill_credited.connect(func(_kind, is_boss): run.record_kill(is_boss))
+	enemies.kill_credited.connect(func(_kind, is_boss):
+		run.record_kill(is_boss)
+		local_player.add_semangat(1.5))
+	villagers.local_player = local_player
+	villagers.first_seen.connect(func(): _show_message("Selamatkan warga yang terkurung!\nBerdiri di dekatnya untuk mengisi Semangat.", 3.0))
+	$HUD/WargaPointer.villagers = villagers
+	$HUD/Pekik.pressed.connect(_use_semangat)
+	local_player.semangat_changed.connect(_on_semangat_changed)
+	_on_semangat_changed(0.0)
 	enemies.announce.connect(func(t): _show_message(t, 1.5); local_player.shake(5.0))
 	local_player.hp_changed.connect(_on_hp_changed)
 	local_player.rempah_changed.connect(func(n): rempah_label.text = str(n))
@@ -266,7 +276,24 @@ func _on_hp_changed(hp: int, max_hp: int) -> void:
 # --- Jeda ---------------------------------------------------------------------
 # Di co-op, jeda berlaku untuk semua pemain (lewat host) dan siapa saja bisa melanjutkan.
 
+func _use_semangat() -> void:
+	if state == State.PLAYING and not _paused and local_player.use_semangat(waves.wave):
+		_show_message("MERDEKA!", 1.0)
+		run.semangat_used += 1
+
+
+func _on_semangat_changed(value: float) -> void:
+	semangat_bar.max_value = local_player.SEMANGAT_MAX
+	semangat_bar.value = value
+	var full: bool = value >= local_player.SEMANGAT_MAX
+	$HUD/TopLeft/SemangatBar/Label.text = "PENUH! [Spasi]" if full else "Semangat"
+	$HUD/Pekik.visible = full
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("semangat"):
+		_use_semangat()
+		return
 	if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_P):
 		_request_pause(not _paused)
 

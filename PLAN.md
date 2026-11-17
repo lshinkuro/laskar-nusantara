@@ -153,8 +153,9 @@ res://
 | Aset grafis | Pakai placeholder sampai M5. Cari aset gratis (itch.io, Kenney) dan cek lisensinya. |
 | Terlalu mirip Brotato | Jangan salin nama, aset, atau angka stat. Tambah mekanik khas sendiri. |
 
-### Ide mekanik khas: Semangat Rakyat
-Meter yang terisi saat pemain menyelamatkan warga di map. Kalau penuh, bisa dipakai untuk serangan spesial.
+### Mekanik khas: Semangat Rakyat ✅
+Meter yang terisi saat pemain menyelamatkan warga di map (dan sedikit dari tiap kill). Kalau penuh,
+dipakai untuk serangan spesial **Pekik Merdeka**.
 
 ---
 

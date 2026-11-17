@@ -207,107 +207,134 @@ def save(name, samples, peak=0.9, rms=None):
 _ = None  # penanda diam di pola
 
 
-def music_menu():
-    b = 196.0
-    mel = [7, _, 8, 7, 6, _, 5, _, 6, _, 7, 6, 5, _, _, _, 5, _, 6, 7, 8, _, 9, 8, 7, _, 6, 5, 6, _, _, _]
-    bal = [2, 1, 2, 3, 2, 1, 0, 1, 3, 2, 3, 4, 3, 2, 1, 0]
-    return track(76, 8, [
-        (lambda d: suling(note(b * 2, d), 60 / 76 * 0.95), mel, 1, 0.9),
-        (lambda d: gender(note(b, d)), bal, 2, 0.5),
-        (lambda d: gender(note(b / 2, d), 2.0), [0, 2, 3, 1], 8, 0.4),
-        (lambda _d: gong(62, 3.0), [1], 16, 0.7),
+MAYOR = [2 ** (st / 12) for st in (0, 2, 4, 5, 7, 9, 11)]
+MINOR = [2 ** (st / 12) for st in (0, 2, 3, 5, 7, 8, 11)]  # minor harmonis: akor V tetap mayor
+
+
+def bas(freq, dur=0.5):
+    """Bas petik lembut (seperti betot kroncong)."""
+    out = []
+    for i in range(int(RATE * dur)):
+        t = i / RATE
+        v = math.sin(2 * math.pi * freq * t) + 0.35 * math.sin(4 * math.pi * freq * t) * math.exp(-8 * t)
+        out.append(v * math.exp(-3.5 * t) * min(1.0, t / 0.005) * 0.6)
+    return out
+
+
+def legato(mel):
+    """Pola melodi -> [(nada, panjang_langkah)]: nada ditahan sampai nada berikutnya (maks 4 langkah)."""
+    out = []
+    for i, d in enumerate(mel):
+        if d is None:
+            out.append(None)
+            continue
+        n = 1
+        while n < 4 and mel[(i + n) % len(mel)] is None:
+            n += 1
+        out.append((d, n))
+    return out
+
+
+def lagu(bpm, base, scale, chords, mel, lead, arp_inst, beat, gain_lead=0.8):
+    """Lagu diatonis: melodi (per 1/8 ketuk) + arpeggio akor + bas + kendang + gong per 4 birama.
+    chords: akar akor (derajat tangga nada) per birama; mel: 8 langkah per birama."""
+    bars = len(chords)
+    step = 60 / bpm / 2
+    arp = []
+    for r in chords:
+        arp += [r, r + 2, r + 4, r + 2, r + 7, r + 4, r + 2, r + 4]
+    bass = []
+    for r in chords:
+        bass += [r, _, r + 4, _]
+    drums = {"D": kendang_dung, "t": kendang_tak, "R": rebana, "B": bedug}
+    return track(bpm, bars, [
+        (lambda dn: lead(note(base * 2, dn[0], scale), dn[1] * step * 0.95), legato(mel), 0.5, gain_lead),
+        (lambda d: arp_inst(note(base, d, scale)), arp, 0.5, 0.22),
+        (lambda d: bas(note(base / 4, d, scale), 0.9), bass, 1, 0.55),
+        (lambda c: drums[c](), [None if c == "." else c for c in beat], 0.5, 0.45),
+        (lambda _d: gong(base / 4, 2.4), [1], 16, 0.55),
     ])
+
+
+def angklung_lead(freq, dur):
+    return angklung(freq, max(0.35, dur))
+
+
+def bilah_lead(freq, dur):
+    return bilah(freq, max(0.4, dur), 3.5, 0.6)
+
+
+def angklung_arp(freq):
+    return angklung(freq, 0.4)
+
+
+def bilah_arp(freq):
+    return bilah(freq, 0.4, 7.0, 0.4)
+
+
+def music_menu():
+    # Gundul Pacul (lagu daerah Jawa, domain publik)
+    mel = [0, 2, 0, 2, 3, 4, 4, _,  6, 7, 6, 4, _, _, _, _,
+           0, 2, 0, 2, 3, 4, 4, _,  6, 4, 3, 2, _, _, _, _,
+           3, 4, 3, 2, 0, 3, 2, 0,  3, 4, 3, 2, 0, _, _, _,
+           3, 4, 3, 2, 0, 3, 2, 0,  1, 2, 0, _, _, _, _, _]
+    return lagu(100, 262.0, MAYOR, [0, 4, 0, 4, 3, 0, 4, 0], mel, suling, angklung_arp, "D...t...D.t.t...")
 
 
 def music_lembah():
-    b = 220.0
-    bal = [2, 1, 2, 3, 2, 1, 4, 3, 5, 3, 2, 1, 3, 2, 1, 0, 2, 1, 2, 3, 5, 6, 5, 3, 2, 1, 3, 2, 4, 3, 1, 0]
-    imbal = [bal[i // 2] + (2 if i % 2 else 0) for i in range(64)]
-    k = {"D": kendang_dung, "t": kendang_tak}
-    return track(104, 8, [
-        (lambda d: bilah(note(b, d), 0.9, 4.0), bal, 1, 0.55),
-        (lambda d: bilah(note(b * 2, d), 0.35, 9.0, 0.6), imbal, 0.5, 0.18),
-        (lambda c: k[c](), [None if c == "." else c for c in "D.t.D.tt.tD.t.Dt"], 0.5, 0.5),
-        (lambda _d: gong(124, 1.2), [1], 8, 0.35),
-        (lambda _d: gong(62, 2.4), [1], 32, 0.8),
-    ])
+    mel = [4, _, 2, 4, 7, _, 6, 4,  5, _, 4, _, 1, _, _, _,
+           2, _, 0, 2, 5, _, 4, 2,  3, _, 2, 1, 3, _, _, _,
+           4, _, 2, 4, 7, _, 9, 7,  8, _, 7, 6, 4, _, _, _,
+           5, 6, 7, _, 6, 4, 2, _,  3, _, 1, _, 2, _, _, _]
+    return lagu(112, 262.0, MAYOR, [0, 4, 5, 3, 0, 4, 5, 3], mel, angklung_lead, bilah_arp, "D.t.D.tt.tD.t.Dt")
 
 
 def music_hutan():
-    b = 174.0
-    ost = [0, 2, 4, 2, 1, 3, 5, 3, 0, 2, 4, 6, 5, 3, 1, 3]
-    bal = [0, _, 3, _, 2, _, 1, _, 4, _, 3, _, 5, _, 4, _]
-    return track(92, 8, [
-        (lambda d: angklung(note(b * 2, d, PELOG), 0.45), ost, 0.5, 0.35),
-        (lambda d: bilah(note(b / 2, d, PELOG), 1.4, 2.5, 0.6), bal, 1, 0.55),
-        (lambda c: kendang_dung() if c == "D" else kendang_tak(), ["D", _, _, "t", _, _, "D", _, _, "t", "t", _, "D", _, _, _], 0.5, 0.4),
-        (lambda _d: gong(55, 3.0), [1], 16, 0.8),
-    ])
+    mel = [0, _, 2, 4, 7, _, 4, _,  5, _, 4, 2, 0, _, _, _,
+           2, _, 4, 6, 9, _, 7, 6,  6, _, _, 4, 1, _, _, _,
+           7, _, 6, 7, 9, _, 7, _,  5, _, 4, 5, 7, _, 5, _,
+           4, _, 2, 4, 6, _, 4, 2,  1, _, _, _, _, _, _, _]
+    return lagu(96, 220.0, MINOR, [0, 5, 2, 6, 0, 5, 2, 4], mel, suling, angklung_arp, "D..t..D...t.D...")
 
 
 def music_pelabuhan():
-    b = 247.0
-    mel = [5, 6, 7, 6, 5, 3, 5, _, 7, 8, 9, 8, 7, 5, 6, _, 5, 6, 7, 9, 8, 7, 6, 5, 3, 5, 6, 5, 3, 2, 3, _]
-    bal = [2, 3, 5, 3, 2, 1, 2, 3]
-    return track(118, 8, [
-        (lambda d: suling(note(b * 2, d), 60 / 118 * 0.48, 0.9), mel, 0.5, 0.8),
-        (lambda d: bilah(note(b, d), 0.7, 5.0), bal, 1, 0.45),
-        (lambda c: rebana() if c == "R" else kendang_tak(0.05), ["R", _, "t", "t", "R", _, "t", _], 0.5, 0.45),
-        (lambda _d: gong(124, 1.0), [1], 8, 0.35),
-        (lambda _d: gong(70, 2.0), [1], 16, 0.6),
-    ])
+    mel = [0, 2, 4, _, 4, _, 2, _,  3, 5, 7, _, 7, _, 5, _,
+           4, _, 6, _, 8, _, 6, 4,  7, _, _, _, 4, _, _, _,
+           0, 2, 4, _, 4, _, 2, _,  3, 5, 7, _, 7, _, 9, _,
+           8, _, 7, _, 6, _, 4, _,  7, _, _, _, _, _, _, _]
+    return lagu(120, 294.0, MAYOR, [0, 3, 4, 0, 0, 3, 4, 0], mel, suling, bilah_arp, "R.ttR.t.R.ttR.tt")
 
 
 def music_desa():
-    b = 220.0
-    bal = [3, 2, 3, 5, 6, 5, 3, 2, 1, 2, 3, 2, 1, 0, 1, 2]
-    imbal = [bal[i // 2] + (2 if i % 2 else 5) for i in range(32)]
-    pat = list("D tDt tD tDt D tt")
-    return track(112, 8, [
-        (lambda d: bilah(note(b, d), 0.8, 4.0), bal, 1, 0.5),
-        (lambda d: bilah(note(b * 2, d), 0.3, 10.0, 0.7), imbal, 0.5, 0.22),
-        (lambda c: kendang_dung() if c == "D" else kendang_tak(), [None if c == " " else c for c in pat], 0.25, 0.5),
-        (lambda _d: gong(124, 1.0), [1], 4, 0.3),
-        (lambda _d: gong(62, 2.4), [1], 16, 0.8),
-    ])
+    mel = [7, _, 7, 6, 4, _, 2, _,  2, _, 4, _, 5, _, _, _,
+           3, _, 5, _, 7, _, 5, 3,  4, _, _, _, 6, _, _, _,
+           7, _, 7, 6, 4, _, 7, _,  9, _, 7, _, 5, _, _, _,
+           3, 4, 5, _, 5, 4, 3, _,  4, _, 1, _, _, _, _, _]
+    return lagu(108, 220.0, MAYOR, [0, 5, 3, 4, 0, 5, 3, 4], mel, bilah_lead, angklung_arp, "D.tDt.tD.tDt.Dtt")
 
 
 def music_benteng():
-    b = 110.0
-    ost = [0, 0, 1, 0, 3, 0, 1, 0]
-    clank = [6, _, _, 5, _, _, 4, _, 6, _, _, 5, _, 3, _, _]
-    return track(96, 8, [
-        (lambda d: bilah(note(b, d, PELOG), 0.5, 6.0, 0.9), ost, 0.5, 0.5),
-        (lambda d: dentang(note(b * 4, d, PELOG)), clank, 0.5, 0.25),
-        (lambda c: bedug() if c == "B" else noise(0.12, 30, 0.6, 0.6), ["B", _, "s", _, "B", "B", "s", "s"], 0.5, 0.55),
-        (lambda _d: gong(49, 2.5), [1], 8, 0.8),
-    ])
+    mel = [0, _, _, 0, 2, _, 4, _,  3, _, _, 3, 5, _, 7, _,
+           4, _, 6, _, 8, _, 6, _,  7, _, _, _, _, _, _, _,
+           7, _, 6, 5, 4, _, 2, _,  5, _, 4, 3, 2, _, 0, _,
+           1, _, 4, _, 6, _, 4, _,  0, _, _, _, _, _, _, _]
+    return lagu(100, 196.0, MINOR, [0, 3, 4, 0, 0, 3, 4, 0], mel, bilah_lead, bilah_arp, "B.t.B.ttB.t.BBtt")
 
 
 def music_boss():
-    b = 147.0
-    bal = [0, 1, 3, 1, 4, 3, 1, 0, 5, 4, 3, 1, 3, 4, 6, 5]
-    fast = [d + 7 for d in bal for _k in range(2)]
-    pat = ["D", "t", "t", "D", "t", "D", "t", "t", "D", "t", "D", "D", "t", "t", "D", "t"]
-    return track(144, 8, [
-        (lambda d: bilah(note(b, d, PELOG), 0.6, 5.0, 0.9), bal, 1, 0.5),
-        (lambda d: bilah(note(b, d, PELOG), 0.25, 12.0, 0.8), fast, 0.25, 0.2),
-        (lambda c: kendang_dung() if c == "D" else kendang_tak(), pat, 0.25, 0.5),
-        (lambda _d: bedug(0.5), [1, _, _, _, 1, _, 1, _], 0.5, 0.6),
-        (lambda _d: gong(55, 1.8), [1], 4, 0.7),
-    ])
+    mel = [7, 6, 7, 4, 7, 6, 7, 2,  5, 4, 5, 0, 5, 4, 5, 2,
+           3, 2, 3, 0, 5, 3, 2, 0,  1, _, 4, _, 6, _, 8, _,
+           7, 6, 7, 9, 10, 9, 7, 6,  5, 7, 9, _, 8, 7, 5, _,
+           3, 5, 7, _, 5, 3, 2, 1,  6, _, 4, _, 1, _, _, _]
+    return lagu(140, 147.0, MINOR, [0, 5, 3, 4, 0, 5, 3, 4], mel, suling, bilah_arp, "DttDtDttDtDDttDt", 0.7)
 
 
 def music_pasar():
-    b = 220.0
-    mel = [5, 6, 7, _, 6, 5, 3, _, 5, 3, 2, _, 3, 5, 6, _, 7, 8, 7, 6, 5, _, 6, 7, 5, _, 3, 2, 3, _, _, _]
-    bal = [2, 3, 2, 1, 2, 3, 5, 3]
-    return track(84, 8, [
-        (lambda d: suling(note(b * 2, d), 60 / 84 * 0.48, 0.8), mel, 0.5, 0.7),
-        (lambda d: gender(note(b, d), 1.4), bal, 1, 0.45),
-        (lambda _c: rebana(0.08), [_, 1, _, 1], 0.5, 0.2),
-        (lambda _d: gong(62, 2.6), [1], 16, 0.6),
-    ])
+    mel = [4, _, _, 2, 4, _, _, _,  5, _, 4, 2, 0, _, _, _,
+           1, _, 3, _, 5, _, 4, 3,  1, _, _, _, _, _, _, _,
+           4, _, _, 2, 4, _, 7, _,  7, _, 5, _, 7, _, 9, _,
+           8, _, 7, 5, 3, _, 1, _,  4, _, 6, _, 8, _, _, _]
+    return lagu(88, 262.0, MAYOR, [0, 5, 1, 4, 0, 5, 1, 4], mel, suling, angklung_arp, ".R.R.R.R", 0.7)
 
 
 def main():

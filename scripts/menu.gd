@@ -18,9 +18,12 @@ func _ready() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS) == OK:
 		Net.my_name = cfg.get_value("player", "name", Net.my_name)
+		Net.my_outfit = cfg.get_value("player", "outfit", Net.my_outfit)
 	name_edit.text = Net.my_name
 	status.text = Net.last_message
 
+	%PrevBtn.pressed.connect(func(): _change_outfit(-1))
+	%NextBtn.pressed.connect(func(): _change_outfit(1))
 	%SoloBtn.pressed.connect(func(): _save_name(); Net.start_solo())
 	%HostBtn.pressed.connect(func(): _save_name(); Net.host_room())
 	%JoinBtn.pressed.connect(_on_join)
@@ -58,11 +61,22 @@ func _save_name() -> void:
 	Net.my_name = n if n != "" else "Pejuang"
 	var cfg := ConfigFile.new()
 	cfg.set_value("player", "name", Net.my_name)
+	cfg.set_value("player", "outfit", Net.my_outfit)
 	cfg.save(SETTINGS)
+
+
+func _change_outfit(step: int) -> void:
+	Net.set_outfit(Net.my_outfit + step)
+	_save_name()
+	_refresh()
 
 
 func _refresh() -> void:
 	Net.expose_state()
+	var outfit: Dictionary = Net.KERAJAAN[Net.my_outfit]
+	%OutfitIcon.texture = outfit.texture
+	%OutfitName.text = "Prajurit " + outfit.name
+	%OutfitName.modulate = outfit.color.lightened(0.4)
 	main_panel.visible = not Net.online
 	lobby_panel.visible = Net.online
 	if not Net.online:
@@ -82,7 +96,7 @@ func _refresh() -> void:
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 		row.add_child(icon)
 		var l := Label.new()
-		l.text = "%s  -  Prajurit %s%s" % [Net.players[id], k.name, "  (host)" if id == 1 else ""]
+		l.text = "%s  -  Prajurit %s%s" % [Net.name_of(id), k.name, "  (host)" if id == 1 else ""]
 		l.modulate = k.color.lightened(0.4)
 		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(l)

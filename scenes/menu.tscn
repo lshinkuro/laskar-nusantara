@@ -1,11 +1,8 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/sawah.gd" id="2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/prajurit_majapahit.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/prajurit_sriwijaya.png" id="4"]
-[ext_resource type="Texture2D" path="res://assets/sprites/prajurit_mataram.png" id="5"]
-[ext_resource type="Texture2D" path="res://assets/sprites/prajurit_pajajaran.png" id="6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/serdadu_besi.png" id="7"]
 
 [node name="Menu" type="Control"]
@@ -53,50 +50,48 @@ theme_type_variation = &"Hud"
 text = "Bangkit, prajurit kerajaan! Usir Kekaisaran Besi."
 horizontal_alignment = 1
 
-[node name="Heroes" type="HBoxContainer" parent="Center/Box"]
+[node name="Outfit" type="HBoxContainer" parent="Center/Box"]
 layout_mode = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 6
 alignment = 1
 
-[node name="H1" type="TextureRect" parent="Center/Box/Heroes"]
-custom_minimum_size = Vector2(32, 32)
+[node name="PrevBtn" type="Button" parent="Center/Box/Outfit"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+text = "<"
+
+[node name="OutfitIcon" type="TextureRect" parent="Center/Box/Outfit"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 texture = ExtResource("3")
 stretch_mode = 5
 
-[node name="H2" type="TextureRect" parent="Center/Box/Heroes"]
-custom_minimum_size = Vector2(32, 32)
+[node name="OutfitName" type="Label" parent="Center/Box/Outfit"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
-texture = ExtResource("4")
-stretch_mode = 5
+size_flags_vertical = 4
+theme_type_variation = &"Hud"
+text = "Prajurit Majapahit"
+horizontal_alignment = 1
 
-[node name="H3" type="TextureRect" parent="Center/Box/Heroes"]
-custom_minimum_size = Vector2(32, 32)
+[node name="NextBtn" type="Button" parent="Center/Box/Outfit"]
+unique_name_in_owner = true
 layout_mode = 2
-texture = ExtResource("5")
-stretch_mode = 5
+size_flags_vertical = 4
+text = ">"
 
-[node name="H4" type="TextureRect" parent="Center/Box/Heroes"]
-custom_minimum_size = Vector2(32, 32)
+[node name="Vs" type="Label" parent="Center/Box/Outfit"]
 layout_mode = 2
-texture = ExtResource("6")
-stretch_mode = 5
-
-[node name="Vs" type="Label" parent="Center/Box/Heroes"]
-layout_mode = 2
+size_flags_vertical = 4
 theme_type_variation = &"Title"
 theme_override_font_sizes/font_size = 12
-text = "  VS  "
+text = " VS "
 
-[node name="E1" type="TextureRect" parent="Center/Box/Heroes"]
-custom_minimum_size = Vector2(32, 32)
-layout_mode = 2
-texture = ExtResource("7")
-stretch_mode = 5
-flip_h = true
-
-[node name="E2" type="TextureRect" parent="Center/Box/Heroes"]
-custom_minimum_size = Vector2(32, 32)
+[node name="E1" type="TextureRect" parent="Center/Box/Outfit"]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
 texture = ExtResource("7")
 stretch_mode = 5

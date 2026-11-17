@@ -20,17 +20,22 @@ const ICE_CONFIG := {"iceServers": [{"urls": ["stun:stun.l.google.com:19302", "s
 const GAME_SCENE := "res://scenes/main.tscn"
 const MENU_SCENE := "res://scenes/menu.tscn"
 
-## Satu kerajaan per slot pemain (urut peer id).
+## Seragam yang bisa dipilih pemain ("ganti baju").
 const KERAJAAN := [
 	{"name": "Majapahit", "texture": preload("res://assets/sprites/prajurit_majapahit.png"), "color": Color(0.85, 0.2, 0.15)},
 	{"name": "Sriwijaya", "texture": preload("res://assets/sprites/prajurit_sriwijaya.png"), "color": Color(0.3, 0.55, 0.95)},
 	{"name": "Mataram", "texture": preload("res://assets/sprites/prajurit_mataram.png"), "color": Color(0.3, 0.75, 0.35)},
 	{"name": "Pajajaran", "texture": preload("res://assets/sprites/prajurit_pajajaran.png"), "color": Color(0.7, 0.4, 0.9)},
+	{"name": "Samudra Pasai", "texture": preload("res://assets/sprites/prajurit_samudra_pasai.png"), "color": Color(0.9, 0.3, 0.3)},
+	{"name": "Gowa", "texture": preload("res://assets/sprites/prajurit_gowa.png"), "color": Color(0.9, 0.7, 0.3)},
+	{"name": "Kutai", "texture": preload("res://assets/sprites/prajurit_kutai.png"), "color": Color(0.95, 0.55, 0.2)},
+	{"name": "Ternate", "texture": preload("res://assets/sprites/prajurit_ternate.png"), "color": Color(0.3, 0.75, 0.75)},
 ]
 
-var players := {}  # peer_id -> nama
+var players := {}  # peer_id -> {"name": String, "outfit": int}
 var room_code := ""
 var my_name := "Pejuang"
+var my_outfit := 0
 var in_game := false
 var online := false
 ## Pesan yang ditampilkan menu setelah kembali (misal "Host keluar").
@@ -68,15 +73,37 @@ func is_room_host() -> bool:
 	return _hosting
 
 
-## Urutan slot pemain (dipakai untuk warna/kerajaan), stabil di semua peer.
-func slot_of(peer_id: int) -> int:
-	var ids := players.keys()
-	ids.sort()
-	return maxi(ids.find(peer_id), 0) % KERAJAAN.size()
-
-
 func kerajaan_of(peer_id: int) -> Dictionary:
-	return KERAJAAN[slot_of(peer_id)]
+	return KERAJAAN[int(players.get(peer_id, {}).get("outfit", 0)) % KERAJAAN.size()]
+
+
+func name_of(peer_id: int) -> String:
+	return str(players.get(peer_id, {}).get("name", "?"))
+
+
+## Ganti baju. Di lobby online, host meneruskan ke semua pemain.
+func set_outfit(outfit: int) -> void:
+	my_outfit = posmod(outfit, KERAJAAN.size())
+	var me := multiplayer.get_unique_id()
+	if players.has(me):
+		if is_host():
+			players[me].outfit = my_outfit
+			_set_players.rpc(players)
+		else:
+			_request_outfit.rpc_id(1, my_outfit)
+	players_changed.emit()
+
+
+@rpc("any_peer", "reliable")
+func _request_outfit(outfit: int) -> void:
+	var id := multiplayer.get_remote_sender_id()
+	if is_host() and players.has(id) and not in_game:
+		players[id].outfit = posmod(outfit, KERAJAAN.size())
+		_set_players.rpc(players)
+
+
+func _me() -> Dictionary:
+	return {"name": my_name, "outfit": my_outfit}
 
 
 # --- Mulai / keluar -----------------------------------------------------------
@@ -84,7 +111,7 @@ func kerajaan_of(peer_id: int) -> Dictionary:
 func start_solo() -> void:
 	_reset()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
-	players = {1: my_name}
+	players = {1: _me()}
 	start_game()
 
 
@@ -95,7 +122,7 @@ func host_room() -> void:
 	_rtc = WebRTCMultiplayerPeer.new()
 	_rtc.create_server()
 	multiplayer.multiplayer_peer = _rtc
-	players = {1: my_name}
+	players = {1: _me()}
 	room_code = _random_code()
 	_open_signaling("host")
 	_status("Membuat room...")
@@ -119,7 +146,7 @@ func host_enet(port: int) -> void:
 	peer.create_server(port, MAX_PLAYERS)
 	multiplayer.multiplayer_peer = peer
 	_hosting = true
-	players = {1: my_name}
+	players = {1: _me()}
 	players_changed.emit()
 
 
@@ -179,18 +206,18 @@ func _status(text: String) -> void:
 
 func _on_connected_to_server() -> void:
 	_join_timer = 0.0
-	_register.rpc_id(1, my_name)
+	_register.rpc_id(1, my_name, my_outfit)
 
 
 @rpc("any_peer", "reliable")
-func _register(player_name: String) -> void:
+func _register(player_name: String, outfit: int) -> void:
 	if not is_host():
 		return
 	var id := multiplayer.get_remote_sender_id()
 	if in_game or players.size() >= MAX_PLAYERS:
 		multiplayer.multiplayer_peer.disconnect_peer(id)
 		return
-	players[id] = player_name.substr(0, 12)
+	players[id] = {"name": player_name.substr(0, 12), "outfit": posmod(outfit, KERAJAAN.size())}
 	_set_players.rpc(players)
 
 

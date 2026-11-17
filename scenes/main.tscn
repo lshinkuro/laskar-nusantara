@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/sawah.gd" id="2"]
@@ -9,6 +9,15 @@
 [ext_resource type="Script" path="res://scripts/projectiles.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/shop.gd" id="8"]
 [ext_resource type="Texture2D" path="res://assets/sprites/rempah.png" id="9"]
+
+[ext_resource type="Script" path="res://scripts/level_up.gd" id="10"]
+
+[sub_resource type="StyleBoxFlat" id="xp_fill"]
+bg_color = Color(0.94, 0.75, 0.25, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [sub_resource type="StyleBoxFlat" id="dim"]
 bg_color = Color(0.05, 0.03, 0.02, 0.7)
@@ -66,6 +75,23 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 theme_type_variation = &"Hud"
 theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="XPBar" type="ProgressBar" parent="HUD/TopLeft"]
+custom_minimum_size = Vector2(120, 9)
+layout_mode = 2
+theme_override_styles/fill = SubResource("xp_fill")
+max_value = 10.0
+show_percentage = false
+
+[node name="Label" type="Label" parent="HUD/TopLeft/XPBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_type_variation = &"Hud"
+theme_override_font_sizes/font_size = 7
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -141,6 +167,10 @@ script = ExtResource("4")
 [node name="Shop" type="CanvasLayer" parent="."]
 layer = 2
 script = ExtResource("8")
+
+[node name="LevelUp" type="CanvasLayer" parent="."]
+layer = 2
+script = ExtResource("10")
 
 [node name="EndScreen" type="CanvasLayer" parent="."]
 layer = 3

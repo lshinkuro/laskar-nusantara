@@ -1,0 +1,116 @@
+extends CanvasLayer
+## Layar "Ilmu Baru": tiap level yang didapat saat wave, pilih 1 dari 4 upgrade stat.
+
+signal finished
+
+const CHOICES := 4
+const UPGRADES := [
+	{"title": "Tulang Besi", "desc": "Badan makin kokoh.", "stats": {"max_hp": 3}},
+	{"title": "Otot Kawat", "desc": "Pukulan makin keras.", "stats": {"damage": 8}},
+	{"title": "Tangan Cekatan", "desc": "Serangan makin cepat.", "stats": {"attack_speed": 8}},
+	{"title": "Langkah Kijang", "desc": "Lari makin gesit.", "stats": {"speed": 6}},
+	{"title": "Kulit Badak", "desc": "Tahan pukulan.", "stats": {"armor": 1}},
+	{"title": "Mata Elang", "desc": "Melihat musuh dari jauh.", "stats": {"range": 10}},
+	{"title": "Napas Panjang", "desc": "Luka cepat pulih.", "stats": {"hp_regen": 2}},
+	{"title": "Berkah Leluhur", "desc": "Rezeki makin lancar.", "stats": {"luck": 8}},
+	{"title": "Tangan Panjang", "desc": "Rempah jauh pun teraih.", "stats": {"pickup_range": 20}},
+]
+const GOLD := Color(0.88, 0.69, 0.29)
+
+var player
+
+var _title: Label
+var _cards: HBoxContainer
+
+
+func _ready() -> void:
+	_build()
+	hide()
+
+
+func open(p) -> void:
+	player = p
+	show()
+	_show_choices()
+
+
+func choose(upgrade: Dictionary) -> void:
+	player.apply_stats(upgrade.stats)
+	player.pending_levels -= 1
+	if player.pending_levels > 0:
+		_show_choices()
+	else:
+		hide()
+		finished.emit()
+
+
+func _show_choices() -> void:
+	_title.text = "NAIK LEVEL %d!  Pilih ilmu baru%s" % [
+		player.level - player.pending_levels + 1,
+		"  (%d tersisa)" % player.pending_levels if player.pending_levels > 1 else ""]
+	for c in _cards.get_children():
+		c.queue_free()
+	var options := UPGRADES.duplicate()
+	options.shuffle()
+	for u in options.slice(0, CHOICES):
+		_cards.add_child(_card(u))
+
+
+func _card(u: Dictionary) -> Control:
+	var card := PanelContainer.new()
+	card.theme_type_variation = &"Card"
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	card.add_child(box)
+	var title := _label(u.title, 11)
+	title.modulate = GOLD
+	box.add_child(title)
+	var desc := _label(u.desc, 8)
+	desc.theme_type_variation = &"Muted"
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(desc)
+	var parts := PackedStringArray()
+	for key in u.stats:
+		parts.append("%+d %s" % [u.stats[key], preload("res://scripts/shop.gd").STAT_NAMES[key]])
+	var effect := _label(", ".join(parts), 10)
+	effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	effect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	box.add_child(effect)
+	var btn := Button.new()
+	btn.text = "Pilih"
+	btn.pressed.connect(choose.bind(u))
+	box.add_child(btn)
+	return card
+
+
+func _label(text: String, font_size: int) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", font_size)
+	return l
+
+
+func _build() -> void:
+	var dim := ColorRect.new()
+	dim.color = Color(0.05, 0.03, 0.02, 0.6)
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(center)
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(460, 150)
+	center.add_child(panel)
+	var root := VBoxContainer.new()
+	root.add_theme_constant_override("separation", 8)
+	panel.add_child(root)
+	_title = _label("", 14)
+	_title.theme_type_variation = &"Title"
+	_title.add_theme_font_size_override("font_size", 14)
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	root.add_child(_title)
+	_cards = HBoxContainer.new()
+	_cards.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_cards.add_theme_constant_override("separation", 6)
+	root.add_child(_cards)

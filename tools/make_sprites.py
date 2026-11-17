@@ -29,6 +29,7 @@ BASE = {
     "y": "f0d860",  # kuning
     "e": "6a3a14",  # cokelat batu
     "E": "4a2a10",  # cokelat batu gelap
+    "G": "6aa040",  # hijau janur
 }
 
 # Prajurit Nusantara (menghadap kanan). 'h' = udeng, 'C' = selendang (warna kerajaan).
@@ -51,11 +52,16 @@ PRAJURIT = """
 ................
 """
 
+# Seragam per kerajaan: h = udeng, C = selendang, c = kain/celana.
 KERAJAAN = {
-    "majapahit": {"h": "b0201c", "C": "e0b04a"},
-    "sriwijaya": {"h": "2a5fb0", "C": "f3e3c3"},
-    "mataram":   {"h": "2f7a3a", "C": "e0b04a"},
-    "pajajaran": {"h": "6a2f8a", "C": "f0d860"},
+    "majapahit":     {"h": "b0201c", "C": "e0b04a"},
+    "sriwijaya":     {"h": "2a5fb0", "C": "f3e3c3"},
+    "mataram":       {"h": "2f7a3a", "C": "e0b04a"},
+    "pajajaran":     {"h": "6a2f8a", "C": "f0d860"},
+    "samudra_pasai": {"h": "1a1a1a", "C": "c02828", "c": "2a2a2a"},
+    "gowa":          {"h": "e0b04a", "C": "8a1a6a", "c": "5a1440"},
+    "kutai":         {"h": "e07a20", "C": "1a1a1a", "c": "7a3a14"},
+    "ternate":       {"h": "f3e3c3", "C": "2a8a8a", "c": "1a4a5a"},
 }
 
 SERDADU_BESI = """
@@ -86,6 +92,17 @@ koRoOOok
 kRooOORk
 .kOOOOk.
 ..kkkk..
+"""
+
+KETUPAT = """
+...kk...
+..kgyk..
+.kgyygk.
+kgyGyygk
+kyygyyGk
+.kGyygk.
+..kgyk..
+...kk...
 """
 
 PELURU = {
@@ -171,6 +188,7 @@ def main():
         png(os.path.join(OUT, f"prajurit_{name}.png"), PRAJURIT, {**BASE, **colors})
     png(os.path.join(OUT, "serdadu_besi.png"), SERDADU_BESI, BASE)
     png(os.path.join(OUT, "rempah.png"), REMPAH, BASE)
+    png(os.path.join(OUT, "ketupat.png"), KETUPAT, {**BASE, "g": "6aa040", "y": "c8d870"})
     for name, rows in PELURU.items():
         png(os.path.join(OUT, f"peluru_{name}.png"), rows, BASE)
     print("sprite dibuat di", os.path.normpath(OUT))

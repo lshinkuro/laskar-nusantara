@@ -3,6 +3,7 @@ extends SceneTree
 ##   godot --headless -s res://tests/net_test.gd -- host
 ##   godot --headless -s res://tests/net_test.gd -- client
 ## Keduanya harus sampai wave 2 (lewat toko + tombol siap) dan melihat musuh yang sama.
+## Client ganti baju ke Gowa (outfit 5) di lobby; kedua sisi harus melihatnya di game.
 
 const PORT := 47231
 const TIMEOUT := 70.0
@@ -14,6 +15,7 @@ var readied_wave := 0
 var max_enemies_seen := 0
 var enemy_moved := false
 var _first_pos := {}
+var outfit_sent := false
 
 
 func _initialize() -> void:
@@ -31,7 +33,14 @@ func _process(delta: float) -> bool:
 		else:
 			net.join_enet("127.0.0.1", PORT)
 		return false
-	if role == "host" and not net.in_game and net.players.size() == 2:
+	if role == "client" and not outfit_sent and net.players.size() == 2:
+		outfit_sent = true
+		net.set_outfit(5)
+	var client_outfit := -1
+	for id in net.players:
+		if id != 1:
+			client_outfit = net.players[id].outfit
+	if role == "host" and not net.in_game and client_outfit == 5:
 		net.start_game()
 
 	var main := root.get_node_or_null("Main")
@@ -47,7 +56,8 @@ func _process(delta: float) -> bool:
 			readied_wave = main.waves.wave
 			main.shop._on_ready()
 		if main.waves.wave >= 2 and main.state == main.State.PLAYING:
-			var ok: bool = main.players.get_child_count() == 2 and max_enemies_seen > 0 and enemy_moved
+			var gowa: bool = main.players.get_children().any(func(p): return p.kerajaan.name == "Gowa")
+			var ok: bool = main.players.get_child_count() == 2 and max_enemies_seen > 0 and enemy_moved and gowa
 			_done(ok, main)
 			return true
 	if elapsed > TIMEOUT:

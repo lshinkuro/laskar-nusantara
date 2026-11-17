@@ -60,7 +60,7 @@ func _nearest_alive_player() -> Node2D:
 func flash(amount: int) -> void:
 	sprite.modulate = Color(4, 4, 4)
 	create_tween().tween_property(sprite, "modulate", Color.WHITE, 0.12)
-	DamageNumber.spawn(get_parent(), position + Vector2(0, -10), amount)
+	DamageNumber.spawn(get_parent(), position + Vector2(0, -16), amount)
 
 
 func die() -> void:

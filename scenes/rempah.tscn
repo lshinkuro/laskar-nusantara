@@ -4,5 +4,6 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/rempah.png" id="2"]
 
 [node name="Rempah" type="Sprite2D"]
+scale = Vector2(1.5, 1.5)
 texture = ExtResource("2")
 script = ExtResource("1")

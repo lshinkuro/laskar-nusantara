@@ -84,7 +84,7 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 
 ### M2 · Minggu 3–4: Ekonomi
 - [x] Musuh mendrop rempah yang otomatis tertarik ke pemain
-- [ ] Sistem XP dan level up, dengan pilihan upgrade stat
+- [x] Sistem XP dan level up, dengan pilihan upgrade stat
 - [x] Toko antar-wave: beli, reroll, kunci item
 - [x] Inventori dengan maksimal 6 slot senjata
 
@@ -92,6 +92,8 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 - [x] Co-op online 2–4 pemain dengan kode room / link undangan (WebRTC + signaling MQTT publik)
 - [x] Prajurit 4 kerajaan (Majapahit, Sriwijaya, Mataram, Pajajaran) vs Serdadu Besi, sprite pixel art
 - [x] UI bertema batik (font Pixelify Sans), kontrol sentuh
+- [x] Ganti baju: 8 seragam kerajaan, tersinkron di co-op
+- [x] Ketupat penambah HP yang dijatuhkan musuh
 
 ### M3 · Minggu 5–6: Sistem data (Resource)
 - [ ] `CharacterData`, `WeaponData`, `ItemData`, `EnemyData` sebagai file `.tres` (WeaponData & ItemData sudah)

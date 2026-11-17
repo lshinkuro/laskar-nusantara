@@ -4,6 +4,7 @@ extends Node2D
 
 const Enemy := preload("res://scenes/enemy.tscn")
 const SYNC_INTERVAL := 0.05
+const KETUPAT_CHANCE := 0.06
 
 @export var players: Node2D  # World/Players
 @export var pickups: Node  # World/Pickups
@@ -54,6 +55,8 @@ func _apply_hit(id: int, amount: int) -> void:
 	e.hp -= amount
 	if e.hp <= 0:
 		pickups.spawn(e.position, 1)
+		if randf() < KETUPAT_CHANCE:
+			pickups.spawn(e.position, 0, true)
 		_kill.rpc(id)
 
 

@@ -1,26 +1,31 @@
 extends Node2D
-## World/Pickups: rempah dibuat host saat musuh mati. Pemain lokal yang mendekat
-## "mengklaim" ke host; host memberi ke pengklaim pertama.
+## World/Pickups: rempah & ketupat dibuat host saat musuh mati. Pemain lokal yang
+## mendekat "mengklaim" ke host; host memberi ke pengklaim pertama.
 
 const Rempah := preload("res://scenes/rempah.tscn")
+const KETUPAT_TEXTURE := preload("res://assets/sprites/ketupat.png")
+const KETUPAT_HEAL := 3
 
 var local_player: Node2D  # diisi main
 var _next_id := 1
 
 
 ## Host saja.
-func spawn(pos: Vector2, value: int) -> void:
-	_spawn.rpc(_next_id, pos + Vector2(randf_range(-4, 4), randf_range(-4, 4)), value)
+func spawn(pos: Vector2, value: int, ketupat := false) -> void:
+	_spawn.rpc(_next_id, pos + Vector2(randf_range(-6, 6), randf_range(-6, 6)), value, ketupat)
 	_next_id += 1
 
 
 @rpc("authority", "call_local", "reliable")
-func _spawn(id: int, pos: Vector2, value: int) -> void:
+func _spawn(id: int, pos: Vector2, value: int, ketupat: bool) -> void:
 	var r := Rempah.instantiate()
 	r.name = "R%d" % id
 	r.id = id
 	r.value = value
+	r.ketupat = ketupat
 	r.position = pos
+	if ketupat:
+		r.texture = KETUPAT_TEXTURE
 	add_child(r)
 
 
@@ -52,7 +57,10 @@ func _collected(id: int, peer: int) -> void:
 	if r == null:
 		return
 	if peer == multiplayer.get_unique_id():
-		local_player.collect_rempah(r.value)
+		if r.ketupat:
+			local_player.heal(KETUPAT_HEAL)
+		else:
+			local_player.collect_rempah(r.value)
 	r.queue_free()
 
 

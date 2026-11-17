@@ -20,6 +20,9 @@ var _resend_loaded := 0.0
 @onready var projectiles: Node2D = $World/Projectiles
 @onready var waves = $World/WaveManager
 @onready var shop = $Shop
+@onready var level_up = $LevelUp
+@onready var xp_bar: ProgressBar = $HUD/TopLeft/XPBar
+@onready var xp_label: Label = $HUD/TopLeft/XPBar/Label
 @onready var hp_bar: ProgressBar = $HUD/TopLeft/HPBar
 @onready var hp_label: Label = $HUD/TopLeft/HPBar/Label
 @onready var rempah_label: Label = $HUD/TopLeft/Rempah/Label
@@ -44,12 +47,16 @@ func _ready() -> void:
 	local_player.hp_changed.connect(_on_hp_changed)
 	local_player.rempah_changed.connect(func(n): rempah_label.text = str(n))
 	local_player.died.connect(_on_local_died)
+	local_player.xp_changed.connect(_on_xp_changed)
+	local_player.leveled_up.connect(func(lv): _show_message("NAIK LEVEL %d!" % lv, 0.8))
+	_on_xp_changed(0, local_player.xp_needed(), 1)
 	local_player.add_weapon(START_WEAPON)
 	_on_hp_changed(local_player.hp, local_player.stats.max_hp)
 
 	waves.wave_started.connect(_on_wave_started)
 	waves.wave_ended.connect(_on_wave_ended)
 	shop.ready_pressed.connect(func(): _player_ready.rpc_id(1))
+	level_up.finished.connect(_open_shop)
 	$EndScreen/Panel/Box/Buttons/Again.pressed.connect(Net.start_game)
 	$EndScreen/Panel/Box/Buttons/Menu.pressed.connect(func(): Net.leave())
 	end_screen.hide()
@@ -64,7 +71,7 @@ func _spawn_player(id: int, slot: int, total: int) -> void:
 	var p := PlayerScene.instantiate()
 	p.name = str(id)
 	p.set_multiplayer_authority(id)
-	p.display_name = Net.players[id]
+	p.display_name = Net.name_of(id)
 	p.kerajaan = Net.kerajaan_of(id)
 	p.projectiles = projectiles
 	p.position = waves.arena_size / 2 + Vector2(slot - (total - 1) / 2.0, 0) * 30
@@ -145,6 +152,7 @@ func _on_wave_started(wave: int) -> void:
 	state = State.PLAYING
 	get_tree().paused = false
 	shop.hide()
+	level_up.hide()
 	joystick.show()
 	local_player.revive()
 	Net.expose_state({"wave": wave, "players_in_game": players.get_child_count()})
@@ -158,7 +166,14 @@ func _on_wave_ended(wave: int) -> void:
 		_finish(true, wave)
 		return
 	state = State.SHOP
-	shop.open(local_player, wave)
+	if local_player.pending_levels > 0:
+		level_up.open(local_player)
+	else:
+		_open_shop()
+
+
+func _open_shop() -> void:
+	shop.open(local_player, waves.wave)
 	shop.set_ready_count(0, Net.players.size())
 
 
@@ -183,6 +198,7 @@ func _finish(won: bool, wave: int) -> void:
 	state = State.OVER
 	get_tree().paused = true
 	shop.hide()
+	level_up.hide()
 	joystick.hide()
 	message.hide()
 	$EndScreen/Panel/Box/Title.text = "MERDEKA!" if won else "GUGUR"
@@ -200,6 +216,12 @@ func _on_hp_changed(hp: int, max_hp: int) -> void:
 	hp_bar.max_value = max_hp
 	hp_bar.value = hp
 	hp_label.text = "%d / %d" % [hp, max_hp]
+
+
+func _on_xp_changed(xp: int, needed: int, level: int) -> void:
+	xp_bar.max_value = needed
+	xp_bar.value = xp
+	xp_label.text = "Lv %d" % level
 
 
 func _update_team_list() -> void:

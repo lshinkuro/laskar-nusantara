@@ -34,6 +34,7 @@ func _spawn(pos: Vector2, dir: Vector2, speed: float, lifetime: float, weapon_pa
 	p.enemies = enemies
 	p.map = map
 	var data := load(weapon_path) as WeaponData
+	p.data = data
 	p.texture = data.texture
 	p.spin = data.spin
 	add_child(p)

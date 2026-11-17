@@ -3,6 +3,7 @@ extends Area2D
 ## memakai kemampuan sesuai jenis. Di client: ikut posisi dari host.
 
 const DamageNumber := preload("res://scripts/damage_number.gd")
+const Fx := preload("res://scripts/fx.gd")
 
 var id := 0
 var kind := "serdadu"
@@ -17,6 +18,9 @@ var map: Node2D
 var enemies: Node
 var target_pos := Vector2.ZERO
 var phase := 1
+## Efek status aktif: nama -> {"t": sisa detik, "power": damage per tick, "tick": detik ke tick berikutnya}.
+## Di host menentukan damage & lambat; di client hanya tampilan.
+var statuses := {}
 
 var _target: Node2D
 var _retarget := 0.0
@@ -26,6 +30,7 @@ var _telegraph := 0.0
 var _dash := 0.0
 var _dash_dir := Vector2.ZERO
 var _ring_offset := 0.0
+var _status_particles: CPUParticles2D
 
 @onready var sprite: Sprite2D = $Sprite
 
@@ -50,11 +55,55 @@ func is_boss() -> bool:
 	return def.has("boss")
 
 
+func add_status(effect: String, duration: float, power: float) -> void:
+	var s: Dictionary = statuses.get(effect, {"tick": 0.5})
+	s.t = duration
+	s.power = maxf(power, s.get("power", 0.0))
+	statuses[effect] = s
+	if _status_particles == null:
+		_status_particles = CPUParticles2D.new()
+		_status_particles.amount = 6
+		_status_particles.lifetime = 0.6
+		_status_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+		_status_particles.emission_sphere_radius = def.radius * 0.7
+		_status_particles.gravity = Vector2(0, -40)
+		_status_particles.initial_velocity_max = 10.0
+		_status_particles.scale_amount_min = 1.5
+		_status_particles.scale_amount_max = 2.5
+		_status_particles.position = Vector2(0, -def.radius * 0.6)
+		add_child(_status_particles)
+	_status_particles.color = Fx.EFFECT_COLORS[effect]
+	_status_particles.emitting = true
+
+
+func _update_statuses(delta: float) -> void:
+	if statuses.is_empty():
+		return
+	var tint := Color.WHITE
+	for effect in statuses.keys():
+		var s: Dictionary = statuses[effect]
+		s.t -= delta
+		if s.t <= 0:
+			statuses.erase(effect)
+			continue
+		tint = Fx.EFFECT_COLORS[effect].lerp(Color.WHITE, 0.35)
+		if simulate and s.power > 0:
+			s.tick -= delta
+			if s.tick <= 0:
+				s.tick = 0.5
+				enemies.status_damage(self, int(s.power), effect)
+	sprite.self_modulate = tint
+	if statuses.is_empty() and _status_particles:
+		_status_particles.emitting = false
+		sprite.self_modulate = Color.WHITE
+
+
 func start_telegraph() -> void:
 	_telegraph = 0.7
 
 
 func _physics_process(delta: float) -> void:
+	_update_statuses(delta)
 	var old := position
 	if simulate:
 		_simulate(delta)
@@ -81,10 +130,11 @@ func _simulate(delta: float) -> void:
 		return
 	var to := _target.position - position
 	var dir := to.normalized()
-	var move := dir * speed
+	var spd := speed * (0.5 if statuses.has("slow") else 1.0)
+	var move := dir * spd
 	if _dash > 0:
 		_dash -= delta
-		move = _dash_dir * speed * 3.5
+		move = _dash_dir * spd * 3.5
 	elif _telegraph > 0:
 		_telegraph -= delta
 		move = Vector2.ZERO
@@ -92,7 +142,7 @@ func _simulate(delta: float) -> void:
 			_dash = 0.5
 			_dash_dir = dir
 	elif def.get("ranged", false) and to.length() < 150:
-		move = dir.orthogonal() * speed * 0.5  # jaga jarak sambil bergeser
+		move = dir.orthogonal() * spd * 0.5  # jaga jarak sambil bergeser
 	position = map.resolve(position + move * delta, def.radius * 0.8)
 	_abilities(delta, dir)
 

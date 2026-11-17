@@ -301,6 +301,53 @@ kgk..kgk
 .kgyygk.
 ..kkkk..
 """,
+    "kunai": """
+...........
+kk.....kk..
+kbkkkkkmmk.
+kbbbbbmmmmk
+kbkkkkkmmk.
+kk.....kk..
+""",
+    "shuriken": """
+....kk....
+...kmmk...
+...kmmk...
+kkkkMMkkkk
+kmmMkkMmmk
+kmmMkkMmmk
+kkkkMMkkkk
+...kmmk...
+...kmmk...
+....kk....
+""",
+    "tombak": """
+..............kk..
+kbbbbbbbbbbbkkmmk.
+kbbbbbbbbbbbkmmmmk
+..............kk..
+""",
+    "bambu_runcing": """
+.............k
+kGGkGGGGkGGGGy
+kGGkGGGGkGGGGk
+""",
+    "kujang": """
+..kkkk....
+.kmmmmkk..
+kmmkkmmmk.
+kmk..kmmmk
+kk....kmmk
+.......kbk
+.......kbk
+........k.
+""",
+    "golok": """
+....kkkkkk..
+kkkkmmmmmmk.
+kbbkmmmmmmmk
+kkkkkkkkkkk.
+""",
     "api": """
 ..rr..
 .ryyr.

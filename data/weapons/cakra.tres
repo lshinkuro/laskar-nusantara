@@ -18,3 +18,5 @@ spread = 20.0
 pierce = 2
 spin = true
 category = "magic"
+effect = "bounce"
+effect_power = 0.0

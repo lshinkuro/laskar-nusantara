@@ -17,3 +17,5 @@ projectile_count = 1
 spread = 0.0
 pierce = 3
 category = "ranged"
+effect = "explode"
+effect_power = 40.0

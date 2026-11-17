@@ -1,5 +1,30 @@
 extends RefCounted
-## Efek visual sekali pakai: percikan kena, ledakan.
+## Efek visual sekali pakai: percikan kena, tebasan, ledakan.
+
+const EFFECT_COLORS := {
+	"burn": Color(1, 0.55, 0.2), "poison": Color(0.5, 1, 0.35), "bleed": Color(0.95, 0.15, 0.15),
+	"slow": Color(0.5, 0.75, 1), "knockback": Color(1, 1, 1), "explode": Color(1, 0.6, 0.2), "bounce": Color(1, 0.9, 0.4),
+}
+
+
+## Busur tebasan putih untuk senjata jarak dekat.
+static func slash(parent: Node, pos: Vector2, angle: float) -> void:
+	var l := Line2D.new()
+	l.width = 3.0
+	l.default_color = Color(1, 1, 1, 0.9)
+	l.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	l.end_cap_mode = Line2D.LINE_CAP_ROUND
+	for i in 7:
+		var a := angle - 1.0 + i / 3.0
+		l.add_point(Vector2.from_angle(a) * 13.0)
+	l.position = pos
+	l.z_index = 6
+	parent.add_child(l)
+	var t := l.create_tween()
+	t.set_parallel()
+	t.tween_property(l, "scale", Vector2(1.5, 1.5), 0.15)
+	t.tween_property(l, "modulate:a", 0.0, 0.15)
+	t.chain().tween_callback(l.queue_free)
 
 
 static func spark(parent: Node, pos: Vector2, color := Color(1, 0.9, 0.5), amount := 6) -> void:

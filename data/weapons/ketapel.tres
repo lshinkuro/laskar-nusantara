@@ -18,3 +18,5 @@ spread = 0.0
 pierce = 0
 spin = true
 category = "ranged"
+effect = "slow"
+effect_power = 0.0

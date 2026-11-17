@@ -19,3 +19,8 @@ extends Resource
 @export var pierce := 0
 ## Peluru berputar (cakra, batu).
 @export var spin := false
+## Efek saat kena: burn/poison/bleed = damage per 0.5 dtk (power), slow = melambat,
+## knockback = dorong (power piksel), explode = ledakan area (power = radius),
+## bounce = peluru memantul ke musuh berikutnya (jumlah pantulan = pierce).
+@export var effect := ""  # "", burn, poison, bleed, slow, knockback, explode, bounce
+@export var effect_power := 0.0

@@ -10,6 +10,7 @@ var texture: Texture2D
 var enemies: Node
 var map: Node2D
 var spin := false
+var data: WeaponData
 
 var _hit := {}
 
@@ -41,7 +42,26 @@ func _on_area_entered(enemy: Area2D) -> void:
 		return
 	_hit[enemy] = true
 	if damage > 0:
-		enemies.hit(enemy, damage)
+		enemies.hit(enemy, damage, data, direction)
 	pierce -= 1
 	if pierce < 0:
 		queue_free()
+	elif data.effect == "bounce":
+		_bounce_from(enemy)
+
+
+## Pantul ke musuh terdekat lain yang belum kena.
+func _bounce_from(from: Node2D) -> void:
+	var best: Node2D = null
+	var best_d := 160.0 * 160.0
+	for e: Node2D in get_tree().get_nodes_in_group("enemies"):
+		if e == from or _hit.has(e):
+			continue
+		var d := position.distance_squared_to(e.position)
+		if d < best_d:
+			best_d = d
+			best = e
+	if best:
+		direction = position.direction_to(best.position)
+		rotation = direction.angle()
+		lifetime = maxf(lifetime, 0.6)

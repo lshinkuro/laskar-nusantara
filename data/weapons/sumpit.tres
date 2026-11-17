@@ -17,3 +17,5 @@ projectile_count = 1
 spread = 0.0
 pierce = 0
 category = "ranged"
+effect = "poison"
+effect_power = 2.0

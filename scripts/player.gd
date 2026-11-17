@@ -291,6 +291,6 @@ func add_weapon(data: WeaponData) -> bool:
 	# Senjata disusun melingkar di sekitar prajurit.
 	var n := weapon_ring.get_child_count()
 	for i in n:
-		weapon_ring.get_child(i).position = Vector2.from_angle(TAU * i / n - PI / 2) * 19.0
+		weapon_ring.get_child(i).position = Vector2.from_angle(TAU * i / n - PI / 2) * (19.0 + maxi(0, n - 3) * 3.0)
 	stats_changed.emit()
 	return true

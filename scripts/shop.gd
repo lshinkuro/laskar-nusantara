@@ -229,8 +229,12 @@ func _effects(data: Resource) -> String:
 		var s := "%s  |  Dmg %d  |  %.1f/dtk  |  Jarak %d" % [kind_name, data.damage, 1.0 / data.fire_interval, data.attack_range]
 		if data.projectile_count > 1:
 			s += "  |  x%d" % data.projectile_count
-		if data.pierce > 0:
+		if data.pierce > 0 and data.effect != "bounce":
 			s += "  |  Tembus %d" % data.pierce
+		var effect_text: String = {"burn": "Membakar", "poison": "Meracun", "bleed": "Berdarah", "slow": "Memperlambat",
+			"knockback": "Mendorong", "explode": "Meledak", "bounce": "Memantul %dx" % data.pierce}.get(data.effect, "")
+		if effect_text != "":
+			s += "\nEfek: " + effect_text
 		return s
 	var parts := PackedStringArray()
 	for key in data.stats:

@@ -17,3 +17,5 @@ projectile_count = 1
 spread = 0.0
 pierce = 2
 category = "melee"
+effect = "bleed"
+effect_power = 3.0

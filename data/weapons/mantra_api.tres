@@ -17,3 +17,5 @@ projectile_count = 2
 spread = 15.0
 pierce = 0
 category = "magic"
+effect = "burn"
+effect_power = 2.0

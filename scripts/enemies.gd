@@ -85,27 +85,45 @@ func boss() -> Node:
 	return null
 
 
+## Lama tiap efek status (detik).
+const STATUS_DURATION := {"burn": 2.5, "poison": 3.5, "bleed": 2.0, "slow": 1.5}
+
+
 ## Dipanggil peluru milik pemain lokal.
-func hit(enemy: Node, amount: int) -> void:
+func hit(enemy: Node, amount: int, data: WeaponData = null, dir := Vector2.ZERO) -> void:
+	var effect := data.effect if data else ""
+	var power := data.effect_power if data else 0.0
 	enemy.flash(amount)
-	Fx.spark(get_parent(), enemy.position + Vector2(0, -8))
+	Fx.spark(get_parent(), enemy.position + Vector2(0, -8), Fx.EFFECT_COLORS.get(effect, Color(1, 0.9, 0.5)))
+	if data and data.category == "melee":
+		Fx.slash(get_parent(), enemy.position + Vector2(0, -8), dir.angle())
 	Sfx.play("hit", -10.0)
 	if multiplayer.is_server():
-		_apply_hit(enemy.id, amount)
+		_apply_hit(enemy.id, amount, effect, power, dir)
 	else:
-		_request_hit.rpc_id(1, enemy.id, amount)
+		_request_hit.rpc_id(1, enemy.id, amount, effect, power, dir)
 
 
 @rpc("any_peer", "reliable")
-func _request_hit(id: int, amount: int) -> void:
+func _request_hit(id: int, amount: int, effect: String, power: float, dir: Vector2) -> void:
 	if multiplayer.is_server():
-		_apply_hit(id, amount)
+		_apply_hit(id, amount, effect, power, dir)
 
 
-func _apply_hit(id: int, amount: int) -> void:
+## Host saja: damage per detik dari status (terbakar/racun/berdarah).
+func status_damage(e: Node, amount: int, effect: String) -> void:
+	if e.hp <= 0:
+		return
+	var DamageNumber := preload("res://scripts/damage_number.gd")
+	DamageNumber.spawn(self, e.position + Vector2(randf_range(-6, 6), -10 - e.def.radius), amount, Fx.EFFECT_COLORS[effect])
+	_apply_hit(e.id, amount)
+
+
+func _apply_hit(id: int, amount: int, effect := "", power := 0.0, dir := Vector2.ZERO) -> void:
 	var e := get_node_or_null("E%d" % id)
 	if e == null or e.hp <= 0:
 		return
+	_apply_effect(e, amount, effect, power, dir)
 	e.hp -= amount
 	if e.hp > 0:
 		return
@@ -119,6 +137,35 @@ func _apply_hit(id: int, amount: int) -> void:
 		if randf() < KETUPAT_CHANCE:
 			pickups.spawn(e.position, 0, true)
 	_kill.rpc(id)
+
+
+func _apply_effect(e: Node, amount: int, effect: String, power: float, dir: Vector2) -> void:
+	match effect:
+		"burn", "poison", "bleed", "slow":
+			# Damage per tick ikut naik dengan kekuatan pukulan (upgrade/tier tetap terasa).
+			e.add_status(effect, STATUS_DURATION[effect], maxf(power, amount * 0.35) if power > 0 else 0.0)
+			_status_fx.rpc(e.id, effect, STATUS_DURATION[effect])
+		"knockback":
+			var push := power * (0.25 if e.is_boss() else 1.0)
+			e.position = map.resolve(e.position + dir.normalized() * push, e.def.radius)
+		"explode":
+			_boom_fx.rpc(e.position, power)
+			for other in get_children():
+				if other != e and other.hp > 0 and other.position.distance_to(e.position) < power:
+					_apply_hit(other.id, maxi(1, roundi(amount * 0.6)))
+
+
+@rpc("authority", "reliable")
+func _status_fx(id: int, effect: String, duration: float) -> void:
+	var e := get_node_or_null("E%d" % id)
+	if e:
+		e.add_status(effect, duration, 0.0)
+
+
+@rpc("authority", "call_local", "reliable")
+func _boom_fx(pos: Vector2, radius: float) -> void:
+	Fx.explosion(get_parent(), pos, radius * 0.6)
+	Sfx.play("enemy_die", -4.0, 0.2)
 
 
 @rpc("authority", "call_local", "reliable")

@@ -25,17 +25,15 @@ var music_volume := 0.6
 var sfx_volume := 0.8
 
 var _pool: Array[AudioStreamPlayer] = []
+var _next := 0
 var _last := {}
 var _music: AudioStreamPlayer
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for bus in ["Music", "SFX"]:
-		if AudioServer.get_bus_index(bus) == -1:
-			AudioServer.add_bus()
-			AudioServer.set_bus_name(AudioServer.bus_count - 1, bus)
-			AudioServer.set_bus_send(AudioServer.bus_count - 1, "Master")
+	# Bus "Music" & "SFX" didefinisikan di default_bus_layout.tres (bukan dibuat lewat kode):
+	# di web, pemutaran mode sample hanya mengenal bus yang ada sejak engine mulai.
 	for i in POOL_SIZE:
 		var p := AudioStreamPlayer.new()
 		p.bus = "SFX"
@@ -45,7 +43,7 @@ func _ready() -> void:
 	_music.stream = preload("res://assets/audio/music_gamelan.wav")
 	_music.bus = "Music"
 	_music.volume_db = -6.0
-	_music.finished.connect(_music.play)
+	# Loop diatur di import WAV (loop_mode); sinyal finished tidak andal di web.
 	add_child(_music)
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS) == OK:
@@ -64,13 +62,13 @@ func play(sound: String, volume_db := 0.0, pitch_variation := 0.08) -> void:
 	if now - int(_last.get(sound, -100000)) < MIN_GAP_MS:
 		return
 	_last[sound] = now
-	for p in _pool:
-		if not p.playing:
-			p.stream = SOUNDS[sound]
-			p.volume_db = volume_db
-			p.pitch_scale = randf_range(1.0 - pitch_variation, 1.0 + pitch_variation)
-			p.play()
-			return
+	# Bergiliran (bukan cari yang `playing == false`): di web status playing tidak selalu kembali false.
+	var p := _pool[_next]
+	_next = (_next + 1) % _pool.size()
+	p.stream = SOUNDS[sound]
+	p.volume_db = volume_db
+	p.pitch_scale = randf_range(1.0 - pitch_variation, 1.0 + pitch_variation)
+	p.play()
 
 
 func play_music() -> void:
@@ -92,6 +90,8 @@ func set_sfx_volume(value: float) -> void:
 
 func _apply(bus: String, value: float) -> void:
 	var idx := AudioServer.get_bus_index(bus)
+	if idx < 0:
+		return
 	AudioServer.set_bus_mute(idx, value <= 0.001)
 	AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(value, 0.001)))
 

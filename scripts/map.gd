@@ -8,11 +8,15 @@ extends Node2D
 
 const Obstacle := preload("res://scripts/obstacle.gd")
 
+## Urutan medan dalam satu run. `layout` menentukan tanah & objek (lihat _build/_draw_ground).
 const MAPS := [
-	{"name": "LEMBAH SUNGAI", "until_wave": 6},
-	{"name": "HUTAN KALIMANTAN", "until_wave": 13},
-	{"name": "DESA & CANDI", "until_wave": 999},
+	{"name": "LEMBAH SUNGAI", "until_wave": 4, "layout": "lembah"},
+	{"name": "HUTAN KALIMANTAN", "until_wave": 8, "layout": "hutan"},
+	{"name": "PELABUHAN SUNDA KELAPA", "until_wave": 12, "layout": "pelabuhan"},
+	{"name": "DESA & CANDI", "until_wave": 16, "layout": "desa"},
+	{"name": "BENTENG BESI", "until_wave": 999, "layout": "benteng"},
 ]
+const SEA_TOP := 445.0  # pelabuhan: laut di bawah garis ini tidak bisa diinjak
 
 ## Bentuk penghalang per jenis: "r" = lingkaran di dasar, "rect" = kotak tapak.
 const SHAPES := {
@@ -26,6 +30,13 @@ const SHAPES := {
 	"joglo": {"rect": Rect2(-23, -11, 46, 11)},
 	"lumbung": {"rect": Rect2(-11, -6, 22, 6)},
 	"candi": {"rect": Rect2(-36, -14, 72, 14)},
+	"peti": {"rect": Rect2(-9, -8, 18, 8)},
+	"tong": {"r": 6.0},
+	"mercusuar": {"r": 12.0},
+	"tembok": {"rect": Rect2(-40, -10, 80, 10)},
+	"tembok_v": {"rect": Rect2(-6, -60, 12, 60)},
+	"meriam_benteng": {"rect": Rect2(-12, -8, 24, 8)},
+	"menara": {"rect": Rect2(-14, -12, 28, 12)},
 }
 
 const CENTER_CLEAR := 110.0
@@ -113,8 +124,8 @@ func _build() -> void:
 	_placed.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1000 + map_index
-	match map_index:
-		0:  # Lembah sungai: terasering melengkung, sungai berkelok, gubuk & kelapa
+	match MAPS[map_index].layout:
+		"lembah":  # Lembah sungai: terasering melengkung, sungai berkelok, gubuk & kelapa
 			for p in [Vector2(250, 205), Vector2(330, 420), Vector2(860, 110)]:
 				_add("gubuk", p, rng)
 			for p in [Vector2(150, 95), Vector2(240, 470), Vector2(890, 470)]:
@@ -129,13 +140,13 @@ func _build() -> void:
 				_add("pisang", Vector2(14 if i % 2 == 0 else 600, rng.randf_range(60, arena_size.y - 40)), rng)
 			_scatter("semak", 14, rng)
 			_scatter("batu", 3, rng)
-		1:  # Hutan Kalimantan: pohon rapat, beringin besar
+		"hutan":  # Hutan Kalimantan: pohon rapat, beringin besar
 			for p in [Vector2(160, 150), Vector2(800, 140), Vector2(300, 450), Vector2(700, 430), Vector2(480, 70)]:
 				_add("beringin", p, rng)
 			_scatter("pohon", 38, rng)
 			_scatter("batu", 8, rng)
 			_scatter("semak", 26, rng)
-		2:  # Desa & candi: candi di utara, joglo & lumbung di sekeliling alun-alun
+		"desa":  # Desa & candi: candi di utara, joglo & lumbung di sekeliling alun-alun
 			_add("candi", Vector2(480, 130), rng)
 			for p in [Vector2(170, 170), Vector2(790, 170), Vector2(190, 440), Vector2(770, 440)]:
 				_add("joglo", p, rng)
@@ -145,6 +156,31 @@ func _build() -> void:
 				_add("kelapa", Vector2(rng.randf_range(30, arena_size.x - 30), 24 if i % 2 == 0 else arena_size.y - 10), rng)
 			_scatter("pohon", 8, rng)
 			_scatter("semak", 12, rng)
+		"pelabuhan":  # Pelabuhan: dermaga, peti & tong, pinisi di laut, mercusuar
+			_colliders.append({"rect": Rect2(-50, SEA_TOP, arena_size.x + 100, 200)})
+			_add("mercusuar", Vector2(900, SEA_TOP - 18), rng)
+			for p in [Vector2(150, 510), Vector2(520, 500), Vector2(760, 520)]:
+				_add("pinisi", p, rng)
+			for p in [Vector2(120, 90), Vector2(300, 80), Vector2(700, 100), Vector2(860, 200), Vector2(90, 330)]:
+				for k in 3:  # tumpukan peti & tong dekat gudang
+					_add("peti" if k != 1 else "tong", p + Vector2(k * 16 - 16, (k % 2) * 10), rng)
+			for p in [Vector2(220, 200), Vector2(760, 330), Vector2(400, 380), Vector2(610, 160)]:
+				_add("tong", p, rng)
+			_add("gubuk", Vector2(470, 70), rng)
+			_scatter("peti", 6, rng)
+		"benteng":  # Benteng Besi: tembok berlubang, meriam, menara, panji
+			for p in [Vector2(200, 130), Vector2(760, 130), Vector2(200, 420), Vector2(760, 420)]:
+				_add("tembok", p, rng)
+			for p in [Vector2(330, 250), Vector2(630, 250)]:
+				_add("tembok_v", p + Vector2(0, 50), rng)
+			for p in [Vector2(40, 60), Vector2(920, 60), Vector2(40, 520), Vector2(920, 520)]:
+				_add("menara", p, rng)
+			for p in [Vector2(480, 70), Vector2(120, 270), Vector2(840, 270), Vector2(480, 480)]:
+				_add("meriam_benteng", p, rng)
+			for p in [Vector2(260, 100), Vector2(700, 100), Vector2(260, 450), Vector2(700, 450)]:
+				_add("panji", p, rng)
+			_scatter("tong", 6, rng)
+			_scatter("peti", 6, rng)
 	_ground.queue_redraw()
 
 
@@ -186,8 +222,8 @@ func _draw_ground() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 17 + map_index
 	var full := Rect2(Vector2.ZERO, arena_size)
-	match map_index:
-		0:
+	match MAPS[map_index].layout:
+		"lembah":
 			g.draw_rect(full.grow(200), Color(0.26, 0.42, 0.2))
 			g.draw_rect(full, Color(0.36, 0.56, 0.28))
 			for i in 70:  # gradasi rumput alami
@@ -210,7 +246,7 @@ func _draw_ground() -> void:
 					g.draw_circle(p, 1.5, [Color(0.95, 0.3, 0.3), Color(1, 0.95, 0.9), Color(1, 0.85, 0.3), Color(0.8, 0.5, 0.95)][rng.randi() % 4])
 				else:
 					_tuft(g, p, Color(0.48, 0.7, 0.34) if rng.randf() < 0.6 else Color(0.28, 0.46, 0.2))
-		1:
+		"hutan":
 			g.draw_rect(full.grow(200), Color(0.13, 0.22, 0.12))
 			g.draw_rect(full, Color(0.2, 0.33, 0.17))
 			for i in 60:
@@ -228,7 +264,7 @@ func _draw_ground() -> void:
 					_tuft(g, p, Color(0.3, 0.5, 0.24))
 				else:
 					g.draw_rect(Rect2(p, Vector2(2, 2)), [Color(0.55, 0.4, 0.15), Color(0.6, 0.25, 0.12)][rng.randi() % 2])
-		2:
+		"desa":
 			g.draw_rect(full.grow(200), Color(0.4, 0.32, 0.2))
 			g.draw_rect(full, Color(0.6, 0.5, 0.34))
 			# Alun-alun berbatu di tengah + jalan silang
@@ -245,6 +281,52 @@ func _draw_ground() -> void:
 				var p := Vector2(rng.randf() * arena_size.x, rng.randf() * arena_size.y)
 				if not plaza.has_point(p):
 					_tuft(g, p, Color(0.45, 0.55, 0.28))
+		"pelabuhan":
+			g.draw_rect(full.grow(200), Color(0.72, 0.62, 0.42))
+			g.draw_rect(full, Color(0.78, 0.68, 0.46))  # pasir
+			# Lantai dermaga kayu di tengah, papan-papan horizontal
+			var dock := Rect2(60, 230, 840, 170)
+			g.draw_rect(dock, Color(0.55, 0.38, 0.22))
+			for y in range(int(dock.position.y), int(dock.end.y), 10):
+				g.draw_line(Vector2(dock.position.x, y), Vector2(dock.end.x, y), Color(0.42, 0.28, 0.15), 1.0)
+				var off := (y / 10 % 2) * 30
+				for x in range(int(dock.position.x) + off, int(dock.end.x), 60):
+					g.draw_line(Vector2(x, y), Vector2(x, y + 10), Color(0.42, 0.28, 0.15), 1.0)
+			g.draw_rect(dock, Color(0.3, 0.2, 0.1), false, 2.0)
+			# Laut & ombak
+			g.draw_rect(Rect2(-200, SEA_TOP, arena_size.x + 400, 300), Color(0.18, 0.42, 0.58))
+			g.draw_rect(Rect2(-200, SEA_TOP, arena_size.x + 400, 6), Color(0.85, 0.9, 0.88))  # buih
+			for i in 70:
+				var p := Vector2(rng.randf() * arena_size.x, SEA_TOP + 12 + rng.randf() * 90)
+				g.draw_line(p, p + Vector2(rng.randf_range(8, 18), 0), Color(0.6, 0.8, 0.88, 0.7), 1.0)
+			# Tiang-tiang dermaga ke laut
+			for x in [280, 640]:
+				g.draw_rect(Rect2(x, SEA_TOP - 4, 26, 60), Color(0.5, 0.34, 0.2))
+				for y in range(int(SEA_TOP), int(SEA_TOP) + 56, 8):
+					g.draw_line(Vector2(x, y), Vector2(x + 26, y), Color(0.35, 0.22, 0.12), 1.0)
+			for i in 120:  # jejak & kerang di pasir
+				var p := Vector2(rng.randf() * arena_size.x, rng.randf() * (SEA_TOP - 10))
+				if not dock.has_point(p):
+					g.draw_circle(p, 1.2, Color(0.66, 0.56, 0.38))
+		"benteng":
+			g.draw_rect(full.grow(200), Color(0.16, 0.15, 0.16))
+			g.draw_rect(full, Color(0.3, 0.29, 0.3))
+			# Ubin batu besar dengan nat
+			for x in range(0, int(arena_size.x), 40):
+				for y in range(0, int(arena_size.y), 40):
+					var tile := Rect2(x + 1, y + 1, 38, 38)
+					var shade := rng.randf_range(-0.04, 0.04)
+					g.draw_rect(tile, Color(0.34 + shade, 0.33 + shade, 0.35 + shade))
+			# Pelat besi berpaku & jalur merah ke tengah (lambang Kekaisaran)
+			g.draw_rect(Rect2(arena_size.x / 2 - 14, 0, 28, arena_size.y), Color(0.36, 0.18, 0.17))
+			g.draw_rect(Rect2(0, arena_size.y / 2 - 14, arena_size.x, 28), Color(0.36, 0.18, 0.17))
+			g.draw_circle(arena_size / 2, 60, Color(0.25, 0.25, 0.27))
+			g.draw_arc(arena_size / 2, 60, 0, TAU, 48, Color(0.6, 0.62, 0.66), 3.0)
+			g.draw_arc(arena_size / 2, 40, 0, TAU, 40, Color(0.55, 0.16, 0.12), 3.0)
+			for i in 40:  # retakan & noda karat
+				var p := Vector2(rng.randf() * arena_size.x, rng.randf() * arena_size.y)
+				g.draw_line(p, p + Vector2(rng.randf_range(-12, 12), rng.randf_range(-12, 12)), Color(0.18, 0.17, 0.18), 1.0)
+				g.draw_circle(p + Vector2(20, 10), rng.randf_range(2, 6), Color(0.45, 0.25, 0.15, 0.5))
 	g.draw_rect(full, Color(0.2, 0.12, 0.06), false, 3.0)
 
 

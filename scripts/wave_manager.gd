@@ -31,6 +31,10 @@ const ENEMY_TABLE := [
 	{"kind": "penembak", "from": 5, "weight": 2},
 	{"kind": "perisai", "from": 7, "weight": 2},
 	{"kind": "ranjau", "from": 9, "weight": 1},
+	{"kind": "kavaleri", "from": 6, "weight": 2},
+	{"kind": "granat", "from": 8, "weight": 2},
+	{"kind": "tabib", "from": 11, "weight": 1},
+	{"kind": "raksasa", "from": 13, "weight": 1},
 ]
 
 
@@ -116,8 +120,9 @@ func _spawn_boss(player_factor: float) -> void:
 	var alive := _alive_players()
 	if alive.is_empty():
 		return
-	var kind := "gubernur" if wave == LAST_WAVE else "mandor" if wave in [10, 15] else "komandan"
-	var hp := (30 + wave * 35) * player_factor * (3.0 if kind == "gubernur" else 1.6 if kind == "mandor" else 1.0)
+	var kind := "gubernur" if wave == LAST_WAVE else "mandor" if wave in [10, 15] \
+		else "laksamana" if wave in [9, 12, 17] else "komandan"
+	var hp: float = (30 + wave * 35) * player_factor * {"gubernur": 3.0, "mandor": 1.6, "laksamana": 1.8}.get(kind, 1.0)
 	var t: Dictionary = enemies.TYPES[kind]
 	enemies.spawn(kind, map.resolve(_spawn_point(alive), t.radius), roundi(hp),
 		(45.0 + wave * 2.0) * t.speed, roundi((2 + wave / 4) * t.dmg))

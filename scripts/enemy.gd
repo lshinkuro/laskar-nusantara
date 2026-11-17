@@ -135,14 +135,14 @@ func _simulate(delta: float) -> void:
 	var move := dir * spd
 	if _dash > 0:
 		_dash -= delta
-		move = _dash_dir * spd * 3.5
+		move = _dash_dir * spd * (4.5 if kind == "kavaleri" else 3.5)
 	elif _telegraph > 0:
 		_telegraph -= delta
 		move = Vector2.ZERO
 		if _telegraph <= 0:
-			_dash = 0.5
+			_dash = 0.6 if kind == "kavaleri" else 0.5
 			_dash_dir = dir
-	elif def.get("ranged", false) and to.length() < 150:
+	elif def.get("ranged", false) and to.length() < (170.0 if kind == "tabib" else 150.0):
 		move = dir.orthogonal() * spd * 0.5  # jaga jarak sambil bergeser
 	position = map.resolve(position + move * delta, def.radius * 0.8)
 	_abilities(delta, dir)
@@ -151,13 +151,37 @@ func _simulate(delta: float) -> void:
 func _abilities(delta: float, dir: Vector2) -> void:
 	for k in _timers:
 		_timers[k] -= delta
-	if def.get("ranged", false) and _timers.shoot <= 0:
+	if def.get("ranged", false) and _timers.shoot <= 0 and kind == "penembak":
 		_timers.shoot = 2.2
 		enemies.fire_bullets(position, PackedVector2Array([dir]), 140.0, damage)
 	if def.get("miner", false) and _timers.mine <= 0:
 		_timers.mine = 4.0
 		enemies.place_mine(position)
 	match kind:
+		"kavaleri":
+			if _timers.dash <= 0:
+				_timers.dash = 3.5
+				enemies.telegraph.rpc(id)
+		"granat":
+			if _timers.shoot <= 0:
+				_timers.shoot = 3.0
+				var at: Vector2 = _target.position + Vector2(randf_range(-20, 20), randf_range(-20, 20))
+				enemies.slam(at, 34.0, 1.0, damage + 1)
+		"tabib":
+			if _timers.summon <= 0:
+				_timers.summon = 3.0
+				enemies.heal_around(position, 90.0, 0.25)
+		"laksamana":
+			if _timers.ring <= 0:
+				_timers.ring = 3.0
+				enemies.fire_fan(position, dir, 7, 60.0, 135.0, damage / 2)
+			if _timers.slam <= 0:
+				_timers.slam = 5.0
+				for k in 3:  # hujan meriam di sekitar target
+					enemies.slam(_target.position + Vector2(randf_range(-70, 70), randf_range(-50, 50)), 40.0, 1.2, damage)
+			if _timers.summon <= 0:
+				_timers.summon = 7.0
+				enemies.summon(position, 2, "kavaleri")
 		"komandan":
 			if _timers.dash <= 0:
 				_timers.dash = 4.5

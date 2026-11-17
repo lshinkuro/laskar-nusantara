@@ -32,6 +32,15 @@ func _draw() -> void:
 		"pisang": _pisang()
 		"orang_orangan": _orang_orangan()
 		"bebek": _bebek()
+		"peti": _peti()
+		"tong": _tong()
+		"mercusuar": _mercusuar()
+		"pinisi": _pinisi()
+		"tembok": _tembok(Vector2(80, 22))
+		"tembok_v": _tembok_v()
+		"meriam_benteng": _meriam_benteng()
+		"menara": _menara()
+		"panji": _panji()
 
 
 func _ready() -> void:
@@ -213,6 +222,115 @@ func _bebek() -> void:
 	draw_circle(Vector2(3, -6), 2.5, Color(0.95, 0.93, 0.85))
 	draw_rect(Rect2(5, -6.5, 2.5, 1.5), Color(0.95, 0.6, 0.15))
 	draw_rect(Rect2(3, -7, 1, 1), OUTLINE)
+
+
+const BESI := Color(0.36, 0.38, 0.42)
+const BESI_GELAP := Color(0.2, 0.21, 0.24)
+const MERAH_BESI := Color(0.55, 0.12, 0.1)
+
+
+func _peti() -> void:
+	_ellipse(Vector2(0, 1), 11, 3, SHADOW)
+	draw_rect(Rect2(-10, -16, 20, 16), OUTLINE)
+	draw_rect(Rect2(-9, -15, 18, 14), Color(0.62, 0.45, 0.24))
+	draw_line(Vector2(-9, -15), Vector2(9, -1), KAYU_GELAP, 1.0)
+	draw_line(Vector2(9, -15), Vector2(-9, -1), KAYU_GELAP, 1.0)
+	draw_rect(Rect2(-9, -9, 18, 2), KAYU_GELAP)
+
+
+func _tong() -> void:
+	_ellipse(Vector2(0, 1), 8, 3, SHADOW)
+	draw_rect(Rect2(-7, -16, 14, 16), OUTLINE)
+	draw_rect(Rect2(-6, -15, 12, 14), Color(0.55, 0.33, 0.17))
+	for y in [-13, -5]:
+		draw_rect(Rect2(-6, y, 12, 2), BESI)
+	_ellipse(Vector2(0, -15), 6, 2, Color(0.45, 0.27, 0.13))
+
+
+func _mercusuar() -> void:
+	_ellipse(Vector2(0, 2), 18, 5, SHADOW)
+	var pts := PackedVector2Array([Vector2(-12, 0), Vector2(12, 0), Vector2(8, -58), Vector2(-8, -58)])
+	draw_colored_polygon(pts, Color(0.95, 0.93, 0.88))
+	for i in 3:  # garis merah
+		var y0 := -12.0 - i * 16.0
+		var w0 := 12.0 - (i * 16 + 12) * 4.0 / 58.0
+		var w1 := 12.0 - (i * 16 + 20) * 4.0 / 58.0
+		draw_colored_polygon(PackedVector2Array([Vector2(-w0, y0), Vector2(w0, y0), Vector2(w1, y0 - 8), Vector2(-w1, y0 - 8)]), Color(0.75, 0.15, 0.12))
+	draw_polyline(pts + PackedVector2Array([pts[0]]), OUTLINE, 1.0)
+	draw_rect(Rect2(-10, -66, 20, 8), OUTLINE)
+	draw_rect(Rect2(-8, -65, 16, 6), Color(1, 0.9, 0.4))  # lampu
+	draw_circle(Vector2(0, -62), 14, Color(1, 0.9, 0.4, 0.15))
+	draw_colored_polygon(PackedVector2Array([Vector2(-11, -66), Vector2(11, -66), Vector2(0, -76)]), Color(0.75, 0.15, 0.12))
+
+
+func _pinisi() -> void:
+	var sway := sin(variant * 20.0) * 1.5
+	_ellipse(Vector2(0, 4), 36, 5, Color(0.1, 0.25, 0.35, 0.5))
+	var hull := PackedVector2Array([Vector2(-36, -10), Vector2(36, -14), Vector2(28, 0), Vector2(-26, 2)])
+	draw_colored_polygon(hull, Color(0.45, 0.27, 0.14))
+	draw_polyline(hull + PackedVector2Array([hull[0]]), OUTLINE, 1.0)
+	draw_line(Vector2(-34, -9), Vector2(34, -13), Color(0.8, 0.7, 0.45), 2.0)
+	for m in [-12, 12]:  # dua tiang dengan layar segitiga khas pinisi
+		var base := Vector2(m, -11)
+		draw_line(base, base + Vector2(sway, -46), KAYU_GELAP, 2.0)
+		draw_colored_polygon(PackedVector2Array([base + Vector2(sway, -44), base + Vector2(sway, -14), base + Vector2(18, -16)]), Color(0.95, 0.9, 0.78))
+		draw_colored_polygon(PackedVector2Array([base + Vector2(sway, -44), base + Vector2(sway, -14), base + Vector2(-12, -18)]), Color(0.88, 0.82, 0.7))
+	draw_line(Vector2(12, -57), Vector2(12, -62), Color(0.85, 0.12, 0.12), 3.0)  # bendera merah putih kecil
+	draw_line(Vector2(12, -55), Vector2(12, -57), Color(1, 1, 1), 3.0)
+
+
+func _tembok(size: Vector2) -> void:
+	_ellipse(Vector2(0, 2), size.x / 2 + 4, 5, SHADOW)
+	var r := Rect2(-size.x / 2, -size.y, size.x, size.y)
+	draw_rect(r.grow(1), OUTLINE)
+	draw_rect(r, BESI)
+	for y in range(int(r.position.y) + 5, 0, 6):  # susunan bata
+		draw_line(Vector2(r.position.x, y), Vector2(r.end.x, y), BESI_GELAP, 1.0)
+	for x in range(int(r.position.x), int(r.end.x), 10):  # gerigi atas
+		draw_rect(Rect2(x, r.position.y - 5, 6, 5), BESI)
+		draw_rect(Rect2(x, r.position.y - 5, 6, 5), OUTLINE, false, 1.0)
+	draw_rect(Rect2(r.position.x, -6, r.size.x, 2), MERAH_BESI)
+
+
+func _tembok_v() -> void:
+	_ellipse(Vector2(0, 2), 10, 4, SHADOW)
+	var r := Rect2(-6, -70, 12, 70)
+	draw_rect(r.grow(1), OUTLINE)
+	draw_rect(r, BESI.darkened(0.1))
+	for y in range(-66, 0, 8):
+		draw_line(Vector2(-6, y), Vector2(6, y), BESI_GELAP, 1.0)
+	draw_rect(Rect2(-6, -12, 12, 12), BESI)  # muka depan
+
+
+func _meriam_benteng() -> void:
+	_ellipse(Vector2(0, 2), 14, 4, SHADOW)
+	draw_rect(Rect2(-11, -8, 22, 8), OUTLINE)
+	draw_rect(Rect2(-10, -7, 20, 6), KAYU)
+	draw_circle(Vector2(-7, -1), 3.5, KAYU_GELAP)
+	draw_circle(Vector2(7, -1), 3.5, KAYU_GELAP)
+	draw_colored_polygon(PackedVector2Array([Vector2(-8, -8), Vector2(-6, -13), Vector2(16, -19), Vector2(17, -14)]), BESI_GELAP)
+	draw_circle(Vector2(17, -16.5), 2.5, OUTLINE)
+
+
+func _menara() -> void:
+	_ellipse(Vector2(0, 2), 20, 5, SHADOW)
+	draw_rect(Rect2(-13, -50, 26, 50), OUTLINE)
+	draw_rect(Rect2(-12, -49, 24, 48), BESI)
+	for y in range(-45, 0, 7):
+		draw_line(Vector2(-12, y), Vector2(12, y), BESI_GELAP, 1.0)
+	draw_rect(Rect2(-4, -12, 8, 12), Color(0.1, 0.1, 0.1))
+	draw_rect(Rect2(-16, -56, 32, 7), BESI.lightened(0.1))
+	for x in range(-16, 16, 8):
+		draw_rect(Rect2(x, -61, 5, 5), BESI.lightened(0.1))
+	draw_line(Vector2(0, -61), Vector2(0, -80), BESI_GELAP, 2.0)
+	draw_colored_polygon(PackedVector2Array([Vector2(1, -80), Vector2(16, -76), Vector2(1, -72)]), MERAH_BESI)
+
+
+func _panji() -> void:
+	_ellipse(Vector2(0, 1), 6, 2, SHADOW)
+	draw_line(Vector2(0, 0), Vector2(0, -40), BESI_GELAP, 2.0)
+	draw_colored_polygon(PackedVector2Array([Vector2(1, -40), Vector2(14, -40), Vector2(14, -22), Vector2(7, -26), Vector2(1, -22)]), MERAH_BESI)
+	draw_rect(Rect2(5, -36, 5, 5), BESI.lightened(0.3))  # lambang besi
 
 
 func _candi() -> void:

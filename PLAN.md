@@ -68,7 +68,7 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 
 ### Map
 - Demo: **Sawah**
-- Nanti: hutan Kalimantan, pelataran candi, pelabuhan
+- Sudah: Lembah Sungai, Hutan Kalimantan, Pelabuhan Sunda Kelapa, Desa & Candi, Benteng Besi
 
 ---
 

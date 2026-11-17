@@ -25,6 +25,11 @@ const TYPES := {
 	"penembak": {"tex": preload("res://assets/sprites/penembak.png"), "hp": 0.8, "speed": 0.8, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "ranged": true},
 	"perisai": {"tex": preload("res://assets/sprites/serdadu_perisai.png"), "hp": 3.0, "speed": 0.6, "dmg": 1.5, "scale": 1.8, "radius": 11.0},
 	"ranjau": {"tex": preload("res://assets/sprites/tukang_ranjau.png"), "hp": 0.9, "speed": 0.9, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "miner": true},
+	"kavaleri": {"tex": preload("res://assets/sprites/kavaleri_besi.png"), "hp": 1.3, "speed": 1.1, "dmg": 1.5, "scale": 1.7, "radius": 11.0},
+	"granat": {"tex": preload("res://assets/sprites/pelempar_granat.png"), "hp": 0.9, "speed": 0.8, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "ranged": true},
+	"tabib": {"tex": preload("res://assets/sprites/tabib_besi.png"), "hp": 1.2, "speed": 0.85, "dmg": 0.8, "scale": 1.5, "radius": 9.0, "ranged": true},
+	"raksasa": {"tex": preload("res://assets/sprites/raksasa_baja.png"), "hp": 6.0, "speed": 0.45, "dmg": 2.5, "scale": 2.4, "radius": 17.0},
+	"laksamana": {"tex": preload("res://assets/sprites/laksamana_besi.png"), "hp": 1.0, "speed": 0.8, "dmg": 2.0, "scale": 2.8, "radius": 18.0, "boss": "LAKSAMANA BESI"},
 	"komandan": {"tex": preload("res://assets/sprites/komandan_besi.png"), "hp": 1.0, "speed": 0.9, "dmg": 1.5, "scale": 2.6, "radius": 16.0, "boss": "KOMANDAN BESI"},
 	"mandor": {"tex": preload("res://assets/sprites/mandor_kejam.png"), "hp": 1.0, "speed": 0.8, "dmg": 2.0, "scale": 2.8, "radius": 18.0, "boss": "MANDOR KEJAM"},
 	"gubernur": {"tex": preload("res://assets/sprites/gubernur_jenderal.png"), "hp": 1.0, "speed": 0.85, "dmg": 2.5, "scale": 3.2, "radius": 20.0, "boss": "GUBERNUR JENDERAL BESI"},
@@ -148,6 +153,9 @@ func _apply_hit(id: int, amount: int, effect := "", power := 0.0, dir := Vector2
 		pickups.spawn(e.position, 1)
 		if randf() < KETUPAT_CHANCE:
 			pickups.spawn(e.position, 0, true)
+	if e.kind == "raksasa":  # Raksasa Baja pecah jadi 2 serdadu
+		for side in [-1, 1]:
+			spawn_basic("serdadu", e.position + Vector2(side * 18, 0))
 	_kill.rpc(id, e.last_hitter)
 
 
@@ -289,9 +297,9 @@ func _slam_at(pos: Vector2, radius: float, delay: float, damage: int) -> void:
 	hazards.add_child(s)
 
 
-func summon(pos: Vector2, count: int) -> void:
+func summon(pos: Vector2, count: int, kind := "serdadu") -> void:
 	for i in count:
-		spawn_basic("serdadu", pos + Vector2.from_angle(TAU * i / count + randf()) * 40)
+		spawn_basic(kind, pos + Vector2.from_angle(TAU * i / count + randf()) * 40)
 
 
 @rpc("authority", "call_local", "reliable")
@@ -299,6 +307,28 @@ func telegraph(id: int) -> void:
 	var e := get_node_or_null("E%d" % id)
 	if e:
 		e.start_telegraph()
+
+
+## Tabib Besi: pulihkan musuh di sekitar (host), tampilkan cincin hijau di semua peer.
+func heal_around(pos: Vector2, radius: float, fraction: float) -> void:
+	for e in get_children():
+		if e.hp > 0 and e.position.distance_to(pos) < radius:
+			e.hp = mini(e.max_hp, e.hp + maxi(1, roundi(e.max_hp * fraction)))
+	_heal_fx.rpc(pos, radius)
+
+
+@rpc("authority", "call_local", "reliable")
+func _heal_fx(pos: Vector2, radius: float) -> void:
+	Fx.ring(get_parent(), pos, radius, Color(0.4, 1, 0.4))
+	Fx.spark(get_parent(), pos + Vector2(0, -10), Color(0.5, 1, 0.5), 8)
+
+
+## Kipas peluru ke arah `dir` (Laksamana Besi).
+func fire_fan(pos: Vector2, dir: Vector2, count: int, spread_deg: float, speed: float, damage: int) -> void:
+	var dirs := PackedVector2Array()
+	for i in count:
+		dirs.append(dir.rotated(deg_to_rad((i - (count - 1) / 2.0) * spread_deg / maxf(1, count - 1))))
+	_bullets.rpc(pos, dirs, speed, damage)
 
 
 @rpc("authority", "call_local", "reliable")

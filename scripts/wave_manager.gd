@@ -20,6 +20,17 @@ var wave := 0
 var time_left := 0.0
 var running := false
 var _spawn_cooldown := 0.0
+var _duration := 20.0
+var _boss_spawned := false
+
+## Musuh yang mulai muncul di wave tertentu, dengan bobot peluang.
+const ENEMY_TABLE := [
+	{"kind": "serdadu", "from": 1, "weight": 6},
+	{"kind": "anjing", "from": 3, "weight": 3},
+	{"kind": "penembak", "from": 5, "weight": 2},
+	{"kind": "perisai", "from": 7, "weight": 2},
+	{"kind": "ranjau", "from": 9, "weight": 1},
+]
 
 
 ## Host saja.
@@ -31,7 +42,13 @@ func start_wave(n: int) -> void:
 func _start(n: int) -> void:
 	wave = n
 	time_left = minf(20.0 + (n - 1) * 5.0, 60.0)
+	_duration = time_left
+	_boss_spawned = false
 	_spawn_cooldown = 1.0
+	enemies.wave = n
+	enemies.base_hp = 6 + n * 3
+	enemies.base_speed = 45.0 + n * 2.0
+	enemies.base_damage = 2 + n / 4
 	running = true
 	wave_started.emit(n)
 
@@ -46,7 +63,16 @@ func _process(delta: float) -> void:
 	time_left = maxf(time_left - delta, 0.0)
 	if not multiplayer.is_server():
 		return
-	if time_left <= 0:
+	var player_factor := 1.0 + 0.6 * (players.get_child_count() - 1)
+	# Boss tiap wave muncul di pertengahan (wave terakhir: di awal). Wave terakhir baru
+	# selesai kalau Gubernur Jenderal tumbang, bukan karena waktu habis.
+	if not _boss_spawned and (time_left <= _duration * 0.55 or (wave == LAST_WAVE and time_left <= _duration - 3.0)):
+		_boss_spawned = true
+		_spawn_boss(player_factor)
+	var finished := time_left <= 0
+	if wave == LAST_WAVE:
+		finished = _boss_spawned and enemies.boss() == null
+	if finished:
 		running = false
 		enemies.clear()
 		pickups.clear()
@@ -57,11 +83,10 @@ func _process(delta: float) -> void:
 		# shortcut: kurva kesulitan hardcode, pindah ke data/waves/*.tres di M4.
 		_spawn_cooldown = maxf(1.2 - wave * 0.08, 0.3)
 		var alive := _alive_players()
-		var count := (1 + wave / 3) * (1.0 + 0.6 * (players.get_child_count() - 1))
-		for i in roundi(count):
+		for i in roundi((1 + wave / 3) * player_factor):
 			if enemies.get_child_count() >= MAX_ENEMIES or alive.is_empty():
 				break
-			enemies.spawn(_spawn_point(alive), 6 + wave * 3, 45.0 + wave * 2.0, 2 + wave / 4)
+			enemies.spawn_basic(_pick_kind(), _spawn_point(alive))
 
 
 @rpc("authority", "call_local", "reliable")
@@ -70,6 +95,30 @@ func _end(n: int) -> void:
 	time_left = 0.0
 	projectiles.clear()
 	wave_ended.emit(n)
+
+
+func _pick_kind() -> String:
+	var options := ENEMY_TABLE.filter(func(t): return wave >= t.from)
+	var total := 0
+	for t in options:
+		total += t.weight
+	var r := randi() % total
+	for t in options:
+		r -= t.weight
+		if r < 0:
+			return t.kind
+	return "serdadu"
+
+
+func _spawn_boss(player_factor: float) -> void:
+	var alive := _alive_players()
+	if alive.is_empty():
+		return
+	var kind := "gubernur" if wave == LAST_WAVE else "mandor" if wave in [10, 15] else "komandan"
+	var hp := (30 + wave * 35) * player_factor * (3.0 if kind == "gubernur" else 1.6 if kind == "mandor" else 1.0)
+	var t: Dictionary = enemies.TYPES[kind]
+	enemies.spawn(kind, map.resolve(_spawn_point(alive), t.radius), roundi(hp),
+		(45.0 + wave * 2.0) * t.speed, roundi((2 + wave / 4) * t.dmg))
 
 
 func _alive_players() -> Array:

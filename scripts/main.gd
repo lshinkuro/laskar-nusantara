@@ -16,6 +16,7 @@ var _ready_peers := {}  # host: peer -> true
 var _resend_loaded := 0.0
 var _paused := false
 var _pause_menu: CanvasLayer
+var _boss: Node
 
 @onready var map: Node2D = $World/Map
 @onready var players: Node2D = $World/Players
@@ -48,6 +49,9 @@ func _ready() -> void:
 		_spawn_player(ids[i], i, ids.size())
 	local_player = players.get_node(str(multiplayer.get_unique_id()))
 	pickups.local_player = local_player
+	enemies.local_player = local_player
+	enemies.boss_changed.connect(_on_boss_changed)
+	enemies.announce.connect(func(t): _show_message(t, 1.5); local_player.shake(5.0))
 	local_player.hp_changed.connect(_on_hp_changed)
 	local_player.rempah_changed.connect(func(n): rempah_label.text = str(n))
 	local_player.died.connect(_on_local_died)
@@ -94,6 +98,11 @@ func _spawn_player(id: int, slot: int, total: int) -> void:
 func _process(delta: float) -> void:
 	wave_label.text = "WAVE %d" % waves.wave if waves.wave > 0 else ""
 	timer_label.text = str(ceili(waves.time_left)) if state == State.PLAYING else ""
+	if state == State.PLAYING and waves.wave == waves.LAST_WAVE and waves.time_left <= 0:
+		timer_label.text = "BOSS!"
+	if _boss and is_instance_valid(_boss):
+		$HUD/Boss/Bar.max_value = _boss.max_hp
+		$HUD/Boss/Bar.value = _boss.hp
 	_update_team_list()
 	# Client mengulang laporan "siap" sampai host memulai (RPC pertama bisa datang
 	# sebelum scene host selesai dimuat).
@@ -274,6 +283,16 @@ func _set_pause(value: bool, by_name: String) -> void:
 		_pause_menu.open(by_name)
 	else:
 		_pause_menu.hide()
+
+
+func _on_boss_changed(boss: Node) -> void:
+	_boss = boss
+	$HUD/Boss.visible = boss != null
+	if boss:
+		$HUD/Boss/Name.text = boss.def.boss
+		_show_message("BOSS: " + boss.def.boss + "!", 1.6)
+		Sfx.play("wave_start", 0.0, 0.0)
+		local_player.shake(4.0)
 
 
 func _on_xp_changed(xp: int, needed: int, level: int) -> void:

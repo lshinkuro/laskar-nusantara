@@ -17,6 +17,7 @@ const STAT_NAMES := {
 	"range": "Jangkauan %",
 	"luck": "Hoki %",
 	"pickup_range": "Jarak Ambil",
+	"projectiles": "Peluru Ekstra",
 }
 const GOLD := Color(0.88, 0.69, 0.29)
 const WEAPON_COLOR := Color(0.95, 0.6, 0.45)
@@ -129,13 +130,21 @@ func _refresh() -> void:
 
 	for c in _weapons.get_children():
 		c.queue_free()
-	for w: WeaponData in player.weapons:
+	for w in player.weapon_ring.get_children():
+		var slot := PanelContainer.new()
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(w.TIER_COLORS[w.tier - 1], 0.35)
+		style.border_color = w.TIER_COLORS[w.tier - 1]
+		style.set_border_width_all(1)
+		style.set_corner_radius_all(2)
+		slot.add_theme_stylebox_override("panel", style)
+		slot.tooltip_text = "%s (Tier %d)" % [w.data.title, w.tier]
 		var icon := TextureRect.new()
-		icon.texture = w.texture
-		icon.tooltip_text = w.title
+		icon.texture = w.data.texture
 		icon.custom_minimum_size = Vector2(14, 14)
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
-		_weapons.add_child(icon)
+		slot.add_child(icon)
+		_weapons.add_child(slot)
 	var names: Array = player.items.map(func(it): return it.title)
 	_items.text = "-" if names.is_empty() else ", ".join(names)
 
@@ -178,7 +187,9 @@ func _card(i: int) -> Control:
 	kind.theme_type_variation = &"Muted"
 	box.add_child(kind)
 
-	var desc := _label(data.description + "\n" + _effects(data), 8)
+	var merge = player.mergeable_weapon(data) if is_weapon else null
+	var extra := "\nGABUNG -> Tier %d: +1 peluru, damage x%.1f" % [merge.tier + 1, 1.0 + 0.5 * merge.tier] if merge else ""
+	var desc := _label(data.description + "\n" + _effects(data) + extra, 8)
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(desc)
@@ -187,11 +198,11 @@ func _card(i: int) -> Control:
 	if o.sold:
 		buy.text = "Terjual"
 		buy.disabled = true
-	elif is_weapon and player.weapons.size() >= player.MAX_WEAPONS:
+	elif is_weapon and not player.can_take_weapon(data):
 		buy.text = "Slot penuh"
 		buy.disabled = true
 	else:
-		buy.text = "Beli  %d" % price
+		buy.text = ("Gabung  %d" if merge else "Beli  %d") % price
 		buy.disabled = player.rempah < price
 	buy.pressed.connect(_buy.bind(i))
 	box.add_child(buy)

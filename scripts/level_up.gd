@@ -14,6 +14,7 @@ const UPGRADES := [
 	{"title": "Napas Panjang", "desc": "Luka cepat pulih.", "stats": {"hp_regen": 2}},
 	{"title": "Berkah Leluhur", "desc": "Rezeki makin lancar.", "stats": {"luck": 8}},
 	{"title": "Tangan Panjang", "desc": "Rempah jauh pun teraih.", "stats": {"pickup_range": 20}},
+	{"title": "Hujan Panah", "desc": "Satu tembakan, banyak anak panah.", "stats": {"projectiles": 1, "damage": -4}},
 ]
 const GOLD := Color(0.88, 0.69, 0.29)
 

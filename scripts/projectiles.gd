@@ -8,15 +8,18 @@ const Projectile := preload("res://scenes/projectile.tscn")
 @export var map: Node2D  # World/Map
 
 
-func fire(pos: Vector2, dir: Vector2, data: WeaponData, damage: int, attack_range: float) -> void:
+## Satu tembakan bisa berisi banyak peluru (multi-tembak); dikirim ke peer lain sekali per tembakan.
+func fire(pos: Vector2, dirs: PackedVector2Array, data: WeaponData, damage: int, attack_range: float) -> void:
 	var lifetime := attack_range / data.projectile_speed * 1.2
-	_spawn(pos, dir, data.projectile_speed, lifetime, data.resource_path, data.pierce, damage)
-	_remote_fire.rpc(pos, dir, data.projectile_speed, lifetime, data.resource_path, data.pierce)
+	for dir in dirs:
+		_spawn(pos, dir, data.projectile_speed, lifetime, data.resource_path, data.pierce, damage)
+	_remote_fire.rpc(pos, dirs, data.projectile_speed, lifetime, data.resource_path, data.pierce)
 
 
 @rpc("any_peer", "unreliable")
-func _remote_fire(pos: Vector2, dir: Vector2, speed: float, lifetime: float, weapon_path: String, pierce: int) -> void:
-	_spawn(pos, dir, speed, lifetime, weapon_path, pierce, 0)
+func _remote_fire(pos: Vector2, dirs: PackedVector2Array, speed: float, lifetime: float, weapon_path: String, pierce: int) -> void:
+	for dir in dirs:
+		_spawn(pos, dir, speed, lifetime, weapon_path, pierce, 0)
 
 
 func _spawn(pos: Vector2, dir: Vector2, speed: float, lifetime: float, weapon_path: String, pierce: int, damage: int) -> void:
@@ -30,7 +33,9 @@ func _spawn(pos: Vector2, dir: Vector2, speed: float, lifetime: float, weapon_pa
 	p.damage = damage
 	p.enemies = enemies
 	p.map = map
-	p.texture = (load(weapon_path) as WeaponData).texture
+	var data := load(weapon_path) as WeaponData
+	p.texture = data.texture
+	p.spin = data.spin
 	add_child(p)
 
 

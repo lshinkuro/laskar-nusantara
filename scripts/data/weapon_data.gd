@@ -15,3 +15,5 @@ extends Resource
 @export var spread := 0.0
 ## Berapa musuh tambahan yang bisa ditembus.
 @export var pierce := 0
+## Peluru berputar (cakra, batu).
+@export var spin := false

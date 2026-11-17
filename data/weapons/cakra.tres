@@ -16,3 +16,4 @@ projectile_speed = 300.0
 projectile_count = 3
 spread = 20.0
 pierce = 2
+spin = true

@@ -103,14 +103,14 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 - [ ] Layar pilih karakter
 
 ### M4 · Minggu 7–8: Musuh & Boss
-- [ ] 4 jenis musuh biasa
-- [ ] Elite Mandor Kejam
-- [ ] Boss Gubernur Jenderal Besi (2 fase)
+- [x] 4 jenis musuh biasa (+ Serdadu Perisai)
+- [x] Elite Mandor Kejam
+- [x] Boss Gubernur Jenderal Besi (2 fase) + Komandan Besi sebagai boss di wave lain
 - [ ] Tabel kurva kesulitan wave 1–20 (jumlah, jenis, dan HP musuh per wave)
 
 ### M5 · Minggu 9–10: Grafis, suara, "juice"
 - [ ] Sprite final
-- [ ] Efek kena hit: flash, getar layar, angka damage
+- [x] Efek kena hit: flash, getar layar, angka damage, percikan, kilatan & jejak tembakan
 - [x] Musik gamelan/kendang dan SFX (disintesis, `tools/make_sounds.py`)
 - [x] Menu utama (latar senja bergerak), pause, settings volume musik & efek terpisah
 

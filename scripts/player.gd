@@ -12,6 +12,7 @@ signal died
 const Weapon := preload("res://scripts/weapon.gd")
 const DamageNumber := preload("res://scripts/damage_number.gd")
 const OBJECT_SCALE := 1.5
+const MAX_TIER := 4
 const MAX_WEAPONS := 6
 const BASE_SPEED := 120.0
 const BASE_PICKUP_RANGE := 40.0
@@ -26,6 +27,7 @@ const BASE_STATS := {
 	"range": 0,         # % jangkauan
 	"luck": 0,          # % peluang rempah dobel
 	"pickup_range": 0,  # piksel jangkauan ambil rempah
+	"projectiles": 0,   # peluru tambahan per tembakan, semua senjata
 }
 
 @export var arena_size := Vector2(960, 540)
@@ -42,7 +44,7 @@ var xp := 0
 ## Level yang belum dipilih upgrade-nya (dipilih di akhir wave).
 var pending_levels := 0
 var items: Array[ItemData] = []
-var weapons: Array[WeaponData] = []
+var weapons: Array[WeaponData] = []  # satu entri per slot; tier ada di node senjata
 var projectiles: Node  # World/Projectiles, diisi main
 var map: Node2D  # World/Map, diisi main
 
@@ -66,6 +68,21 @@ func _ready() -> void:
 	$Camera2D.enabled = is_local()
 	if is_local():
 		$Camera2D.make_current()
+
+
+var _shake := 0.0
+
+
+## Guncang kamera (hanya pemain lokal).
+func shake(amount: float) -> void:
+	if is_local():
+		_shake = maxf(_shake, amount)
+
+
+func _process(delta: float) -> void:
+	if _shake > 0:
+		_shake = maxf(_shake - delta * 25.0, 0.0)
+		$Camera2D.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * _shake
 
 
 func is_local() -> bool:
@@ -130,6 +147,7 @@ func take_damage(amount: int) -> void:
 	var factor := 10.0 / (10.0 + armor) if armor >= 0 else (10.0 - armor) / 10.0
 	hp = maxi(hp - maxi(1, roundi(amount * factor)), 0)
 	_invuln = invuln_time
+	shake(3.0)
 	hp_changed.emit(hp, stats.max_hp)
 	Sfx.play("hurt", -4.0)
 	if hp == 0:
@@ -217,7 +235,26 @@ func apply_stats(changes: Dictionary) -> void:
 	stats_changed.emit()
 
 
+## Senjata yang sama digabung jadi tier lebih tinggi (tidak makan slot).
+func mergeable_weapon(data: WeaponData) -> Node:
+	var best: Node = null
+	for w in weapon_ring.get_children():
+		if w.data == data and w.tier < MAX_TIER and (best == null or w.tier < best.tier):
+			best = w
+	return best
+
+
+func can_take_weapon(data: WeaponData) -> bool:
+	return mergeable_weapon(data) != null or weapons.size() < MAX_WEAPONS
+
+
 func add_weapon(data: WeaponData) -> bool:
+	var merge := mergeable_weapon(data)
+	if merge:
+		merge.tier += 1
+		merge.queue_redraw()
+		stats_changed.emit()
+		return true
 	if weapons.size() >= MAX_WEAPONS:
 		return false
 	weapons.append(data)

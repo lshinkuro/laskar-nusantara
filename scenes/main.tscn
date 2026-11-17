@@ -38,12 +38,13 @@ script = ExtResource("2")
 y_sort_enabled = true
 script = ExtResource("6")
 
-[node name="Enemies" type="Node2D" parent="World" node_paths=PackedStringArray("players", "pickups", "map")]
+[node name="Enemies" type="Node2D" parent="World" node_paths=PackedStringArray("players", "pickups", "map", "hazards")]
 y_sort_enabled = true
 script = ExtResource("5")
 players = NodePath("../Players")
 pickups = NodePath("../Pickups")
 map = NodePath("../Map")
+hazards = NodePath("../Projectiles")
 
 [node name="Players" type="Node2D" parent="World"]
 y_sort_enabled = true
@@ -143,6 +144,32 @@ grow_horizontal = 2
 theme_type_variation = &"Hud"
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
+
+[node name="Boss" type="VBoxContainer" parent="HUD"]
+visible = false
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 40.0
+offset_right = 120.0
+offset_bottom = 66.0
+grow_horizontal = 2
+theme_override_constants/separation = 1
+
+[node name="Name" type="Label" parent="HUD/Boss"]
+layout_mode = 2
+theme_type_variation = &"Hud"
+theme_override_colors/font_color = Color(1, 0.45, 0.4, 1)
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+
+[node name="Bar" type="ProgressBar" parent="HUD/Boss"]
+custom_minimum_size = Vector2(240, 8)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+show_percentage = false
 
 [node name="Team" type="VBoxContainer" parent="HUD"]
 anchors_preset = 1

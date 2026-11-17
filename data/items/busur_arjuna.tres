@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Busur Arjuna"
+description = "Pusaka sang pemanah: semua senjata menembak satu peluru lebih banyak."
+price = 60
+color = Color(0.94, 0.75, 0.25, 1)
+stats = {"projectiles": 1, "damage": -5}

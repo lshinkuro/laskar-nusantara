@@ -16,6 +16,11 @@ Rencana lengkap: [PLAN.md](PLAN.md).
 - **Medan berganti:** wave 1–6 Lembah Sungai (terasering & sungai), 7–13 Hutan Kalimantan, 14–20 Desa & Candi. Pohon, bangunan,
   dan batu menghalangi gerak dan peluru.
 - **Suara:** musik gamelan & efek suara, volume musik dan efek diatur terpisah (menu *Pengaturan* / layar jeda).
+- **Musuh:** Serdadu Besi, Anjing Pelacak (w3+), Penembak (w5+), Serdadu Perisai (w7+), Tukang Ranjau (w9+).
+- **Boss tiap wave** (muncul di pertengahan): Komandan Besi (terjang + cincin peluru), Mandor Kejam
+  (wave 10 & 15: panggil pasukan + hantaman area), Gubernur Jenderal Besi (wave 20, 2 fase; harus dikalahkan untuk menang).
+- **Senjata bertingkat:** beli senjata yang sama untuk menggabung (abu → biru → ungu → merah), tiap tier +1 peluru
+  & damage x1.5. *Busur Arjuna* (item) dan *Hujan Panah* (ilmu) menambah peluru semua senjata.
 - **Jeda:** tombol *Jeda*, Esc, atau P. Di co-op, jeda berlaku untuk semua pemain.
 - **Co-op online (2–4 pemain):** "Buat Room Online" → bagikan kode 5 huruf atau tombol *Salin Link*.
   Teman memasukkan kode lalu "Gabung" (atau buka link-nya). Host menekan "Mulai Perang!".
@@ -35,13 +40,14 @@ scripts/  net (autoload lobby+signaling), sfx (autoload suara), map + obstacle (
 data/     items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
 assets/   sprites/ (tools/make_sprites.py), audio/ (tools/make_sounds.py, sintesis gamelan),
           fonts/ (Pixelify Sans, OFL), ui/theme.tres
-tests/    smoke_test (solo), level_test (XP, ilmu, ketupat), touch_test, net_test (co-op 2 proses lewat ENet)
+tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
 ```
 
 ## Tes
 ```sh
 godot --headless --fixed-fps 60 -s res://tests/smoke_test.gd
 godot --headless -s res://tests/level_test.gd
+godot --headless --fixed-fps 60 -s res://tests/boss_test.gd
 godot --headless -s res://tests/net_test.gd -- host &  godot --headless -s res://tests/net_test.gd -- client
 ```
 

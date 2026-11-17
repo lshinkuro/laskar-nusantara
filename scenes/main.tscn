@@ -89,11 +89,11 @@ map = NodePath("../Map")
 [node name="TopLeft" type="VBoxContainer" parent="HUD"]
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 128.0
+offset_right = 100.0
 offset_bottom = 40.0
 
 [node name="HPBar" type="ProgressBar" parent="HUD/TopLeft"]
-custom_minimum_size = Vector2(120, 13)
+custom_minimum_size = Vector2(92, 10)
 layout_mode = 2
 max_value = 20.0
 value = 20.0
@@ -105,21 +105,21 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_type_variation = &"Hud"
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 7
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Icon" type="TextureRect" parent="HUD/TopLeft/HPBar"]
 layout_mode = 1
 offset_left = 2.0
-offset_top = 2.5
+offset_top = 1.0
 offset_right = 10.0
-offset_bottom = 10.5
+offset_bottom = 9.0
 texture = ExtResource("13")
 stretch_mode = 3
 
 [node name="XPBar" type="ProgressBar" parent="HUD/TopLeft"]
-custom_minimum_size = Vector2(120, 9)
+custom_minimum_size = Vector2(92, 7)
 layout_mode = 2
 theme_override_styles/fill = SubResource("xp_fill")
 max_value = 10.0
@@ -131,21 +131,21 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_type_variation = &"Hud"
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 6
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Icon" type="TextureRect" parent="HUD/TopLeft/XPBar"]
 layout_mode = 1
 offset_left = 2.0
-offset_top = 0.5
+offset_top = -0.5
 offset_right = 10.0
-offset_bottom = 8.5
+offset_bottom = 7.5
 texture = ExtResource("14")
 stretch_mode = 3
 
 [node name="SemangatBar" type="ProgressBar" parent="HUD/TopLeft"]
-custom_minimum_size = Vector2(120, 9)
+custom_minimum_size = Vector2(92, 7)
 layout_mode = 2
 theme_override_styles/fill = SubResource("semangat_fill")
 show_percentage = false
@@ -156,7 +156,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme_type_variation = &"Hud"
-theme_override_font_sizes/font_size = 7
+theme_override_font_sizes/font_size = 6
 text = "Semangat"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -164,9 +164,9 @@ vertical_alignment = 1
 [node name="Icon" type="TextureRect" parent="HUD/TopLeft/SemangatBar"]
 layout_mode = 1
 offset_left = 2.0
-offset_top = 0.5
+offset_top = -0.5
 offset_right = 10.0
-offset_bottom = 8.5
+offset_bottom = 7.5
 texture = ExtResource("15")
 stretch_mode = 3
 
@@ -191,11 +191,11 @@ anchor_right = 0.5
 offset_left = -80.0
 offset_top = 4.0
 offset_right = 80.0
-offset_bottom = 18.0
+offset_bottom = 15.0
 grow_horizontal = 2
 theme_type_variation = &"Hud"
 theme_override_colors/font_color = Color(0.88, 0.69, 0.29, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 1
 
 [node name="TimerLabel" type="Label" parent="HUD"]
@@ -203,12 +203,12 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -80.0
-offset_top = 16.0
+offset_top = 13.0
 offset_right = 80.0
-offset_bottom = 40.0
+offset_bottom = 30.0
 grow_horizontal = 2
 theme_type_variation = &"Hud"
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 
 [node name="Boss" type="VBoxContainer" parent="HUD"]
@@ -259,12 +259,12 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
-offset_top = -46.0
+offset_top = -40.0
 offset_right = 300.0
-offset_bottom = -34.0
+offset_bottom = -30.0
 grow_vertical = 0
 theme_type_variation = &"Hud"
-theme_override_font_sizes/font_size = 8
+theme_override_font_sizes/font_size = 7
 text = "WASD / geser layar: gerak   |   Spasi: Pekik Merdeka   |   Esc: jeda"
 
 [node name="WargaPointer" type="Control" parent="HUD"]
@@ -280,12 +280,12 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 6.0
-offset_top = -30.0
-offset_right = 86.0
+offset_top = -26.0
+offset_right = 80.0
 offset_bottom = -6.0
 grow_vertical = 0
 focus_mode = 0
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 8
 text = "PEKIK MERDEKA!"
 
 [node name="Pause" type="Button" parent="HUD"]
@@ -294,26 +294,27 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -62.0
-offset_top = -26.0
+offset_left = -50.0
+offset_top = -22.0
 offset_right = -6.0
 offset_bottom = -6.0
 grow_horizontal = 0
 grow_vertical = 0
 focus_mode = 0
-theme_override_font_sizes/font_size = 9
+theme_override_font_sizes/font_size = 8
 text = "II  Jeda"
 
 [node name="Message" type="Label" parent="HUD"]
-anchors_preset = 15
+anchors_preset = 10
 anchor_right = 1.0
-anchor_bottom = 1.0
+offset_top = 70.0
+offset_bottom = 130.0
 grow_horizontal = 2
-grow_vertical = 2
+mouse_filter = 2
 theme_type_variation = &"Title"
-theme_override_font_sizes/font_size = 18
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 11
 horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="TouchJoystick" type="Control" parent="HUD"]
 anchors_preset = 15

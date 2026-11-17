@@ -83,22 +83,23 @@ func _card(u: Dictionary) -> Control:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
 	card.add_child(box)
-	var title := _label(u.title, 11)
+	var title := _label(u.title, 9)
 	title.modulate = GOLD
 	box.add_child(title)
-	var desc := _label(u.desc, 8)
+	var desc := _label(u.desc, 7)
 	desc.theme_type_variation = &"Muted"
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(desc)
 	var parts := PackedStringArray()
 	for key in u.stats:
 		parts.append("%+d %s" % [u.stats[key], preload("res://scripts/shop.gd").STAT_NAMES[key]])
-	var effect := _label(", ".join(parts), 10)
+	var effect := _label(", ".join(parts), 8)
 	effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	effect.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(effect)
 	var btn := Button.new()
 	btn.text = "[%d] Pilih" % (_cards.get_child_count() + 1)
+	btn.add_theme_font_size_override("font_size", 8)
 	btn.pressed.connect(choose.bind(u))
 	box.add_child(btn)
 	return card
@@ -120,14 +121,14 @@ func _build() -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(460, 150)
+	panel.custom_minimum_size = Vector2(380, 110)
 	center.add_child(panel)
 	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 8)
+	root.add_theme_constant_override("separation", 6)
 	panel.add_child(root)
-	_title = _label("", 14)
+	_title = _label("", 11)
 	_title.theme_type_variation = &"Title"
-	_title.add_theme_font_size_override("font_size", 14)
+	_title.add_theme_font_size_override("font_size", 11)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(_title)
 	_cards = HBoxContainer.new()

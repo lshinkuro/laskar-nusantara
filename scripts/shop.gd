@@ -322,7 +322,7 @@ func _card(i: int) -> Control:
 	style.set_corner_radius_all(9)
 	style.set_content_margin_all(6)
 	card.add_theme_stylebox_override("panel", style)
-	card.custom_minimum_size = Vector2(104, 0)
+	card.custom_minimum_size = Vector2(92, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.modulate = Color(1, 1, 1, 0.45) if o.sold else Color.WHITE
 	var box := VBoxContainer.new()
@@ -332,20 +332,20 @@ func _card(i: int) -> Control:
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 5)
 	box.add_child(head)
-	head.add_child(_icon_slot(_icon_of(data), rc, 32))
+	head.add_child(_icon_slot(_icon_of(data), rc, 26))
 	var names := VBoxContainer.new()
 	names.add_theme_constant_override("separation", 0)
 	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(names)
-	var title := _label(data.title, 11)
+	var title := _label(data.title, 9)
 	title.add_theme_color_override("font_color", rc.lightened(0.25) if data.rarity > 0 else Color(0.97, 0.93, 0.84))
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.custom_minimum_size.x = 56  # tanpa lebar minimum, label ber-wrap menghitung tinggi seolah lebar 0
+	title.custom_minimum_size.x = 50  # tanpa lebar minimum, label ber-wrap menghitung tinggi seolah lebar 0
 	names.add_child(title)
 	var kind_text: String = ("Senjata " + {"melee": "dekat", "ranged": "jauh", "magic": "magis"}[data.category]) if is_weapon else "Item"
 	if not is_weapon and not data.tags.is_empty():
 		kind_text += " - " + ", ".join(data.tags).capitalize()
-	var kind := _label(kind_text, 8)
+	var kind := _label(kind_text, 7)
 	kind.add_theme_color_override("font_color", Color(0.7, 0.62, 0.52))
 	names.add_child(kind)
 
@@ -355,13 +355,13 @@ func _card(i: int) -> Control:
 	desc.fit_content = true
 	desc.scroll_active = false
 	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	desc.add_theme_font_size_override("normal_font_size", 9)
-	desc.custom_minimum_size.x = 88
+	desc.add_theme_font_size_override("normal_font_size", 8)
+	desc.custom_minimum_size.x = 78
 	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var lines := _effect_lines(data)
 	if merge:
 		lines.append("[color=#f0d860]Gabung -> Tier %d[/color]" % (merge.tier + 1))
-	lines.append("[color=#a89880][font_size=8]%s[/font_size][/color]" % data.description)
+	lines.append("[color=#a89880][font_size=7]%s[/font_size][/color]" % data.description)
 	desc.text = "\n".join(lines)
 	box.add_child(desc)
 	if not is_weapon:
@@ -372,8 +372,8 @@ func _card(i: int) -> Control:
 
 	var buy := Button.new()
 	buy.icon = REMPAH_ICON
-	buy.add_theme_font_size_override("font_size", 12)
-	buy.custom_minimum_size = Vector2(0, 24)
+	buy.add_theme_font_size_override("font_size", 9)
+	buy.custom_minimum_size = Vector2(0, 18)
 	if o.sold:
 		buy.icon = null
 		buy.text = "Terjual"
@@ -397,7 +397,7 @@ func _card(i: int) -> Control:
 	var lock := Button.new()
 	lock.text = "Terkunci" if o.locked else "Kunci"
 	lock.disabled = o.sold
-	lock.add_theme_font_size_override("font_size", 8)
+	lock.add_theme_font_size_override("font_size", 7)
 	lock.tooltip_text = "Kartu terkunci tidak ikut dikocok & tetap ada di wave berikutnya."
 	lock.pressed.connect(_toggle_lock.bind(i))
 	box.add_child(lock)
@@ -575,7 +575,7 @@ func _build() -> void:
 	_frame = margin
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 10)
+		margin.add_theme_constant_override("margin_" + side, 48 if side in ["left", "right"] else 30)
 	add_child(margin)
 
 	var panel := PanelContainer.new()
@@ -586,16 +586,16 @@ func _build() -> void:
 
 	var header := HBoxContainer.new()
 	root.add_child(header)
-	_title = _label("", 14)
+	_title = _label("", 11)
 	_title.theme_type_variation = &"Title"
-	_title.add_theme_font_size_override("font_size", 14)
+	_title.add_theme_font_size_override("font_size", 11)
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_title)
 	var rempah_icon := TextureRect.new()
 	rempah_icon.texture = preload("res://assets/sprites/rempah.png")
 	rempah_icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 	header.add_child(rempah_icon)
-	_rempah = _label("", 16)
+	_rempah = _label("", 12)
 	_rempah.add_theme_color_override("font_color", Color(0.98, 0.8, 0.35))
 	header.add_child(_rempah)
 
@@ -620,7 +620,7 @@ func _build() -> void:
 	var slots_row := HBoxContainer.new()
 	slots_row.add_theme_constant_override("separation", 3)
 	bag_box.add_child(slots_row)
-	var bag_title := _label("TAS PUSAKA", 9)
+	var bag_title := _label("TAS PUSAKA", 8)
 	bag_title.modulate = GOLD
 	slots_row.add_child(bag_title)
 	_weapon_count = _label("", 8)
@@ -640,7 +640,7 @@ func _build() -> void:
 	_bag_detail.fit_content = true
 	_bag_detail.scroll_active = false
 	_bag_detail.add_theme_font_size_override("normal_font_size", 8)
-	_bag_detail.custom_minimum_size.x = 200
+	_bag_detail.custom_minimum_size.x = 170
 	_bag_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	action_row.add_child(_bag_detail)
 	_combine_btn = Button.new()
@@ -657,7 +657,7 @@ func _build() -> void:
 
 	var right := PanelContainer.new()
 	right.theme_type_variation = &"Card"
-	right.custom_minimum_size = Vector2(150, 0)
+	right.custom_minimum_size = Vector2(120, 0)
 	body.add_child(right)
 	var info := VBoxContainer.new()
 	right.add_child(info)
@@ -668,8 +668,8 @@ func _build() -> void:
 	_stats.bbcode_enabled = true
 	_stats.fit_content = true
 	_stats.scroll_active = false
-	_stats.add_theme_font_size_override("normal_font_size", 8)
-	_stats.custom_minimum_size.x = 136
+	_stats.add_theme_font_size_override("normal_font_size", 7)
+	_stats.custom_minimum_size.x = 108
 	info.add_child(_stats)
 	var syn_title := _label("Sinergi", 10)
 	syn_title.modulate = GOLD
@@ -688,6 +688,6 @@ func _build() -> void:
 	_ready_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	footer.add_child(_ready_label)
 	_ready_btn = Button.new()
-	_ready_btn.add_theme_font_size_override("font_size", 12)
+	_ready_btn.add_theme_font_size_override("font_size", 9)
 	_ready_btn.pressed.connect(_on_ready)
 	footer.add_child(_ready_btn)

@@ -18,6 +18,7 @@ var map: Node2D
 var enemies: Node
 var target_pos := Vector2.ZERO
 var phase := 1
+var last_hitter := 0  # host: peer yang terakhir memukul (untuk kredit kill)
 ## Efek status aktif: nama -> {"t": sisa detik, "power": damage per tick, "tick": detik ke tick berikutnya}.
 ## Di host menentukan damage & lambat; di client hanya tampilan.
 var statuses := {}

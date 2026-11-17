@@ -6,6 +6,7 @@ enum State { WAITING, PLAYING, SHOP, OVER }
 
 const PlayerScene := preload("res://scenes/player.tscn")
 const PauseMenu := preload("res://scripts/pause_menu.gd")
+const RunSummary := preload("res://scripts/run_summary.gd")
 
 var state := State.WAITING
 var local_player
@@ -17,6 +18,7 @@ var _paused := false
 var _pause_menu: CanvasLayer
 var _boss: Node
 var _unlocked_this_run: Array[String] = []
+var run := RunSummary.new()
 
 @onready var map: Node2D = $World/Map
 @onready var players: Node2D = $World/Players
@@ -51,6 +53,8 @@ func _ready() -> void:
 	pickups.local_player = local_player
 	enemies.local_player = local_player
 	enemies.boss_changed.connect(_on_boss_changed)
+	enemies.local_hit.connect(run.record_hit)
+	enemies.kill_credited.connect(func(_kind, is_boss): run.record_kill(is_boss))
 	enemies.announce.connect(func(t): _show_message(t, 1.5); local_player.shake(5.0))
 	local_player.hp_changed.connect(_on_hp_changed)
 	local_player.rempah_changed.connect(func(n): rempah_label.text = str(n))
@@ -96,6 +100,8 @@ func _spawn_player(id: int, slot: int, total: int) -> void:
 
 
 func _process(delta: float) -> void:
+	if state == State.PLAYING and not _paused:
+		run.time += delta
 	wave_label.text = "WAVE %d" % waves.wave if waves.wave > 0 else ""
 	timer_label.text = str(ceili(waves.time_left)) if state == State.PLAYING else ""
 	if state == State.PLAYING and waves.wave == waves.LAST_WAVE and waves.time_left <= 0:
@@ -240,6 +246,7 @@ func _finish(won: bool, wave: int) -> void:
 		else "Pasukan bertahan sampai wave %d dari %d." % [wave, waves.LAST_WAVE]
 	if not _unlocked_this_run.is_empty():
 		$EndScreen/Panel/Box/Sub.text += "\nKarakter baru: " + ", ".join(_unlocked_this_run)
+	run.build($EndScreen/Panel/Box/Stats, local_player, wave, Net.character_of(multiplayer.get_unique_id()).title)
 	var host := multiplayer.is_server()
 	$EndScreen/Panel/Box/Buttons/Again.visible = host
 	$EndScreen/Panel/Box/Wait.visible = not host

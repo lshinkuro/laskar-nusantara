@@ -44,6 +44,7 @@ var stats := BASE_STATS.duplicate()
 var hp := 20
 var alive := true
 var rempah := 0
+var rempah_total := 0  # rempah terkumpul sepanjang run (statistik)
 var level := 1
 var xp := 0
 ## Level yang belum dipilih upgrade-nya (dipilih di akhir wave).
@@ -193,6 +194,7 @@ func collect_rempah(value: int) -> void:
 	var bonus: float = value * stats.harvest / 100.0
 	value = maxi(0, value + int(bonus) + (1 if randf() < bonus - int(bonus) else 0))
 	rempah += value
+	rempah_total += value
 	rempah_changed.emit(rempah)
 	gain_xp(value)
 

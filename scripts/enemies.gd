@@ -5,6 +5,10 @@ extends Node2D
 
 signal boss_changed(boss: Node)  # boss baru muncul, atau null saat boss tumbang
 signal announce(text: String)
+## Peluru pemain lokal mengenai musuh (untuk statistik run).
+signal local_hit(data: WeaponData, amount: int)
+## Musuh tumbang oleh pukulan terakhir pemain lokal.
+signal kill_credited(kind: String, is_boss: bool)
 
 const Enemy := preload("res://scenes/enemy.tscn")
 const EnemyBullet := preload("res://scripts/enemy_bullet.gd")
@@ -98,8 +102,9 @@ func hit(enemy: Node, amount: int, data: WeaponData = null, dir := Vector2.ZERO)
 	if data and data.category == "melee":
 		Fx.slash(get_parent(), enemy.position + Vector2(0, -8), dir.angle())
 	Sfx.play("hit", -10.0)
+	local_hit.emit(data, amount)
 	if multiplayer.is_server():
-		_apply_hit(enemy.id, amount, effect, power, dir)
+		_apply_hit(enemy.id, amount, effect, power, dir, 1)
 	else:
 		_request_hit.rpc_id(1, enemy.id, amount, effect, power, dir)
 
@@ -107,7 +112,7 @@ func hit(enemy: Node, amount: int, data: WeaponData = null, dir := Vector2.ZERO)
 @rpc("any_peer", "reliable")
 func _request_hit(id: int, amount: int, effect: String, power: float, dir: Vector2) -> void:
 	if multiplayer.is_server():
-		_apply_hit(id, amount, effect, power, dir)
+		_apply_hit(id, amount, effect, power, dir, multiplayer.get_remote_sender_id())
 
 
 ## Host saja: damage per detik dari status (terbakar/racun/berdarah).
@@ -119,10 +124,12 @@ func status_damage(e: Node, amount: int, effect: String) -> void:
 	_apply_hit(e.id, amount)
 
 
-func _apply_hit(id: int, amount: int, effect := "", power := 0.0, dir := Vector2.ZERO) -> void:
+func _apply_hit(id: int, amount: int, effect := "", power := 0.0, dir := Vector2.ZERO, by := 0) -> void:
 	var e := get_node_or_null("E%d" % id)
 	if e == null or e.hp <= 0:
 		return
+	if by > 0:
+		e.last_hitter = by
 	_apply_effect(e, amount, effect, power, dir)
 	e.hp -= amount
 	if e.hp > 0:
@@ -136,7 +143,7 @@ func _apply_hit(id: int, amount: int, effect := "", power := 0.0, dir := Vector2
 		pickups.spawn(e.position, 1)
 		if randf() < KETUPAT_CHANCE:
 			pickups.spawn(e.position, 0, true)
-	_kill.rpc(id)
+	_kill.rpc(id, e.last_hitter)
 
 
 func _apply_effect(e: Node, amount: int, effect: String, power: float, dir: Vector2) -> void:
@@ -152,7 +159,7 @@ func _apply_effect(e: Node, amount: int, effect: String, power: float, dir: Vect
 			_boom_fx.rpc(e.position, power)
 			for other in get_children():
 				if other != e and other.hp > 0 and other.position.distance_to(e.position) < power:
-					_apply_hit(other.id, maxi(1, roundi(amount * 0.6)))
+					_apply_hit(other.id, maxi(1, roundi(amount * 0.6)), "", 0.0, Vector2.ZERO, e.last_hitter)
 
 
 @rpc("authority", "reliable")
@@ -169,11 +176,13 @@ func _boom_fx(pos: Vector2, radius: float) -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func _kill(id: int) -> void:
+func _kill(id: int, killer: int) -> void:
 	var e := get_node_or_null("E%d" % id)
 	if e == null:
 		return
 	e.hp = 0
+	if killer == multiplayer.get_unique_id():
+		kill_credited.emit(e.kind, e.is_boss())
 	Fx.spark(get_parent(), e.position, Color(0.75, 0.78, 0.82), 10 if not e.is_boss() else 40)
 	if e.is_boss():
 		Fx.explosion(get_parent(), e.position, 40)

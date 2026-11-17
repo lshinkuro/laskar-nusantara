@@ -88,6 +88,7 @@ func _buy(i: int) -> void:
 		player.apply_item(o.data)
 	o.sold = true
 	o.locked = false
+	Sfx.play("buy", -4.0, 0.0)
 	_refresh()
 
 

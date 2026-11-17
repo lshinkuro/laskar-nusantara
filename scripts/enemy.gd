@@ -10,6 +10,7 @@ var speed := 50.0
 var damage := 2
 var simulate := false
 var players: Node2D
+var map: Node2D
 var target_pos := Vector2.ZERO
 
 var _target: Node2D
@@ -35,7 +36,7 @@ func _physics_process(delta: float) -> void:
 			_retarget = 0.5
 			_target = _nearest_alive_player()
 		if _target:
-			position += position.direction_to(_target.position) * speed * delta
+			position = map.resolve(position + position.direction_to(_target.position) * speed * delta, 8.0)
 	else:
 		position = position.lerp(target_pos, minf(1.0, delta * 12.0))
 	var dx := position.x - old.x
@@ -64,6 +65,7 @@ func flash(amount: int) -> void:
 
 
 func die() -> void:
+	Sfx.play("enemy_die", -8.0, 0.15)
 	remove_from_group("enemies")
 	$CollisionShape2D.set_deferred("disabled", true)
 	set_physics_process(false)

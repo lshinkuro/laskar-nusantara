@@ -8,6 +8,7 @@ var lifetime := 1.0
 var pierce := 0
 var texture: Texture2D
 var enemies: Node
+var map: Node2D
 
 var _hit := {}
 
@@ -21,7 +22,7 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	position += direction * speed * delta
 	lifetime -= delta
-	if lifetime <= 0:
+	if lifetime <= 0 or map.blocks(position):
 		queue_free()
 
 

@@ -59,8 +59,10 @@ func _collected(id: int, peer: int) -> void:
 	if peer == multiplayer.get_unique_id():
 		if r.ketupat:
 			local_player.heal(KETUPAT_HEAL)
+			Sfx.play("heal", -4.0, 0.0)
 		else:
 			local_player.collect_rempah(r.value)
+			Sfx.play("pickup", -10.0, 0.12)
 	r.queue_free()
 
 

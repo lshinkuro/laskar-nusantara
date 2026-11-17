@@ -5,6 +5,7 @@ extends Node2D
 const Projectile := preload("res://scenes/projectile.tscn")
 
 @export var enemies: Node  # World/Enemies
+@export var map: Node2D  # World/Map
 
 
 func fire(pos: Vector2, dir: Vector2, data: WeaponData, damage: int, attack_range: float) -> void:
@@ -28,6 +29,7 @@ func _spawn(pos: Vector2, dir: Vector2, speed: float, lifetime: float, weapon_pa
 	p.pierce = pierce
 	p.damage = damage
 	p.enemies = enemies
+	p.map = map
 	p.texture = (load(weapon_path) as WeaponData).texture
 	add_child(p)
 

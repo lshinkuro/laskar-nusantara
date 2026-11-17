@@ -13,6 +13,9 @@ Rencana lengkap: [PLAN.md](PLAN.md).
 - **Rempah** dari musuh yang gugur = uang belanja di **Pasar Rakyat** antar-wave sekaligus XP.
 - **Naik level:** HP Maks +1, lalu di akhir wave pilih 1 dari 4 *ilmu* (upgrade stat) per level.
 - **Ketupat** kadang jatuh dari musuh: +3 HP (tidak diambil kalau HP masih penuh).
+- **Medan berganti:** wave 1–6 Sawah, 7–13 Hutan Kalimantan, 14–20 Desa & Candi. Pohon, bangunan,
+  dan batu menghalangi gerak dan peluru.
+- **Suara:** musik gamelan & efek suara (tombol *Suara* untuk mematikan).
 - **Co-op online (2–4 pemain):** "Buat Room Online" → bagikan kode 5 huruf atau tombol *Salin Link*.
   Teman memasukkan kode lalu "Gabung" (atau buka link-nya). Host menekan "Mulai Perang!".
 
@@ -26,10 +29,11 @@ Rencana lengkap: [PLAN.md](PLAN.md).
 ## Struktur
 ```
 scenes/   menu, main (game), player, enemy, projectile, rempah
-scripts/  net (autoload lobby+signaling), main, player, weapon, enemies, pickups,
-          projectiles, wave_manager, shop, menu, sawah, touch_joystick
+scripts/  net (autoload lobby+signaling), sfx (autoload suara), map + obstacle (medan), main, player, weapon, enemies, pickups,
+          projectiles, wave_manager, shop, menu, touch_joystick
 data/     items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
-assets/   sprites/ (dibuat oleh tools/make_sprites.py), fonts/ (Pixelify Sans, OFL), ui/theme.tres
+assets/   sprites/ (tools/make_sprites.py), audio/ (tools/make_sounds.py, sintesis gamelan),
+          fonts/ (Pixelify Sans, OFL), ui/theme.tres
 tests/    smoke_test (solo), level_test (XP, ilmu, ketupat), touch_test, net_test (co-op 2 proses lewat ENet)
 ```
 

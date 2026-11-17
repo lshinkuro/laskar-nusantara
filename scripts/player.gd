@@ -44,6 +44,7 @@ var pending_levels := 0
 var items: Array[ItemData] = []
 var weapons: Array[WeaponData] = []
 var projectiles: Node  # World/Projectiles, diisi main
+var map: Node2D  # World/Map, diisi main
 
 var _invuln := 0.0
 var _regen := 0.0
@@ -83,7 +84,7 @@ func _physics_process(delta: float) -> void:
 	var speed := BASE_SPEED * maxf(0.3, 1.0 + stats.speed / 100.0)
 	velocity = Input.get_vector("move_left", "move_right", "move_up", "move_down") * speed
 	move_and_slide()
-	position = position.clamp(Vector2(12, 12), arena_size - Vector2(12, 12))
+	position = map.resolve(position.clamp(Vector2(12, 12), arena_size - Vector2(12, 12)), 8.0)
 	_animate(delta, velocity.length() > 1, velocity.x)
 
 	if stats.hp_regen > 0 and hp < stats.max_hp:
@@ -130,6 +131,7 @@ func take_damage(amount: int) -> void:
 	hp = maxi(hp - maxi(1, roundi(amount * factor)), 0)
 	_invuln = invuln_time
 	hp_changed.emit(hp, stats.max_hp)
+	Sfx.play("hurt", -4.0)
 	if hp == 0:
 		_set_alive.rpc(false, 0)
 

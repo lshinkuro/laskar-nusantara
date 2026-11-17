@@ -13,6 +13,7 @@ const MIN_SPAWN_DISTANCE := 150.0
 @export var pickups: Node
 @export var projectiles: Node
 @export var players: Node2D
+@export var map: Node2D
 @export var arena_size := Vector2(960, 540)
 
 var wave := 0
@@ -81,4 +82,4 @@ func _spawn_point(alive: Array) -> Vector2:
 		p = Vector2(randf_range(16, arena_size.x - 16), randf_range(16, arena_size.y - 16))
 		if alive.all(func(pl): return p.distance_to(pl.position) >= MIN_SPAWN_DISTANCE):
 			break
-	return p
+	return map.resolve(p, 12.0)

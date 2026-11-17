@@ -28,6 +28,7 @@ func _process(delta: float) -> void:
 	var damage := maxi(1, roundi(data.damage * maxf(0.1, 1.0 + stats.damage / 100.0)))
 	var dir := global_position.direction_to(target.global_position)
 	rotation = dir.angle()
+	Sfx.play("shoot", -14.0, 0.15)
 	for i in data.projectile_count:
 		var angle := deg_to_rad((i - (data.projectile_count - 1) / 2.0) * data.spread)
 		player.projectiles.fire(global_position, dir.rotated(angle), data, damage, attack_range)

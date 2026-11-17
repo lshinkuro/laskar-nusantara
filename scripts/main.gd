@@ -14,6 +14,7 @@ var _loaded := {}  # host: peer -> true
 var _ready_peers := {}  # host: peer -> true
 var _resend_loaded := 0.0
 
+@onready var map: Node2D = $World/Map
 @onready var players: Node2D = $World/Players
 @onready var enemies: Node2D = $World/Enemies
 @onready var pickups: Node2D = $World/Pickups
@@ -48,7 +49,12 @@ func _ready() -> void:
 	local_player.rempah_changed.connect(func(n): rempah_label.text = str(n))
 	local_player.died.connect(_on_local_died)
 	local_player.xp_changed.connect(_on_xp_changed)
-	local_player.leveled_up.connect(func(lv): _show_message("NAIK LEVEL %d!" % lv, 0.8))
+	local_player.leveled_up.connect(func(lv):
+		_show_message("NAIK LEVEL %d!" % lv, 0.8)
+		Sfx.play("levelup", -2.0, 0.0))
+	$HUD/Sound.pressed.connect(_toggle_sound)
+	_update_sound_button()
+	Sfx.play_music()
 	_on_xp_changed(0, local_player.xp_needed(), 1)
 	local_player.add_weapon(START_WEAPON)
 	_on_hp_changed(local_player.hp, local_player.stats.max_hp)
@@ -74,6 +80,7 @@ func _spawn_player(id: int, slot: int, total: int) -> void:
 	p.display_name = Net.name_of(id)
 	p.kerajaan = Net.kerajaan_of(id)
 	p.projectiles = projectiles
+	p.map = map
 	p.position = waves.arena_size / 2 + Vector2(slot - (total - 1) / 2.0, 0) * 30
 	p.died.connect(_check_all_dead)
 	players.add_child(p)
@@ -156,12 +163,20 @@ func _on_wave_started(wave: int) -> void:
 	joystick.show()
 	local_player.revive()
 	Net.expose_state({"wave": wave, "players_in_game": players.get_child_count()})
-	_show_message("WAVE TERAKHIR!" if wave == waves.LAST_WAVE else "WAVE %d" % wave, 1.2)
+	var title := "WAVE TERAKHIR!" if wave == waves.LAST_WAVE else "WAVE %d" % wave
+	var map_index: int = map.index_for_wave(wave)
+	if map_index != map.map_index or wave == 1:
+		map.set_map(map_index)
+		title = map.map_name() + "\n" + title
+	_show_message(title, 1.6)
+	Sfx.play("wave_start", -2.0, 0.0)
 
 
 func _on_wave_ended(wave: int) -> void:
 	get_tree().paused = true
 	joystick.hide()
+	if wave < waves.LAST_WAVE:
+		Sfx.play("wave_end", -4.0, 0.0)
 	if wave >= waves.LAST_WAVE:
 		_finish(true, wave)
 		return
@@ -208,6 +223,7 @@ func _finish(won: bool, wave: int) -> void:
 	$EndScreen/Panel/Box/Buttons/Again.visible = host
 	$EndScreen/Panel/Box/Wait.visible = not host
 	end_screen.show()
+	Sfx.play("victory" if won else "game_over", 0.0, 0.0)
 
 
 # --- HUD ----------------------------------------------------------------------
@@ -216,6 +232,15 @@ func _on_hp_changed(hp: int, max_hp: int) -> void:
 	hp_bar.max_value = max_hp
 	hp_bar.value = hp
 	hp_label.text = "%d / %d" % [hp, max_hp]
+
+
+func _toggle_sound() -> void:
+	Sfx.set_muted(not Sfx.muted)
+	_update_sound_button()
+
+
+func _update_sound_button() -> void:
+	$HUD/Sound.text = "Suara: Mati" if Sfx.muted else "Suara: Nyala"
 
 
 func _on_xp_changed(xp: int, needed: int, level: int) -> void:

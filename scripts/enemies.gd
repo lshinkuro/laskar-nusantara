@@ -8,6 +8,7 @@ const KETUPAT_CHANCE := 0.06
 
 @export var players: Node2D  # World/Players
 @export var pickups: Node  # World/Pickups
+@export var map: Node2D  # World/Map
 
 var _next_id := 1
 var _sync := 0.0
@@ -29,6 +30,7 @@ func _spawn(id: int, pos: Vector2, max_hp: int, speed: float, damage: int) -> vo
 	e.speed = speed
 	e.damage = damage
 	e.players = players
+	e.map = map
 	e.simulate = multiplayer.is_server()
 	add_child(e)
 
@@ -36,6 +38,7 @@ func _spawn(id: int, pos: Vector2, max_hp: int, speed: float, damage: int) -> vo
 ## Dipanggil peluru milik pemain lokal.
 func hit(enemy: Node, amount: int) -> void:
 	enemy.flash(amount)
+	Sfx.play("hit", -10.0)
 	if multiplayer.is_server():
 		_apply_hit(enemy.id, amount)
 	else:

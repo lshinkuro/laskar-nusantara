@@ -78,15 +78,16 @@ func open(p, finished_wave: int) -> void:
 	_sel = {}
 	_roll()
 	_ready_btn.disabled = false
-	_ready_btn.text = "Siap Berperang!"
+	_ready_btn.text = "Siap Berperang! [Enter]"
 	_shown_rempah = player.rempah
 	_refresh()
 	show()
 	# Pasar "naik" dari bawah, lalu kartu dibagikan.
-	_frame.position.y = 40
+	# Geser layernya, bukan panelnya: mengubah position Control berjangkar ikut membekukan ukurannya.
+	offset.y = 40
 	_frame.modulate.a = 0.0
 	var t := create_tween().set_parallel().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	t.tween_property(_frame, "position:y", 0.0, 0.35)
+	t.tween_property(self, "offset:y", 0.0, 0.35)
 	t.tween_property(_frame, "modulate:a", 1.0, 0.2)
 	_deal_cards()
 
@@ -161,6 +162,14 @@ func _on_reroll() -> void:
 		_deal_cards()
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	# Enter = Siap Berperang, supaya tetap bisa lanjut walau tombolnya tak terlihat.
+	if visible and not _ready_btn.disabled and event is InputEventKey and event.pressed and not event.echo \
+			and event.keycode in [KEY_ENTER, KEY_KP_ENTER]:
+		get_viewport().set_input_as_handled()
+		_on_ready()
+
+
 func _on_ready() -> void:
 	_ready_btn.disabled = true
 	_ready_btn.text = "Menunggu teman..."
@@ -175,6 +184,7 @@ func _refresh() -> void:
 	_reroll.disabled = player.rempah < _reroll_cost
 
 	for c in _cards.get_children():
+		_cards.remove_child(c)
 		c.queue_free()
 	for i in _offers.size():
 		_cards.add_child(_card(i))
@@ -195,6 +205,7 @@ func _refresh() -> void:
 
 func _refresh_bag() -> void:
 	for c in _weapons.get_children() + _items.get_children():
+		c.get_parent().remove_child(c)
 		c.queue_free()
 	if _sel.has("weapon") and not is_instance_valid(_sel.weapon):
 		_sel = {}

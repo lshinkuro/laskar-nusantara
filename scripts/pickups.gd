@@ -1,9 +1,13 @@
 extends Node2D
-## World/Pickups: rempah & ketupat dibuat host saat musuh mati. Pemain lokal yang
+## World/Pickups: rempah, ketupat, & Peti Pusaka dibuat host saat musuh mati. Pemain lokal yang
 ## mendekat "mengklaim" ke host; host memberi ke pengklaim pertama.
 
 const Rempah := preload("res://scenes/rempah.tscn")
 const KETUPAT_TEXTURE := preload("res://assets/sprites/ketupat.png")
+const PETI_TEXTURE := preload("res://assets/sprites/peti_pusaka.png")
+
+## Pemain lokal membuka Peti Pusaka (main memberi isinya).
+signal chest_opened
 const KETUPAT_HEAL := 3
 
 var local_player: Node2D  # diisi main
@@ -11,21 +15,23 @@ var _next_id := 1
 
 
 ## Host saja.
-func spawn(pos: Vector2, value: int, ketupat := false) -> void:
-	_spawn.rpc(_next_id, pos + Vector2(randf_range(-6, 6), randf_range(-6, 6)), value, ketupat)
+func spawn(pos: Vector2, value: int, kind := "rempah") -> void:
+	_spawn.rpc(_next_id, pos + Vector2(randf_range(-6, 6), randf_range(-6, 6)), value, kind)
 	_next_id += 1
 
 
 @rpc("authority", "call_local", "reliable")
-func _spawn(id: int, pos: Vector2, value: int, ketupat: bool) -> void:
+func _spawn(id: int, pos: Vector2, value: int, kind: String) -> void:
 	var r := Rempah.instantiate()
 	r.name = "R%d" % id
 	r.id = id
 	r.value = value
-	r.ketupat = ketupat
+	r.kind = kind
 	r.position = pos
-	if ketupat:
+	if kind == "ketupat":
 		r.texture = KETUPAT_TEXTURE
+	elif kind == "peti":
+		r.texture = PETI_TEXTURE
 	add_child(r)
 
 
@@ -57,9 +63,12 @@ func _collected(id: int, peer: int) -> void:
 	if r == null:
 		return
 	if peer == multiplayer.get_unique_id():
-		if r.ketupat:
+		if r.kind == "ketupat":
 			local_player.heal(KETUPAT_HEAL)
 			Sfx.play("heal", -4.0, 0.0)
+		elif r.kind == "peti":
+			chest_opened.emit()
+			Sfx.play("levelup", -2.0, 0.0)
 		else:
 			local_player.collect_rempah(r.value)
 			Sfx.play("pickup", -10.0, 0.12)

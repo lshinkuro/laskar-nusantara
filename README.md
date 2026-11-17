@@ -41,8 +41,11 @@ Tombol **? Cara Main** (juga di layar jeda) menjelaskan semuanya dengan gambar; 
 - **Sinergi:** Jurus Silat / Barisan Pemanah / Ilmu Kebatinan (3 senjata sejenis), Kuliner Nusantara &
   Busana Adat (3 item berlabel), Pusaka Leluhur (2 item pusaka).
 - **Rangkuman run:** kill, damage per senjata, pukulan terkuat, rempah, waktu, sinergi.
-- **Senjata bertingkat:** beli senjata yang sama untuk menggabung (abu → biru → ungu → merah), tiap tier +1 peluru
-  & damage x1.5. *Busur Arjuna* (item) dan *Hujan Panah* (ilmu) menambah peluru semua senjata.
+- **Tas Pusaka** (di Pasar Rakyat, tiap selesai wave): klik senjata/item lalu **Gabung** (2 sama & setara → naik
+  tier/level; item Lv2 = 2.5x efek, Lv3 = 6x) atau **Lepas** (dijual ±40%). Maks 6 senjata & 12 item.
+  Boss menjatuhkan **Peti Pusaka** (satu per pemain) berisi item/senjata acak yang condong langka.
+- **Senjata bertingkat:** tier abu → biru → ungu → merah, tiap tier +1 peluru & damage x1.5 (kalau slot penuh,
+  senjata yang sama otomatis digabung). *Busur Arjuna* (item) dan *Hujan Panah* (ilmu) menambah peluru semua senjata.
 - **Jeda:** tombol *Jeda*, Esc, atau P. Di co-op, jeda berlaku untuk semua pemain.
 - **Co-op online (2–4 pemain):** "Buat Room Online" → bagikan kode 5 huruf atau tombol *Salin Link*.
   Teman memasukkan kode lalu "Gabung" (atau buka link-nya). Host menekan "Mulai Perang!".
@@ -62,7 +65,7 @@ scripts/  net (autoload lobby+signaling), sfx (autoload suara), map + obstacle (
 data/     characters/*.tres, items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
 assets/   sprites/ (tools/make_sprites.py), audio/ (tools/make_sounds.py, sintesis gamelan),
           fonts/ (Pixelify Sans, OFL), ui/theme.tres
-tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), item_test (item unik & sinergi), semangat_test (warga & Pekik Merdeka), enemies2_test (musuh & map baru), music_test (pergantian lagu), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
+tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), item_test (item unik & sinergi), semangat_test (warga & Pekik Merdeka), enemies2_test (musuh & map baru), music_test (pergantian lagu), tas_test (gabung/lepas & Peti Pusaka), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
 ```
 
 ## Tes
@@ -75,6 +78,7 @@ godot --headless --fixed-fps 60 -s res://tests/item_test.gd
 godot --headless --fixed-fps 60 -s res://tests/semangat_test.gd
 godot --headless --fixed-fps 60 -s res://tests/enemies2_test.gd
 godot --headless --fixed-fps 60 -s res://tests/music_test.gd
+godot --headless --fixed-fps 60 -s res://tests/tas_test.gd
 godot --headless --fixed-fps 60 -s res://tests/boss_test.gd
 godot --headless -s res://tests/net_test.gd -- host &  godot --headless -s res://tests/net_test.gd -- client
 ```

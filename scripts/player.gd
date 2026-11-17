@@ -23,6 +23,10 @@ const KENTONGAN_HIT := preload("res://data/allies/kentongan_hit.tres")
 const DamageNumber := preload("res://scripts/damage_number.gd")
 const OBJECT_SCALE := 1.5
 const MAX_TIER := 4
+const MAX_ITEMS := 12
+const MAX_ITEM_LEVEL := 3
+## Pengali efek item per level (2 item Lv1 = 2x, digabung jadi Lv2 = 2.5x).
+const ITEM_MULT := [1.0, 2.5, 6.0]
 const MAX_WEAPONS := 6
 const BASE_SPEED := 120.0
 const BASE_PICKUP_RANGE := 40.0
@@ -60,6 +64,7 @@ var xp := 0
 ## Level yang belum dipilih upgrade-nya (dipilih di akhir wave).
 var pending_levels := 0
 var items: Array[ItemData] = []
+var item_levels: Array[int] = []  # level tiap item (sejajar dengan `items`)
 var weapons: Array[WeaponData] = []  # satu entri per slot; tier ada di node senjata
 var projectiles: Node  # World/Projectiles, diisi main
 var enemies: Node  # World/Enemies, diisi main
@@ -339,14 +344,132 @@ func spend(amount: int) -> bool:
 	return true
 
 
-func apply_item(item: ItemData) -> void:
+# --- Tas Pusaka: item berlevel, bisa dilepas & digabung -------------------------
+
+func can_take_item() -> bool:
+	return items.size() < MAX_ITEMS
+
+
+func apply_item(item: ItemData, level := 1) -> void:
 	items.append(item)
-	apply_stats(item.stats)
+	item_levels.append(level)
+	_item_effect(item, level, 1)
+
+
+## Pasang (+1) atau cabut (-1) efek satu item pada level tertentu.
+func _item_effect(item: ItemData, level: int, sign: int) -> void:
+	var m: float = ITEM_MULT[level - 1]
+	var scaled := {}
+	for k in item.stats:
+		scaled[k] = sign * roundi(item.stats[k] * m)
+	apply_stats(scaled)
 	if item.special != "":
-		specials[item.special] = specials.get(item.special, 0.0) + item.special_value
-		if item.special == "wayang":
-			_add_ally()
+		specials[item.special] = specials.get(item.special, 0.0) + sign * item.special_value * m
+		if specials[item.special] <= 0.001:
+			specials.erase(item.special)
+		_sync_allies()
 	recompute_synergies()
+
+
+func item_sell_value(i: int) -> int:
+	return roundi(items[i].price * 0.4 * pow(2, item_levels[i] - 1))
+
+
+func remove_item(i: int) -> int:
+	var value := item_sell_value(i)
+	_item_effect(items[i], item_levels[i], -1)
+	items.remove_at(i)
+	item_levels.remove_at(i)
+	stats_changed.emit()
+	return value
+
+
+## Indeks item lain yang sama & selevel (bisa digabung), atau -1.
+func item_combine_partner(i: int) -> int:
+	if item_levels[i] >= MAX_ITEM_LEVEL:
+		return -1
+	for j in items.size():
+		if j != i and items[j] == items[i] and item_levels[j] == item_levels[i]:
+			return j
+	return -1
+
+
+func combine_item(i: int) -> bool:
+	var j := item_combine_partner(i)
+	if j < 0:
+		return false
+	var data := items[i]
+	var level := item_levels[i] + 1
+	for k in [maxi(i, j), mini(i, j)]:
+		_item_effect(items[k], item_levels[k], -1)
+		items.remove_at(k)
+		item_levels.remove_at(k)
+	apply_item(data, level)
+	stats_changed.emit()
+	return true
+
+
+func weapon_sell_value(w: Node) -> int:
+	return roundi(w.data.price * 0.4 * pow(2, w.tier - 1))
+
+
+func sell_weapon(w: Node) -> int:
+	if weapon_ring.get_child_count() <= 1:
+		return 0  # minimal satu senjata
+	var value := weapon_sell_value(w)
+	weapons.remove_at(w.get_index())
+	weapon_ring.remove_child(w)
+	w.queue_free()
+	_layout_weapons()
+	recompute_synergies()
+	stats_changed.emit()
+	return value
+
+
+## Senjata lain yang sama & setier (bisa digabung), atau null.
+func weapon_combine_partner(w: Node) -> Node:
+	if w.tier >= MAX_TIER:
+		return null
+	for o in weapon_ring.get_children():
+		if o != w and o.data == w.data and o.tier == w.tier:
+			return o
+	return null
+
+
+func combine_weapon(w: Node) -> bool:
+	var o := weapon_combine_partner(w)
+	if o == null:
+		return false
+	weapons.remove_at(o.get_index())
+	weapon_ring.remove_child(o)
+	o.queue_free()
+	w.tier += 1
+	w.queue_redraw()
+	_layout_weapons()
+	recompute_synergies()
+	stats_changed.emit()
+	return true
+
+
+func _layout_weapons() -> void:
+	# Senjata disusun melingkar di sekitar prajurit.
+	var n := weapon_ring.get_child_count()
+	for i in n:
+		weapon_ring.get_child(i).position = Vector2.from_angle(TAU * i / n - PI / 2) * (19.0 + maxi(0, n - 3) * 3.0)
+
+
+## Isi Peti Pusaka: item atau senjata acak (kalau tas penuh, jadi rempah).
+func receive_loot(wave: int) -> String:
+	var Loot := preload("res://scripts/loot.gd")
+	var data: Resource = Loot.pick(wave, stats.luck)
+	if data is WeaponData and can_take_weapon(data):
+		add_weapon(data)
+		return data.title
+	if data is ItemData and can_take_item():
+		apply_item(data)
+		return data.title
+	collect_rempah(20)
+	return "20 rempah (tas penuh)"
 
 
 ## Terapkan selisih bonus sinergi (yang baru aktif ditambah, yang hilang dikurangi).
@@ -365,12 +488,23 @@ func recompute_synergies() -> void:
 		apply_stats(diff)
 
 
-func _add_ally() -> void:
+## Jumlah sekutu wayang mengikuti total nilai item Wayang Kulit (bisa naik/turun).
+func _sync_allies() -> void:
 	var allies := get_node_or_null("Allies")
 	if allies == null:
 		allies = Node2D.new()
 		allies.name = "Allies"
 		add_child(allies)
+	var target := int(round(specials.get("wayang", 0.0)))
+	while allies.get_child_count() > target:
+		var last := allies.get_child(allies.get_child_count() - 1)
+		allies.remove_child(last)
+		last.queue_free()
+	while allies.get_child_count() < target:
+		_add_ally(allies)
+
+
+func _add_ally(allies: Node) -> void:
 	var w := Weapon.new()
 	w.data = WAYANG
 	w.player = self
@@ -417,26 +551,24 @@ func damage_multiplier(category: String) -> float:
 	return maxf(0.1, 1.0 + (stats.damage + stats.get(category + "_damage", 0)) / 100.0)
 
 
+## Senjata baru mengisi slot kosong (digabung manual di Tas Pusaka). Kalau slot penuh,
+## otomatis digabung ke senjata yang sama dengan tier terendah.
 func add_weapon(data: WeaponData) -> bool:
-	var merge := mergeable_weapon(data)
-	if merge:
+	if weapons.size() >= MAX_WEAPONS:
+		var merge := mergeable_weapon(data)
+		if merge == null:
+			return false
 		merge.tier += 1
 		merge.queue_redraw()
 		stats_changed.emit()
 		return true
-	if weapons.size() < MAX_WEAPONS:
-		call_deferred("recompute_synergies")  # setelah node senjata masuk ring
-	if weapons.size() >= MAX_WEAPONS:
-		return false
+	call_deferred("recompute_synergies")  # setelah node senjata masuk ring
 	weapons.append(data)
 	var w := Weapon.new()
 	w.data = data
 	w.player = self
 	w.scale = Vector2.ONE * OBJECT_SCALE
 	weapon_ring.add_child(w)
-	# Senjata disusun melingkar di sekitar prajurit.
-	var n := weapon_ring.get_child_count()
-	for i in n:
-		weapon_ring.get_child(i).position = Vector2.from_angle(TAU * i / n - PI / 2) * (19.0 + maxi(0, n - 3) * 3.0)
+	_layout_weapons()
 	stats_changed.emit()
 	return true

@@ -264,6 +264,19 @@ WARGA = """
 ................
 """
 
+PETI_PUSAKA = """
+.kkkkkkkkkk.
+kOOOOOOOOOOk
+kOggggggggOk
+kOOOOOOOOOOk
+kkkkkkkkkkkk
+kOOOOkkOOOOk
+kOOOkyykOOOk
+kOOOOkkOOOOk
+kggggggggggk
+kkkkkkkkkkkk
+"""
+
 IKON_HATI = """
 .kk.kk.
 krrkrrk
@@ -560,7 +573,7 @@ def main():
                        "peluru_musuh": PELURU_MUSUH, "wayang": WAYANG, "warga": WARGA,
                        "kavaleri_besi": KAVALERI, "pelempar_granat": GRANAT, "tabib_besi": TABIB,
                        "raksasa_baja": RAKSASA, "laksamana_besi": LAKSAMANA,
-                       "ikon_hati": IKON_HATI, "ikon_bendera": IKON_BENDERA, "ikon_bintang": IKON_BINTANG}.items():
+                       "peti_pusaka": PETI_PUSAKA, "ikon_hati": IKON_HATI, "ikon_bendera": IKON_BENDERA, "ikon_bintang": IKON_BINTANG}.items():
         png(os.path.join(OUT, f"{name}.png"), rows, BASE)
     png(os.path.join(OUT, "rempah.png"), REMPAH, BASE)
     png(os.path.join(OUT, "ketupat.png"), KETUPAT, {**BASE, "g": "6aa040", "y": "c8d870"})

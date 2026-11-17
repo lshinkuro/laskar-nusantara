@@ -23,12 +23,13 @@ func _process(_delta: float) -> bool:
 	var p = main.local_player
 	match frames:
 		30:
-			# Gabung senjata: senjata awal karakter + 2 yang sama = 1 slot tier 3.
+			# Gabung senjata di Tas Pusaka: 2 senjata awal setier -> 1 slot tier 2.
 			var start_weapon = p.weapon_ring.get_child(0).data
 			p.add_weapon(start_weapon)
-			p.add_weapon(start_weapon)
+			var two_slots: bool = p.weapons.size() == 2
+			p.combine_weapon(p.weapon_ring.get_child(0))
 			var w = p.weapon_ring.get_child(0)
-			checks.merge_tier = p.weapons.size() == 1 and w.tier == 3
+			checks.merge_tier = two_slots and p.weapons.size() == 1 and w.tier == 2
 			p.position = Vector2(150, 270)
 			e.wave = 20
 			e.spawn("gubernur", Vector2(480, 270), 400, 40.0, 3)

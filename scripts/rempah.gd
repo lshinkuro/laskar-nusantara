@@ -3,7 +3,7 @@ extends Sprite2D
 
 var id := 0
 var value := 1
-var ketupat := false
+var kind := "rempah"  # rempah / ketupat / peti
 var granted := false  # dipakai host
 var _claimed := false
 
@@ -14,7 +14,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var d := position.distance_to(player.position)
 	# Ketupat tidak diambil kalau HP masih penuh, biar tersisa untuk teman.
-	if ketupat and not _claimed and player.hp >= player.stats.max_hp:
+	if kind == "ketupat" and not _claimed and player.hp >= player.stats.max_hp:
 		return
 	if not _claimed and d < player.pickup_range():
 		_claimed = true

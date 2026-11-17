@@ -60,6 +60,9 @@ func _ready() -> void:
 		run.record_kill(is_boss)
 		local_player.add_semangat(1.5))
 	villagers.local_player = local_player
+	pickups.chest_opened.connect(func():
+		var got: String = local_player.receive_loot(waves.wave)
+		_show_message("PETI PUSAKA!\n" + got, 1.8))
 	villagers.first_seen.connect(func(): _show_message("Selamatkan warga yang terkurung!\nBerdiri di dekatnya untuk mengisi Semangat.", 3.0))
 	$HUD/WargaPointer.villagers = villagers
 	$HUD/Pekik.pressed.connect(_use_semangat)

@@ -147,12 +147,14 @@ func _apply_hit(id: int, amount: int, effect := "", power := 0.0, dir := Vector2
 	if e.is_boss():
 		for i in 12:
 			pickups.spawn(e.position + Vector2.from_angle(TAU * i / 12) * 18, 1)
-		pickups.spawn(e.position + Vector2(-10, 0), 0, true)
-		pickups.spawn(e.position + Vector2(10, 0), 0, true)
+		pickups.spawn(e.position + Vector2(-10, 0), 0, "ketupat")
+		pickups.spawn(e.position + Vector2(10, 0), 0, "ketupat")
+		for i in players.get_child_count():  # satu Peti Pusaka per pemain
+			pickups.spawn(e.position + Vector2((i - (players.get_child_count() - 1) / 2.0) * 22, 14), 0, "peti")
 	else:
 		pickups.spawn(e.position, 1)
 		if randf() < KETUPAT_CHANCE:
-			pickups.spawn(e.position, 0, true)
+			pickups.spawn(e.position, 0, "ketupat")
 	if e.kind == "raksasa":  # Raksasa Baja pecah jadi 2 serdadu
 		for side in [-1, 1]:
 			spawn_basic("serdadu", e.position + Vector2(side * 18, 0))

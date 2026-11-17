@@ -2,6 +2,7 @@ extends Control
 ## Menu utama + lobby room online.
 
 const SETTINGS := "user://settings.cfg"
+const AudioSettings := preload("res://scripts/audio_settings.gd")
 
 @onready var main_panel: Control = %MainPanel
 @onready var lobby_panel: Control = %LobbyPanel
@@ -24,9 +25,9 @@ func _ready() -> void:
 
 	%PrevBtn.pressed.connect(func(): _change_outfit(-1))
 	%NextBtn.pressed.connect(func(): _change_outfit(1))
-	%SoundBtn.pressed.connect(func():
-		Sfx.set_muted(not Sfx.muted)
-		_refresh())
+	%SettingsPanel.add_child(AudioSettings.new())
+	%SettingsPanel.hide()
+	%SettingsBtn.pressed.connect(func(): %SettingsPanel.visible = not %SettingsPanel.visible)
 	Sfx.play_music()
 	%SoloBtn.pressed.connect(func(): _save_name(); Net.start_solo())
 	%HostBtn.pressed.connect(func(): _save_name(); Net.host_room())
@@ -77,7 +78,6 @@ func _change_outfit(step: int) -> void:
 
 func _refresh() -> void:
 	Net.expose_state()
-	%SoundBtn.text = "Suara: Mati" if Sfx.muted else "Suara: Nyala"
 	var outfit: Dictionary = Net.KERAJAAN[Net.my_outfit]
 	%OutfitIcon.texture = outfit.texture
 	%OutfitName.text = "Prajurit " + outfit.name

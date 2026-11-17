@@ -1,7 +1,7 @@
 extends SceneTree
 ## XP & level up: 30 XP -> level 3 (butuh 10 + 15), 2 pilihan ilmu tertunda.
 ## Akhir wave: layar ilmu muncul dulu, setelah 2 pilihan baru toko terbuka.
-## Ketupat: heal +3 tapi tidak lewat HP maks.
+## Ketupat: heal +3 tapi tidak lewat HP maks. Jeda: game berhenti & lanjut lagi.
 ## Jalankan: godot --headless -s res://tests/level_test.gd
 
 var frames := 0
@@ -15,9 +15,13 @@ func _process(_delta: float) -> bool:
 	if main == null or frames < 10:
 		return false
 	var p = main.local_player
+	main._request_pause(true)
+	var pause_ok: bool = paused and main._pause_menu.visible
+	main._request_pause(false)
+	pause_ok = pause_ok and not paused and not main._pause_menu.visible
 	var hp_before: int = p.stats.max_hp
 	p.gain_xp(30)
-	var ok: bool = p.level == 3 and p.xp == 5 and p.pending_levels == 2 and p.stats.max_hp == hp_before + 2
+	var ok: bool = pause_ok and p.level == 3 and p.xp == 5 and p.pending_levels == 2 and p.stats.max_hp == hp_before + 2
 	main._on_wave_ended(1)
 	ok = ok and main.level_up.visible and not main.shop.visible
 	var stats_before: Dictionary = p.stats.duplicate()
@@ -33,6 +37,6 @@ func _process(_delta: float) -> bool:
 	ok = ok and p.hp == hurt + 3
 	p.heal(100)
 	ok = ok and p.hp == p.stats.max_hp
-	print("level=%d xp=%d max_hp=%d damage=%d shop=%s -> %s" % [p.level, p.xp, p.stats.max_hp, p.stats.damage, main.shop.visible, "OK" if ok else "FAIL"])
+	print("pause=%s " % pause_ok, "level=%d xp=%d max_hp=%d damage=%d shop=%s -> %s" % [p.level, p.xp, p.stats.max_hp, p.stats.damage, main.shop.visible, "OK" if ok else "FAIL"])
 	quit(0 if ok else 1)
 	return true

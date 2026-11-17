@@ -5,6 +5,9 @@ extends Node2D
 var kind := "pohon"
 var variant := 0.0  # 0..1, variasi kecil warna/ukuran
 
+var _home := Vector2.ZERO
+var _t := 0.0
+
 const OUTLINE := Color(0.1, 0.07, 0.04)
 const SHADOW := Color(0, 0, 0, 0.25)
 const DAUN := [Color(0.16, 0.36, 0.16), Color(0.24, 0.48, 0.2), Color(0.36, 0.6, 0.26)]
@@ -26,6 +29,24 @@ func _draw() -> void:
 		"joglo": _joglo()
 		"lumbung": _lumbung()
 		"candi": _candi()
+		"pisang": _pisang()
+		"orang_orangan": _orang_orangan()
+		"bebek": _bebek()
+
+
+func _ready() -> void:
+	# Bebek berenang pelan bolak-balik (hiasan, tidak disinkronkan).
+	set_process(kind == "bebek")
+	_home = position
+
+
+
+func _process(delta: float) -> void:
+	_t += delta
+	var p := _home + Vector2(sin(_t * 0.4 + variant * 9) * 22, cos(_t * 0.3 + variant * 5) * 14)
+	scale.x = -1 if p.x < position.x else 1
+	position = p
+	queue_redraw()
 
 
 func _ellipse(center: Vector2, rx: float, ry: float, color: Color) -> void:
@@ -157,6 +178,41 @@ func _lumbung() -> void:
 	var roof := PackedVector2Array([Vector2(-15, -18), Vector2(15, -18), Vector2(11, -33), Vector2(0, -40), Vector2(-11, -33)])
 	draw_colored_polygon(roof, ATAP_JERAMI)
 	draw_polyline(roof + PackedVector2Array([roof[0]]), OUTLINE, 1.0)
+
+
+func _pisang() -> void:
+	_ellipse(Vector2.ZERO, 10, 3, SHADOW)
+	draw_rect(Rect2(-3, -18, 6, 18), OUTLINE)
+	draw_rect(Rect2(-2, -18, 4, 18), Color(0.5, 0.55, 0.25))
+	var top := Vector2(0, -18)
+	for i in 5:
+		var a := PI + 0.2 + i * (PI - 0.4) / 4.0
+		var tip := top + Vector2(cos(a) * 18, sin(a) * 12 - 2)
+		var mid := top.lerp(tip, 0.5) + Vector2(0, -4)
+		var leaf := PackedVector2Array([top, mid + Vector2(0, -3), tip, mid + Vector2(0, 3)])
+		draw_colored_polygon(leaf, DAUN[1] if i % 2 else DAUN[2])
+		draw_line(top, tip, DAUN[0], 1.0)
+	draw_colored_polygon(PackedVector2Array([Vector2(2, -16), Vector2(6, -14), Vector2(5, -8), Vector2(2, -10)]), Color(0.85, 0.8, 0.3))
+
+
+func _orang_orangan() -> void:
+	_ellipse(Vector2.ZERO, 6, 2, SHADOW)
+	draw_line(Vector2(0, 0), Vector2(0, -20), KAYU_GELAP, 2.0)
+	draw_line(Vector2(-10, -14), Vector2(10, -14), KAYU_GELAP, 2.0)
+	draw_rect(Rect2(-5, -16, 10, 9), Color(0.75, 0.3, 0.2))  # baju
+	draw_line(Vector2(-10, -14), Vector2(-12, -10), Color(0.85, 0.75, 0.4), 1.0)  # jerami
+	draw_line(Vector2(10, -14), Vector2(12, -10), Color(0.85, 0.75, 0.4), 1.0)
+	draw_circle(Vector2(0, -21), 4, Color(0.9, 0.82, 0.55))
+	draw_colored_polygon(PackedVector2Array([Vector2(-8, -23), Vector2(8, -23), Vector2(0, -30)]), ATAP_JERAMI)  # caping
+	draw_line(Vector2(-8, -23), Vector2(8, -23), OUTLINE, 1.0)
+
+
+func _bebek() -> void:
+	_ellipse(Vector2(0, 1), 5, 1.5, Color(1, 1, 1, 0.25))  # riak air
+	draw_circle(Vector2(0, -2), 4, Color(0.95, 0.93, 0.85))
+	draw_circle(Vector2(3, -6), 2.5, Color(0.95, 0.93, 0.85))
+	draw_rect(Rect2(5, -6.5, 2.5, 1.5), Color(0.95, 0.6, 0.15))
+	draw_rect(Rect2(3, -7, 1, 1), OUTLINE)
 
 
 func _candi() -> void:

@@ -9,7 +9,7 @@ extends Node2D
 const Obstacle := preload("res://scripts/obstacle.gd")
 
 const MAPS := [
-	{"name": "SAWAH", "until_wave": 6},
+	{"name": "LEMBAH SUNGAI", "until_wave": 6},
 	{"name": "HUTAN KALIMANTAN", "until_wave": 13},
 	{"name": "DESA & CANDI", "until_wave": 999},
 ]
@@ -20,6 +20,8 @@ const SHAPES := {
 	"beringin": {"r": 12.0},
 	"kelapa": {"r": 4.0},
 	"batu": {"r": 8.0},
+	"pisang": {"r": 5.0},
+	"orang_orangan": {"r": 4.0},
 	"gubuk": {"rect": Rect2(-15, -9, 30, 9)},
 	"joglo": {"rect": Rect2(-23, -11, 46, 11)},
 	"lumbung": {"rect": Rect2(-11, -6, 22, 6)},
@@ -112,13 +114,21 @@ func _build() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1000 + map_index
 	match map_index:
-		0:  # Sawah: gubuk di pematang, kelapa di pinggir
-			for p in [Vector2(240, 120), Vector2(720, 120), Vector2(240, 420), Vector2(720, 420)]:
+		0:  # Lembah sungai: terasering melengkung, sungai berkelok, gubuk & kelapa
+			for p in [Vector2(250, 205), Vector2(330, 420), Vector2(860, 110)]:
 				_add("gubuk", p, rng)
-			for i in 10:
-				_add("kelapa", Vector2(rng.randf_range(30, arena_size.x - 30), 24 if i % 2 == 0 else arena_size.y - 10), rng)
-			_scatter("batu", 4, rng)
-			_scatter("semak", 6, rng)
+			for p in [Vector2(150, 95), Vector2(240, 470), Vector2(890, 470)]:
+				_add("orang_orangan", p, rng)
+			var river := _river_points()
+			for i in range(3, river.size() - 2, 4):  # kelapa & batu di tepi sungai
+				var side := 34.0 if i % 8 == 3 else -34.0
+				_add("kelapa" if i % 3 else "batu", river[i] + Vector2(side, 0), rng)
+			for i in range(2, river.size() - 2, 6):  # bebek berenang di sungai
+				_add("bebek", river[i] + Vector2(rng.randf_range(-6, 6), 0), rng)
+			for i in 6:
+				_add("pisang", Vector2(14 if i % 2 == 0 else 600, rng.randf_range(60, arena_size.y - 40)), rng)
+			_scatter("semak", 14, rng)
+			_scatter("batu", 3, rng)
 		1:  # Hutan Kalimantan: pohon rapat, beringin besar
 			for p in [Vector2(160, 150), Vector2(800, 140), Vector2(300, 450), Vector2(700, 430), Vector2(480, 70)]:
 				_add("beringin", p, rng)
@@ -178,16 +188,28 @@ func _draw_ground() -> void:
 	var full := Rect2(Vector2.ZERO, arena_size)
 	match map_index:
 		0:
-			g.draw_rect(full.grow(200), Color(0.42, 0.29, 0.17))
-			g.draw_rect(full, Color(0.55, 0.42, 0.25))
-			for x in range(0, int(arena_size.x), 120):
-				for y in range(0, int(arena_size.y), 120):
-					var petak := Rect2(x + 4, y + 4, 112, 112).intersection(full.grow(-4))
-					g.draw_rect(petak, Color(0.33, 0.5, 0.28))
-					for py in range(int(petak.position.y) + 6, int(petak.end.y) - 4, 10):
-						for px in range(int(petak.position.x) + 6, int(petak.end.x) - 4, 9):
-							_tuft(g, Vector2(px + rng.randi_range(-1, 1), py),
-								Color(0.5, 0.7, 0.3) if rng.randf() > 0.3 else Color(0.36, 0.55, 0.22))
+			g.draw_rect(full.grow(200), Color(0.26, 0.42, 0.2))
+			g.draw_rect(full, Color(0.36, 0.56, 0.28))
+			for i in 70:  # gradasi rumput alami
+				var c := Vector2(rng.randf() * arena_size.x, rng.randf() * arena_size.y)
+				var col := Color(0.42, 0.62, 0.3, 0.5) if rng.randf() < 0.5 else Color(0.3, 0.5, 0.24, 0.5)
+				g.draw_circle(c, rng.randf_range(20, 60), col)
+			for t in TERRACES:
+				_draw_terrace(g, t.c, t.r, t.seed, rng)
+			# Jalan setapak meliuk dari barat ke timur, menyeberang sungai lewat jembatan
+			var path := PackedVector2Array()
+			for i in 17:
+				var x := i * 60.0
+				path.append(Vector2(x, 300 + sin(i * 0.7) * 40 - i * 3))
+			g.draw_polyline(path, Color(0.5, 0.38, 0.22), 18.0)
+			g.draw_polyline(path, Color(0.62, 0.5, 0.32), 12.0)
+			_draw_river(g)
+			for i in 900:  # rumput & bunga liar
+				var p := Vector2(rng.randf() * arena_size.x, rng.randf() * arena_size.y)
+				if rng.randf() < 0.12:
+					g.draw_circle(p, 1.5, [Color(0.95, 0.3, 0.3), Color(1, 0.95, 0.9), Color(1, 0.85, 0.3), Color(0.8, 0.5, 0.95)][rng.randi() % 4])
+				else:
+					_tuft(g, p, Color(0.48, 0.7, 0.34) if rng.randf() < 0.6 else Color(0.28, 0.46, 0.2))
 		1:
 			g.draw_rect(full.grow(200), Color(0.13, 0.22, 0.12))
 			g.draw_rect(full, Color(0.2, 0.33, 0.17))
@@ -224,6 +246,72 @@ func _draw_ground() -> void:
 				if not plaza.has_point(p):
 					_tuft(g, p, Color(0.45, 0.55, 0.28))
 	g.draw_rect(full, Color(0.2, 0.12, 0.06), false, 3.0)
+
+
+## Kelompok sawah terasering: pusat, radius (x, y), seed bentuk.
+const TERRACES := [
+	{"c": Vector2(190, 140), "r": Vector2(150, 110), "seed": 1.0},
+	{"c": Vector2(260, 450), "r": Vector2(140, 95), "seed": 2.5},
+	{"c": Vector2(880, 470), "r": Vector2(120, 90), "seed": 4.0},
+]
+const TERRACE_COLORS := [Color(0.42, 0.62, 0.62), Color(0.4, 0.64, 0.3), Color(0.82, 0.7, 0.32), Color(0.34, 0.56, 0.26), Color(0.45, 0.66, 0.66)]
+
+
+func _terrace_ring(c: Vector2, r: Vector2, k: float, seed_v: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in 48:
+		var a := TAU * i / 48
+		var wobble := 1.0 + 0.09 * sin(3 * a + seed_v) + 0.05 * sin(5 * a + seed_v * 2)
+		pts.append(c + Vector2(cos(a) * r.x, sin(a) * r.y) * k * wobble)
+	return pts
+
+
+func _draw_terrace(g: Node2D, c: Vector2, r: Vector2, seed_v: float, rng: RandomNumberGenerator) -> void:
+	var rings := 8
+	for i in rings:
+		var k := 1.0 - i * 0.115
+		var ring := _terrace_ring(c, r, k, seed_v)
+		var col: Color = TERRACE_COLORS[(i + int(seed_v)) % TERRACE_COLORS.size()]
+		g.draw_colored_polygon(ring, col)
+		g.draw_polyline(ring + PackedVector2Array([ring[0]]), Color(0.48, 0.38, 0.22), 3.0)  # pematang
+		g.draw_polyline(ring + PackedVector2Array([ring[0]]), Color(0.6, 0.5, 0.3), 1.0)
+		# isi tiap lapis: padi atau kilau air
+		var inner := k - 0.06
+		for j in 30:
+			var a := rng.randf() * TAU
+			var wob := 1.0 + 0.09 * sin(3 * a + seed_v) + 0.05 * sin(5 * a + seed_v * 2)
+			var p := c + Vector2(cos(a) * r.x, sin(a) * r.y) * inner * wob
+			if col.b > 0.5:
+				g.draw_line(p, p + Vector2(8, 0), Color(0.85, 0.95, 0.95, 0.6), 1.0)
+			else:
+				_tuft(g, p, col.lightened(0.25))
+
+
+## Jalur sungai berkelok dari utara ke selatan (sama di semua peer).
+func _river_points() -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	for i in 31:
+		var y := -20.0 + i * 20.0
+		pts.append(Vector2(640 + 50 * sin(y * 0.012) + 22 * sin(y * 0.031), y))
+	return pts
+
+
+func _draw_river(g: Node2D) -> void:
+	var river := _river_points()
+	g.draw_polyline(river, Color(0.78, 0.7, 0.48), 46.0)  # tepian pasir
+	g.draw_polyline(river, Color(0.24, 0.42, 0.52), 34.0)
+	g.draw_polyline(river, Color(0.32, 0.55, 0.65), 24.0)
+	for i in range(0, river.size(), 2):
+		var p := river[i] + Vector2(-8 + (i % 3) * 6, 4)
+		g.draw_line(p, p + Vector2(12, 0), Color(0.8, 0.92, 0.95, 0.7), 1.0)
+	# Jembatan kayu di tempat jalan setapak menyeberang
+	var bridge_y := 300 + sin(640 / 60.0 * 0.7) * 40 - 640 / 60.0 * 3
+	var bx := 640 + 50 * sin(bridge_y * 0.012) + 22 * sin(bridge_y * 0.031)
+	for k in 9:
+		g.draw_rect(Rect2(bx - 26 + k * 6, bridge_y - 9, 5, 18), Color(0.55, 0.38, 0.2))
+		g.draw_line(Vector2(bx - 26 + k * 6, bridge_y - 9), Vector2(bx - 26 + k * 6, bridge_y + 9), Color(0.35, 0.22, 0.1), 1.0)
+	g.draw_line(Vector2(bx - 27, bridge_y - 10), Vector2(bx + 27, bridge_y - 10), Color(0.35, 0.22, 0.1), 2.0)
+	g.draw_line(Vector2(bx - 27, bridge_y + 10), Vector2(bx + 27, bridge_y + 10), Color(0.35, 0.22, 0.1), 2.0)
 
 
 func _tuft(g: Node2D, p: Vector2, c: Color) -> void:

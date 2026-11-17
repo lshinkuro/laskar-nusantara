@@ -5,6 +5,7 @@ extends Node
 enum State { WAITING, PLAYING, SHOP, OVER }
 
 const PlayerScene := preload("res://scenes/player.tscn")
+const PauseMenu := preload("res://scripts/pause_menu.gd")
 const START_WEAPON := preload("res://data/weapons/sumpit.tres")
 
 var state := State.WAITING
@@ -13,6 +14,8 @@ var local_player
 var _loaded := {}  # host: peer -> true
 var _ready_peers := {}  # host: peer -> true
 var _resend_loaded := 0.0
+var _paused := false
+var _pause_menu: CanvasLayer
 
 @onready var map: Node2D = $World/Map
 @onready var players: Node2D = $World/Players
@@ -52,8 +55,10 @@ func _ready() -> void:
 	local_player.leveled_up.connect(func(lv):
 		_show_message("NAIK LEVEL %d!" % lv, 0.8)
 		Sfx.play("levelup", -2.0, 0.0))
-	$HUD/Sound.pressed.connect(_toggle_sound)
-	_update_sound_button()
+	$HUD/Pause.pressed.connect(_request_pause.bind(true))
+	_pause_menu = PauseMenu.new()
+	_pause_menu.resume_pressed.connect(_request_pause.bind(false))
+	add_child(_pause_menu)
 	Sfx.play_music()
 	_on_xp_changed(0, local_player.xp_needed(), 1)
 	local_player.add_weapon(START_WEAPON)
@@ -211,6 +216,8 @@ func _on_peer_disconnected(id: int) -> void:
 
 func _finish(won: bool, wave: int) -> void:
 	state = State.OVER
+	_paused = false
+	_pause_menu.hide()
 	get_tree().paused = true
 	shop.hide()
 	level_up.hide()
@@ -234,13 +241,39 @@ func _on_hp_changed(hp: int, max_hp: int) -> void:
 	hp_label.text = "%d / %d" % [hp, max_hp]
 
 
-func _toggle_sound() -> void:
-	Sfx.set_muted(not Sfx.muted)
-	_update_sound_button()
+# --- Jeda ---------------------------------------------------------------------
+# Di co-op, jeda berlaku untuk semua pemain (lewat host) dan siapa saja bisa melanjutkan.
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_P):
+		_request_pause(not _paused)
 
 
-func _update_sound_button() -> void:
-	$HUD/Sound.text = "Suara: Mati" if Sfx.muted else "Suara: Nyala"
+func _request_pause(value: bool) -> void:
+	if value and state != State.PLAYING:
+		return
+	_ask_pause.rpc_id(1, value)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _ask_pause(value: bool) -> void:
+	if not multiplayer.is_server() or (value and state != State.PLAYING) or value == _paused:
+		return
+	var id := multiplayer.get_remote_sender_id()
+	_set_pause.rpc(value, Net.name_of(id if id != 0 else 1) if Net.players.size() > 1 else "")
+
+
+@rpc("authority", "call_local", "reliable")
+func _set_pause(value: bool, by_name: String) -> void:
+	if value and state != State.PLAYING:
+		return
+	_paused = value
+	get_tree().paused = value
+	joystick.visible = not value
+	if value:
+		_pause_menu.open(by_name)
+	else:
+		_pause_menu.hide()
 
 
 func _on_xp_changed(xp: int, needed: int, level: int) -> void:

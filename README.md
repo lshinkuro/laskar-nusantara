@@ -13,9 +13,10 @@ Rencana lengkap: [PLAN.md](PLAN.md).
 - **Rempah** dari musuh yang gugur = uang belanja di **Pasar Rakyat** antar-wave sekaligus XP.
 - **Naik level:** HP Maks +1, lalu di akhir wave pilih 1 dari 4 *ilmu* (upgrade stat) per level.
 - **Ketupat** kadang jatuh dari musuh: +3 HP (tidak diambil kalau HP masih penuh).
-- **Medan berganti:** wave 1–6 Sawah, 7–13 Hutan Kalimantan, 14–20 Desa & Candi. Pohon, bangunan,
+- **Medan berganti:** wave 1–6 Lembah Sungai (terasering & sungai), 7–13 Hutan Kalimantan, 14–20 Desa & Candi. Pohon, bangunan,
   dan batu menghalangi gerak dan peluru.
-- **Suara:** musik gamelan & efek suara (tombol *Suara* untuk mematikan).
+- **Suara:** musik gamelan & efek suara, volume musik dan efek diatur terpisah (menu *Pengaturan* / layar jeda).
+- **Jeda:** tombol *Jeda*, Esc, atau P. Di co-op, jeda berlaku untuk semua pemain.
 - **Co-op online (2–4 pemain):** "Buat Room Online" → bagikan kode 5 huruf atau tombol *Salin Link*.
   Teman memasukkan kode lalu "Gabung" (atau buka link-nya). Host menekan "Mulai Perang!".
 

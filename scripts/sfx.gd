@@ -20,7 +20,9 @@ const SOUNDS := {
 	"victory": preload("res://assets/audio/victory.wav"),
 }
 
-var muted := false
+## Volume 0..1 per bus, disimpan di settings.
+var music_volume := 0.6
+var sfx_volume := 0.8
 
 var _pool: Array[AudioStreamPlayer] = []
 var _last := {}
@@ -29,18 +31,28 @@ var _music: AudioStreamPlayer
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	for bus in ["Music", "SFX"]:
+		if AudioServer.get_bus_index(bus) == -1:
+			AudioServer.add_bus()
+			AudioServer.set_bus_name(AudioServer.bus_count - 1, bus)
+			AudioServer.set_bus_send(AudioServer.bus_count - 1, "Master")
 	for i in POOL_SIZE:
 		var p := AudioStreamPlayer.new()
+		p.bus = "SFX"
 		add_child(p)
 		_pool.append(p)
 	_music = AudioStreamPlayer.new()
 	_music.stream = preload("res://assets/audio/music_gamelan.wav")
-	_music.volume_db = -9.0
+	_music.bus = "Music"
+	_music.volume_db = -6.0
 	_music.finished.connect(_music.play)
 	add_child(_music)
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS) == OK:
-		set_muted(cfg.get_value("audio", "muted", false), false)
+		music_volume = cfg.get_value("audio", "music", music_volume)
+		sfx_volume = cfg.get_value("audio", "sfx", sfx_volume)
+	_apply("Music", music_volume)
+	_apply("SFX", sfx_volume)
 	# Semua tombol berbunyi "klik" tanpa perlu disambung satu per satu.
 	get_tree().node_added.connect(func(n):
 		if n is BaseButton:
@@ -66,11 +78,27 @@ func play_music() -> void:
 		_music.play()
 
 
-func set_muted(value: bool, save := true) -> void:
-	muted = value
-	AudioServer.set_bus_mute(0, muted)
-	if save:
-		var cfg := ConfigFile.new()
-		cfg.load(SETTINGS)
-		cfg.set_value("audio", "muted", muted)
-		cfg.save(SETTINGS)
+func set_music_volume(value: float) -> void:
+	music_volume = clampf(value, 0.0, 1.0)
+	_apply("Music", music_volume)
+	_save()
+
+
+func set_sfx_volume(value: float) -> void:
+	sfx_volume = clampf(value, 0.0, 1.0)
+	_apply("SFX", sfx_volume)
+	_save()
+
+
+func _apply(bus: String, value: float) -> void:
+	var idx := AudioServer.get_bus_index(bus)
+	AudioServer.set_bus_mute(idx, value <= 0.001)
+	AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(value, 0.001)))
+
+
+func _save() -> void:
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS)
+	cfg.set_value("audio", "music", music_volume)
+	cfg.set_value("audio", "sfx", sfx_volume)
+	cfg.save(SETTINGS)

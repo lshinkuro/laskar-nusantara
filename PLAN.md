@@ -94,7 +94,7 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 - [x] UI bertema batik (font Pixelify Sans), kontrol sentuh
 - [x] Ganti baju: 8 seragam kerajaan, tersinkron di co-op
 - [x] Ketupat penambah HP yang dijatuhkan musuh
-- [x] 3 medan berganti per wave: Sawah, Hutan Kalimantan, Desa & Candi (pohon/bangunan sebagai penghalang)
+- [x] 3 medan berganti per wave: Lembah Sungai, Hutan Kalimantan, Desa & Candi (pohon/bangunan sebagai penghalang)
 
 ### M3 · Minggu 5–6: Sistem data (Resource)
 - [ ] `CharacterData`, `WeaponData`, `ItemData`, `EnemyData` sebagai file `.tres` (WeaponData & ItemData sudah)
@@ -112,7 +112,7 @@ Item mengubah stat, sebagian punya efek khusus. Contoh:
 - [ ] Sprite final
 - [ ] Efek kena hit: flash, getar layar, angka damage
 - [x] Musik gamelan/kendang dan SFX (disintesis, `tools/make_sounds.py`)
-- [ ] Menu utama, pause, settings volume
+- [x] Menu utama (latar senja bergerak), pause, settings volume musik & efek terpisah
 
 ### M6 · Minggu 11–12: Balancing & rilis
 - [ ] Playtest dengan 5–10 teman: catat di wave berapa mereka mati dan build apa yang terlalu kuat

@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/menu.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/map.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/menu_backdrop.gd" id="2"]
 [ext_resource type="Texture2D" path="res://assets/sprites/prajurit_majapahit.png" id="3"]
 [ext_resource type="Texture2D" path="res://assets/sprites/serdadu_besi.png" id="7"]
 
@@ -14,32 +14,13 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Map" type="Node2D" parent="."]
-position = Vector2(-160, -90)
-script = ExtResource("2")
-
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Backdrop" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0.08, 0.05, 0.03, 0.55)
-
-[node name="SoundBtn" type="Button" parent="."]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -84.0
-offset_top = 6.0
-offset_right = -6.0
-offset_bottom = 24.0
-grow_horizontal = 0
-focus_mode = 0
-theme_override_font_sizes/font_size = 8
-text = "Suara: Nyala"
+script = ExtResource("2")
 
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -212,3 +193,30 @@ text = "WASD / panah, atau geser layar untuk bergerak. Senjata menembak otomatis
 horizontal_alignment = 1
 autowrap_mode = 3
 custom_minimum_size = Vector2(280, 0)
+
+[node name="SettingsBtn" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -84.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = 24.0
+grow_horizontal = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 8
+text = "Pengaturan"
+
+[node name="SettingsPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -236.0
+offset_top = 28.0
+offset_right = -6.0
+offset_bottom = 80.0
+grow_horizontal = 0

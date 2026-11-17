@@ -4,6 +4,7 @@ extends Control
 const SETTINGS := "user://settings.cfg"
 const AudioSettings := preload("res://scripts/audio_settings.gd")
 const HowToPlay := preload("res://scripts/how_to_play.gd")
+const UiAnim := preload("res://scripts/ui_anim.gd")
 const SELECTED := Color(1.0, 0.85, 0.35)
 
 @onready var main_panel: Control = %MainPanel
@@ -57,6 +58,12 @@ func _ready() -> void:
 	Net.players_changed.connect(_refresh)
 	Net.status_changed.connect(func(t): status.text = t; _refresh())
 	_refresh()
+	# Judul memantul, tiga kolom meluncur naik bergantian.
+	await get_tree().process_frame
+	UiAnim.pop_in($Margin/Root/Title, 0.0, 1.6)
+	var cols: Array = $Margin/Root/Columns.get_children()
+	for i in cols.size():
+		UiAnim.slide_in(cols[i], Vector2(0, 40), 0.1 + i * 0.1)
 
 	var room := Net.room_from_url()
 	if room != "" and not Net.url_join_used:
@@ -120,7 +127,8 @@ func _build_outfits() -> void:
 		b.pressed.connect(func():
 			Net.set_outfit(i)
 			_save()
-			_refresh())
+			_refresh()
+			UiAnim.bump(%Preview, 1.25))
 		%OutfitGrid.add_child(b)
 
 
@@ -136,7 +144,9 @@ func _build_characters() -> void:
 		b.pressed.connect(func():
 			Net.set_character(i)
 			_save()
-			_refresh())
+			_refresh()
+			UiAnim.bump(b, 1.08)
+			UiAnim.bump(%Preview, 1.2))
 		%CharList.add_child(b)
 
 

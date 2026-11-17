@@ -17,6 +17,7 @@ const UPGRADES := [
 	{"title": "Hujan Panah", "desc": "Satu tembakan, banyak anak panah.", "stats": {"projectiles": 1, "damage": -4}},
 ]
 const GOLD := Color(0.88, 0.69, 0.29)
+const UiAnim := preload("res://scripts/ui_anim.gd")
 
 var player
 
@@ -70,11 +71,14 @@ func _show_choices() -> void:
 		c.queue_free()
 	for u in _choices:
 		_cards.add_child(_card(u))
+	UiAnim.deal(_cards)
 
 
 func _card(u: Dictionary) -> Control:
 	var card := PanelContainer.new()
 	card.theme_type_variation = &"Card"
+	card.mouse_entered.connect(func(): UiAnim.hover(card, true))
+	card.mouse_exited.connect(func(): UiAnim.hover(card, false))
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)

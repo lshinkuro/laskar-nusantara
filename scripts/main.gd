@@ -7,6 +7,7 @@ enum State { WAITING, PLAYING, SHOP, OVER }
 const PlayerScene := preload("res://scenes/player.tscn")
 const PauseMenu := preload("res://scripts/pause_menu.gd")
 const RunSummary := preload("res://scripts/run_summary.gd")
+const UiAnim := preload("res://scripts/ui_anim.gd")
 
 var state := State.WAITING
 var local_player
@@ -70,7 +71,9 @@ func _ready() -> void:
 	_on_semangat_changed(0.0)
 	enemies.announce.connect(func(t): _show_message(t, 1.5); local_player.shake(5.0))
 	local_player.hp_changed.connect(_on_hp_changed)
-	local_player.rempah_changed.connect(func(n): rempah_label.text = str(n))
+	local_player.rempah_changed.connect(func(n):
+		rempah_label.text = str(n)
+		UiAnim.bump(rempah_label, 1.4))
 	local_player.died.connect(_on_local_died)
 	local_player.xp_changed.connect(_on_xp_changed)
 	local_player.leveled_up.connect(func(lv):
@@ -272,6 +275,10 @@ func _finish(won: bool, wave: int) -> void:
 	$EndScreen/Panel/Box/Buttons/Again.visible = host
 	$EndScreen/Panel/Box/Wait.visible = not host
 	end_screen.show()
+	UiAnim.pop_in($EndScreen/Panel, 0.0, 0.5)
+	UiAnim.pop_in($EndScreen/Panel/Box/Title, 0.15, 2.0)
+	UiAnim.deal($EndScreen/Panel/Box/Stats, 0.12, false)
+	UiAnim.pop_in($EndScreen/Panel/Box/Buttons, 0.5)
 	Sfx.play("victory" if won else "game_over", 0.0, 0.0)
 	Sfx.play_music("desa" if won else "menu")  # menang: lagu pesta; kalah: kembali tenang
 
@@ -284,7 +291,7 @@ func _on_hp_changed(hp: int, max_hp: int) -> void:
 		flash.color.a = 0.3
 		create_tween().tween_property(flash, "color:a", 0.0, 0.35)
 	hp_bar.max_value = max_hp
-	hp_bar.value = hp
+	create_tween().tween_property(hp_bar, "value", float(hp), 0.2)
 	hp_label.text = "%d / %d" % [hp, max_hp]
 
 

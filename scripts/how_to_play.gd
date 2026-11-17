@@ -17,6 +17,7 @@ const PAGES := [
 ]
 
 var _page := 0
+var _panel: Control
 var _title: Label
 var _image: TextureRect
 var _text: Label
@@ -36,6 +37,7 @@ func _ready() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
+	_panel = panel
 	panel.custom_minimum_size = Vector2(420, 230)
 	center.add_child(panel)
 	var box := VBoxContainer.new()
@@ -80,6 +82,11 @@ func _ready() -> void:
 			_show(_page + 1))
 	nav.add_child(_next)
 	_show(0)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and is_visible_in_tree() and _panel:
+		preload("res://scripts/ui_anim.gd").pop_in(_panel)
 
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -6,6 +6,8 @@ extends Resource
 @export_multiline var description := ""
 @export var price := 20
 @export var color := Color.WHITE
+## Ikon pixel art 16x16 (dibuat tools/make_icons.py).
+@export var icon: Texture2D
 ## Perubahan stat pemain, kunci sesuai Player.BASE_STATS. Contoh: {"max_hp": 5}
 @export var stats := {}
 ## 0 Biasa, 1 Langka, 2 Epik, 3 Legendaris (peluang muncul di toko).

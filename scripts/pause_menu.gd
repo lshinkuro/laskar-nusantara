@@ -5,6 +5,9 @@ signal resume_pressed
 
 const AudioSettings := preload("res://scripts/audio_settings.gd")
 const HowToPlay := preload("res://scripts/how_to_play.gd")
+const UiAnim := preload("res://scripts/ui_anim.gd")
+
+var _panel: Control
 
 var _by: Label
 
@@ -19,6 +22,7 @@ func _ready() -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var panel := PanelContainer.new()
+	_panel = panel
 	panel.custom_minimum_size = Vector2(240, 0)
 	center.add_child(panel)
 	var box := VBoxContainer.new()
@@ -58,3 +62,4 @@ func open(by_name: String) -> void:
 	_by.text = "" if by_name == "" else "Dijeda oleh %s" % by_name
 	_by.visible = by_name != ""
 	show()
+	UiAnim.pop_in(_panel)

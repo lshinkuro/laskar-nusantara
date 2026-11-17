@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/icons/peci_hitam.png" id="icon"]
 [ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
 
 [resource]
@@ -11,3 +12,4 @@ color = Color(0.102, 0.071, 0.043, 1)
 stats = {"armor": 1, "damage": 5}
 rarity = 1
 tags = PackedStringArray("busana")
+icon = ExtResource("icon")

@@ -25,6 +25,7 @@ const STAT_NAMES := {
 	"harvest": "Panen %",
 }
 const GOLD := Color(0.88, 0.69, 0.29)
+const REMPAH_ICON := preload("res://assets/sprites/rempah.png")
 const Synergy := preload("res://scripts/synergy.gd")
 const RARITY_NAMES := ["Biasa", "Langka", "Epik", "Legendaris"]
 const RARITY_COLORS := [Color(0.75, 0.7, 0.62), Color(0.4, 0.65, 1.0), Color(0.75, 0.45, 1.0), Color(1.0, 0.6, 0.2)]
@@ -52,6 +53,9 @@ var _item_count: Label
 ## Slot tas yang dipilih: {"weapon": Node} atau {"item": index}.
 var _sel := {}
 var _swatches := {}
+var _shown_rempah := 0
+var _frame: Control
+var _rempah_tween: Tween
 var _synergies: Label
 var _ready_label: Label
 var _ready_btn: Button
@@ -75,8 +79,16 @@ func open(p, finished_wave: int) -> void:
 	_roll()
 	_ready_btn.disabled = false
 	_ready_btn.text = "Siap Berperang!"
+	_shown_rempah = player.rempah
 	_refresh()
 	show()
+	# Pasar "naik" dari bawah, lalu kartu dibagikan.
+	_frame.position.y = 40
+	_frame.modulate.a = 0.0
+	var t := create_tween().set_parallel().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(_frame, "position:y", 0.0, 0.35)
+	t.tween_property(_frame, "modulate:a", 1.0, 0.2)
+	_deal_cards()
 
 
 func set_ready_count(n: int, total: int) -> void:
@@ -131,6 +143,8 @@ func _buy(i: int) -> void:
 	o.sold = true
 	o.locked = false
 	Sfx.play("buy", -4.0, 0.0)
+	var card: Control = _cards.get_child(i)
+	_fly_to_bag(_icon_of(o.data), card.global_position + Vector2(8, 8), o.data is WeaponData)
 	_refresh()
 
 
@@ -144,6 +158,7 @@ func _on_reroll() -> void:
 		_reroll_cost += 1
 		_roll()
 		_refresh()
+		_deal_cards()
 
 
 func _on_ready() -> void:
@@ -155,7 +170,7 @@ func _on_ready() -> void:
 # --- Tampilan -----------------------------------------------------------------
 
 func _refresh() -> void:
-	_rempah.text = "Rempah: %d" % player.rempah
+	_set_rempah_label(player.rempah)
 	_reroll.text = "Kocok ulang (%d)" % _reroll_cost
 	_reroll.disabled = player.rempah < _reroll_cost
 
@@ -197,7 +212,7 @@ func _refresh_bag() -> void:
 	for i in player.items.size():
 		var it: ItemData = player.items[i]
 		var lv: int = player.item_levels[i]
-		var b := _slot_button(_swatch(it.color), "" if lv == 1 else str(lv), RARITY_COLORS[it.rarity])
+		var b := _slot_button(_icon_of(it), "" if lv == 1 else str(lv), RARITY_COLORS[it.rarity])
 		b.tooltip_text = "%s (Lv%d)" % [it.title, lv]
 		b.modulate = Color(1.3, 1.2, 0.6) if _sel.get("item", -1) == i else Color.WHITE
 		b.pressed.connect(func(): _sel = {"item": i}; _refresh_bag())
@@ -295,81 +310,87 @@ func _card(i: int) -> Control:
 	var data: Resource = o.data
 	var is_weapon := data is WeaponData
 	var price := price_of(data)
+	var rc: Color = RARITY_COLORS[data.rarity]
 
+	# Kartu ala Brotato: latar diwarnai kelangkaan, ikon besar, satu stat per baris.
 	var card := PanelContainer.new()
-	card.theme_type_variation = &"CardLocked" if o.locked else &"Card"
-	if data.rarity > 0 and not o.locked:
-		var style := StyleBoxFlat.new()
-		style.bg_color = Color(0.27, 0.18, 0.12)
-		style.border_color = RARITY_COLORS[data.rarity]
-		style.set_border_width_all(1 + int(data.rarity >= 2))
-		style.set_corner_radius_all(3)
-		style.set_content_margin_all(5)
-		card.add_theme_stylebox_override("panel", style)
+	var style := StyleBoxFlat.new()
+	style.bg_color = rc.darkened(0.8) if data.rarity > 0 else Color(0.13, 0.105, 0.09)
+	style.bg_color.a = 0.97
+	style.border_color = Color(0.95, 0.85, 0.4) if o.locked else (rc if data.rarity > 0 else Color(0.3, 0.24, 0.17))
+	style.set_border_width_all(3 if o.locked else 2)
+	style.set_corner_radius_all(9)
+	style.set_content_margin_all(6)
+	card.add_theme_stylebox_override("panel", style)
 	card.custom_minimum_size = Vector2(104, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.modulate = Color(1, 1, 1, 0.45) if o.sold else Color.WHITE
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 3)
+	box.add_theme_constant_override("separation", 4)
 	card.add_child(box)
 
 	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 5)
 	box.add_child(head)
-	if is_weapon:
-		var icon := TextureRect.new()
-		icon.texture = data.texture
-		icon.custom_minimum_size = Vector2(12, 12)
-		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
-		head.add_child(icon)
-	else:
-		var swatch := ColorRect.new()
-		swatch.color = data.color
-		swatch.custom_minimum_size = Vector2(10, 10)
-		swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		head.add_child(swatch)
-	var title := _label(data.title, 10)
-	title.modulate = WEAPON_COLOR if is_weapon else GOLD
+	head.add_child(_icon_slot(_icon_of(data), rc, 32))
+	var names := VBoxContainer.new()
+	names.add_theme_constant_override("separation", 0)
+	names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(names)
+	var title := _label(data.title, 11)
+	title.add_theme_color_override("font_color", rc.lightened(0.25) if data.rarity > 0 else Color(0.97, 0.93, 0.84))
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(title)
-
-	var kind_text: String = ("Senjata" if is_weapon else "Item") + "  -  " + RARITY_NAMES[data.rarity]
+	title.custom_minimum_size.x = 56  # tanpa lebar minimum, label ber-wrap menghitung tinggi seolah lebar 0
+	names.add_child(title)
+	var kind_text: String = ("Senjata " + {"melee": "dekat", "ranged": "jauh", "magic": "magis"}[data.category]) if is_weapon else "Item"
 	if not is_weapon and not data.tags.is_empty():
-		kind_text += "  [" + ", ".join(data.tags).capitalize() + "]"
+		kind_text += " - " + ", ".join(data.tags).capitalize()
 	var kind := _label(kind_text, 8)
-	kind.modulate = RARITY_COLORS[data.rarity]
-	box.add_child(kind)
+	kind.add_theme_color_override("font_color", Color(0.7, 0.62, 0.52))
+	names.add_child(kind)
 
 	var merge = player.mergeable_weapon(data) if is_weapon and player.weapons.size() >= player.MAX_WEAPONS else null
-	var extra := "\nGABUNG -> Tier %d: +1 peluru, damage x%.1f" % [merge.tier + 1, 1.0 + 0.5 * merge.tier] if merge else ""
 	var desc := RichTextLabel.new()
 	desc.bbcode_enabled = true
 	desc.fit_content = true
 	desc.scroll_active = false
 	desc.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	desc.add_theme_font_size_override("normal_font_size", 8)
-	desc.text = data.description + "\n" + _effects(data) + ("[color=#f0d860]" + extra + "[/color]" if extra != "" else "")
+	desc.add_theme_font_size_override("normal_font_size", 9)
+	desc.custom_minimum_size.x = 88
 	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var lines := _effect_lines(data)
+	if merge:
+		lines.append("[color=#f0d860]Gabung -> Tier %d[/color]" % (merge.tier + 1))
+	lines.append("[color=#a89880][font_size=8]%s[/font_size][/color]" % data.description)
+	desc.text = "\n".join(lines)
 	box.add_child(desc)
-	# Sorot kartu: pratinjau perubahan stat di panel prajurit.
 	if not is_weapon:
 		card.mouse_entered.connect(func(): _show_stats(data.stats))
 		card.mouse_exited.connect(func(): _show_stats({}))
+	card.mouse_entered.connect(_hover.bind(card, true))
+	card.mouse_exited.connect(_hover.bind(card, false))
 
 	var buy := Button.new()
+	buy.icon = REMPAH_ICON
+	buy.add_theme_font_size_override("font_size", 12)
+	buy.custom_minimum_size = Vector2(0, 24)
 	if o.sold:
+		buy.icon = null
 		buy.text = "Terjual"
 		buy.disabled = true
 	elif is_weapon and not player.can_take_weapon(data):
+		buy.icon = null
 		buy.text = "Slot penuh"
 		buy.disabled = true
 	elif not is_weapon and not player.can_take_item():
+		buy.icon = null
 		buy.text = "Tas penuh"
 		buy.disabled = true
 	else:
-		buy.text = ("Gabung  %d" if merge else "Beli  %d") % price
+		buy.text = " %d" % price
 		if player.rempah < price:
-			buy.text = "Kurang %d rempah" % (price - player.rempah)
 			buy.disabled = true
+			buy.tooltip_text = "Kurang %d rempah" % (price - player.rempah)
 	buy.pressed.connect(_buy.bind(i))
 	box.add_child(buy)
 
@@ -377,9 +398,117 @@ func _card(i: int) -> Control:
 	lock.text = "Terkunci" if o.locked else "Kunci"
 	lock.disabled = o.sold
 	lock.add_theme_font_size_override("font_size", 8)
+	lock.tooltip_text = "Kartu terkunci tidak ikut dikocok & tetap ada di wave berikutnya."
 	lock.pressed.connect(_toggle_lock.bind(i))
 	box.add_child(lock)
 	return card
+
+
+## Satu baris per efek, angka berwarna (hijau naik, merah turun) seperti Brotato.
+func _effect_lines(data: Resource) -> PackedStringArray:
+	var lines := PackedStringArray()
+	if data is WeaponData:
+		lines.append("Damage [color=#f0d860]%d[/color]" % data.damage)
+		lines.append("Serang [color=#f0d860]%.1f[/color]/dtk" % (1.0 / data.fire_interval))
+		lines.append("Jarak [color=#f0d860]%d[/color]" % data.attack_range)
+		if data.projectile_count > 1:
+			lines.append("Peluru [color=#f0d860]x%d[/color]" % data.projectile_count)
+		if data.pierce > 0 and data.effect != "bounce":
+			lines.append("Tembus [color=#f0d860]%d[/color]" % data.pierce)
+		var effect_text: String = {"burn": "Membakar", "poison": "Meracun", "bleed": "Berdarah", "slow": "Memperlambat",
+			"knockback": "Mendorong", "explode": "Meledak", "bounce": "Memantul %dx" % data.pierce}.get(data.effect, "")
+		if effect_text != "":
+			lines.append("[color=#ffb070]%s[/color]" % effect_text)
+		return lines
+	for key in data.stats:
+		var v: int = data.stats[key]
+		lines.append("[color=%s]%+d[/color] %s" % ["#7fe07f" if v > 0 else "#ff7a6a", v, STAT_NAMES.get(key, key)])
+	return lines
+
+
+func _icon_of(data: Resource) -> Texture2D:
+	if data is WeaponData:
+		return data.texture
+	return data.icon if data.icon else _swatch(data.color)
+
+
+## Slot ikon membulat berwarna kelangkaan, ikon diperbesar tajam (pixel art).
+func _icon_slot(tex: Texture2D, rc: Color, px: int) -> Control:
+	var slot := PanelContainer.new()
+	var st := StyleBoxFlat.new()
+	st.bg_color = rc.darkened(0.55)
+	st.border_color = rc
+	st.set_border_width_all(2)
+	st.set_corner_radius_all(6)
+	st.set_content_margin_all(2)
+	slot.add_theme_stylebox_override("panel", st)
+	var icon := TextureRect.new()
+	icon.texture = tex
+	icon.custom_minimum_size = Vector2(px - 6, px - 6)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	slot.add_child(icon)
+	slot.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	return slot
+
+
+## Kartu terangkat & sedikit miring saat disorot.
+func _hover(card: Control, on: bool) -> void:
+	card.pivot_offset = card.size / 2
+	card.z_index = 1 if on else 0
+	var t := card.create_tween().set_parallel().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_property(card, "scale", Vector2.ONE * (1.04 if on else 1.0), 0.15)
+	t.tween_property(card, "rotation", (-0.02 if card.get_index() % 2 else 0.02) if on else 0.0, 0.15)
+
+
+## Kartu "dibagikan": muncul satu per satu sambil berputar & memantul.
+func _deal_cards() -> void:
+	for i in _cards.get_child_count():
+		var c: Control = _cards.get_child(i)
+		c.modulate.a = 0.0
+		c.scale = Vector2(0.6, 0.6)
+		c.rotation = -0.3
+		var t := c.create_tween().set_parallel().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		t.tween_callback(func(): c.pivot_offset = c.size / 2).set_delay(0.0)
+		t.tween_property(c, "modulate:a", 1.0, 0.2).set_delay(0.07 * i)
+		t.tween_property(c, "scale", Vector2.ONE, 0.35).set_delay(0.07 * i)
+		t.tween_property(c, "rotation", 0.0, 0.35).set_delay(0.07 * i)
+
+
+## Ikon barang yang dibeli terbang ke tas.
+func _fly_to_bag(tex: Texture2D, from: Vector2, is_weapon: bool) -> void:
+	var target_box: Control = _weapons if is_weapon else _items
+	var fly := TextureRect.new()
+	fly.texture = tex
+	fly.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	fly.size = Vector2(26, 26)
+	fly.position = from
+	fly.z_index = 10
+	add_child(fly)
+	var to := target_box.global_position + Vector2(target_box.size.x, 4)
+	var t := fly.create_tween().set_parallel()
+	t.tween_property(fly, "position", to, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	t.tween_property(fly, "size", Vector2(14, 14), 0.4)
+	t.chain().tween_callback(func():
+		fly.queue_free()
+		if target_box.get_child_count() > 0:
+			var last: Control = target_box.get_child(target_box.get_child_count() - 1)
+			last.pivot_offset = last.size / 2
+			last.scale = Vector2(1.6, 1.6)
+			last.create_tween().tween_property(last, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT))
+
+
+## Angka rempah berubah bertahap (hitung naik/turun).
+func _set_rempah_label(value: int) -> void:
+	var from: int = _shown_rempah
+	_shown_rempah = value
+	if _rempah_tween and _rempah_tween.is_valid():
+		_rempah_tween.kill()
+	_rempah_tween = create_tween()
+	_rempah_tween.tween_method(func(v: float): _rempah.text = "%d" % roundi(v), float(from), float(value), 0.35)
+	_rempah.pivot_offset = _rempah.size / 2
+	_rempah.scale = Vector2(1.25, 1.25)
+	create_tween().tween_property(_rempah, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK)
 
 
 ## Tampilkan stat prajurit; `preview` = perubahan dari kartu yang sedang disorot
@@ -396,7 +525,7 @@ func _show_stats(preview: Dictionary) -> void:
 			var after: int = now + preview[key]
 			shown.append("[color=%s]%s %d>%d[/color]" % ["#7fe07f" if after > now else "#ff7a6a", name, now, after])
 		else:
-			shown.append("%s %d" % [name, now])
+			shown.append("%s [color=#f0d860]%d[/color]" % [name, now])
 	var lines := PackedStringArray()
 	for i in range(0, shown.size(), 2):
 		lines.append("  ".join(shown.slice(i, i + 2)))
@@ -443,6 +572,7 @@ func _build() -> void:
 	add_child(dim)
 
 	var margin := MarginContainer.new()
+	_frame = margin
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 10)
@@ -465,8 +595,8 @@ func _build() -> void:
 	rempah_icon.texture = preload("res://assets/sprites/rempah.png")
 	rempah_icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 	header.add_child(rempah_icon)
-	_rempah = _label("", 12)
-	_rempah.modulate = GOLD
+	_rempah = _label("", 16)
+	_rempah.add_theme_color_override("font_color", Color(0.98, 0.8, 0.35))
 	header.add_child(_rempah)
 
 	var body := HBoxContainer.new()
@@ -510,6 +640,7 @@ func _build() -> void:
 	_bag_detail.fit_content = true
 	_bag_detail.scroll_active = false
 	_bag_detail.add_theme_font_size_override("normal_font_size", 8)
+	_bag_detail.custom_minimum_size.x = 200
 	_bag_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	action_row.add_child(_bag_detail)
 	_combine_btn = Button.new()
@@ -538,6 +669,7 @@ func _build() -> void:
 	_stats.fit_content = true
 	_stats.scroll_active = false
 	_stats.add_theme_font_size_override("normal_font_size", 8)
+	_stats.custom_minimum_size.x = 136
 	info.add_child(_stats)
 	var syn_title := _label("Sinergi", 10)
 	syn_title.modulate = GOLD

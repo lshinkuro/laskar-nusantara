@@ -1,5 +1,6 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
 
+[ext_resource type="Texture2D" path="res://assets/icons/gula_aren.png" id="icon"]
 [ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
 
 [resource]
@@ -11,3 +12,4 @@ color = Color(0.627, 0.376, 0.165, 1)
 stats = {"attack_speed": 12}
 rarity = 0
 tags = PackedStringArray("kuliner")
+icon = ExtResource("icon")

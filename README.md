@@ -24,7 +24,9 @@ Tombol **? Cara Main** (juga di layar jeda) menjelaskan semuanya dengan gambar; 
 - **Ketupat** kadang jatuh dari musuh: +3 HP (tidak diambil kalau HP masih penuh).
 - **5 medan berganti:** wave 1–4 Lembah Sungai, 5–8 Hutan Kalimantan, 9–12 Pelabuhan Sunda Kelapa (laut tak bisa
   diseberangi), 13–16 Desa & Candi, 17–20 Benteng Besi. Pohon, bangunan, tembok, dan batu menghalangi gerak & peluru.
-- **Suara:** musik gamelan & efek suara, volume musik dan efek diatur terpisah (menu *Pengaturan* / layar jeda).
+- **Musik:** 8 lagu gamelan yang berganti dengan crossfade sesuai suasana — menu (Senja di Desa), tiap medan
+  (Lembah, Rimba, Pelabuhan, Pesta Desa, Benteng), boss (Pertempuran), dan Pasar Rakyat.
+- **Suara:** efek suara, volume musik dan efek diatur terpisah (menu *Pengaturan* / layar jeda).
 - **Musuh:** Serdadu Besi, Anjing Pelacak (w3+), Penembak (w5+), Kavaleri Besi (w6+, menyeruduk), Serdadu Perisai (w7+),
   Pelempar Granat (w8+), Tukang Ranjau (w9+), Tabib Besi (w11+, menyembuhkan teman), Raksasa Baja (w13+, pecah jadi 2).
 - **Boss tiap wave** (muncul di pertengahan): Komandan Besi (terjang + cincin peluru), Laksamana Besi (wave 9, 12, 17:
@@ -60,7 +62,7 @@ scripts/  net (autoload lobby+signaling), sfx (autoload suara), map + obstacle (
 data/     characters/*.tres, items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
 assets/   sprites/ (tools/make_sprites.py), audio/ (tools/make_sounds.py, sintesis gamelan),
           fonts/ (Pixelify Sans, OFL), ui/theme.tres
-tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), item_test (item unik & sinergi), semangat_test (warga & Pekik Merdeka), enemies2_test (musuh & map baru), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
+tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), item_test (item unik & sinergi), semangat_test (warga & Pekik Merdeka), enemies2_test (musuh & map baru), music_test (pergantian lagu), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
 ```
 
 ## Tes
@@ -72,6 +74,7 @@ godot --headless --fixed-fps 60 -s res://tests/weapon_test.gd
 godot --headless --fixed-fps 60 -s res://tests/item_test.gd
 godot --headless --fixed-fps 60 -s res://tests/semangat_test.gd
 godot --headless --fixed-fps 60 -s res://tests/enemies2_test.gd
+godot --headless --fixed-fps 60 -s res://tests/music_test.gd
 godot --headless --fixed-fps 60 -s res://tests/boss_test.gd
 godot --headless -s res://tests/net_test.gd -- host &  godot --headless -s res://tests/net_test.gd -- client
 ```

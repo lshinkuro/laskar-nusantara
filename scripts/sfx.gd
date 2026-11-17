@@ -24,10 +24,27 @@ const SOUNDS := {
 var music_volume := 0.6
 var sfx_volume := 0.8
 
+## Lagu latar per suasana (dibuat tools/make_sounds.py, loop lewat import WAV).
+const MUSIC := {
+	"menu": preload("res://assets/audio/music_menu.wav"),
+	"lembah": preload("res://assets/audio/music_lembah.wav"),
+	"hutan": preload("res://assets/audio/music_hutan.wav"),
+	"pelabuhan": preload("res://assets/audio/music_pelabuhan.wav"),
+	"desa": preload("res://assets/audio/music_desa.wav"),
+	"benteng": preload("res://assets/audio/music_benteng.wav"),
+	"boss": preload("res://assets/audio/music_boss.wav"),
+	"pasar": preload("res://assets/audio/music_pasar.wav"),
+}
+const MUSIC_DB := -6.0
+const FADE := 0.8
+
+var _music_players: Array[AudioStreamPlayer] = []
+var _current := 0
+var _track := ""
+var _fade: Tween
 var _pool: Array[AudioStreamPlayer] = []
 var _next := 0
 var _last := {}
-var _music: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -39,12 +56,12 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		_pool.append(p)
-	_music = AudioStreamPlayer.new()
-	_music.stream = preload("res://assets/audio/music_gamelan.wav")
-	_music.bus = "Music"
-	_music.volume_db = -6.0
-	# Loop diatur di import WAV (loop_mode); sinyal finished tidak andal di web.
-	add_child(_music)
+	for i in 2:  # dua pemutar untuk crossfade antar lagu
+		var m := AudioStreamPlayer.new()
+		m.bus = "Music"
+		m.volume_db = -60.0
+		add_child(m)
+		_music_players.append(m)
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS) == OK:
 		music_volume = cfg.get_value("audio", "music", music_volume)
@@ -72,9 +89,31 @@ func play(sound: String, volume_db := 0.0, pitch_variation := 0.08) -> void:
 	p.play()
 
 
-func play_music() -> void:
-	if not _music.playing:
-		_music.play()
+## Ganti lagu latar dengan crossfade (loop diatur di import WAV; sinyal finished tidak andal di web).
+func play_music(track := "menu") -> void:
+	if track == _track or not MUSIC.has(track):
+		return
+	_track = track
+	# Pergantian cepat berturut-turut: batalkan fade sebelumnya supaya callback stop-nya
+	# tidak menghentikan pemutar yang sekarang dipakai ulang.
+	if _fade and _fade.is_valid():
+		_fade.kill()
+	var old := _music_players[_current]
+	_current = 1 - _current
+	var new := _music_players[_current]
+	new.stop()
+	new.stream = MUSIC[track]
+	new.volume_db = -40.0
+	new.play()
+	_fade = create_tween().set_parallel()
+	_fade.tween_property(new, "volume_db", MUSIC_DB, FADE)
+	if old.playing:
+		_fade.tween_property(old, "volume_db", -60.0, FADE)
+		_fade.chain().tween_callback(old.stop)
+
+
+func current_track() -> String:
+	return _track
 
 
 func set_music_volume(value: float) -> void:

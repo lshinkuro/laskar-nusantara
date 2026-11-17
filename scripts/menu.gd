@@ -39,7 +39,7 @@ func _ready() -> void:
 	%SettingsPanel.add_child(AudioSettings.new())
 	%SettingsPanel.hide()
 	%SettingsBtn.pressed.connect(func(): %SettingsPanel.visible = not %SettingsPanel.visible)
-	Sfx.play_music()
+	Sfx.play_music("menu")
 	%SoloBtn.pressed.connect(func(): _save(); Net.start_solo())
 	%HostBtn.pressed.connect(func(): _save(); Net.host_room())
 	%JoinBtn.pressed.connect(_on_join)

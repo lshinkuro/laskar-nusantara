@@ -77,7 +77,6 @@ func _ready() -> void:
 	_pause_menu = PauseMenu.new()
 	_pause_menu.resume_pressed.connect(_request_pause.bind(false))
 	add_child(_pause_menu)
-	Sfx.play_music()
 	_on_xp_changed(0, local_player.xp_needed(), 1)
 	local_player.apply_character(Net.character_of(multiplayer.get_unique_id()))
 	_on_hp_changed(local_player.hp, local_player.stats.max_hp)
@@ -208,6 +207,7 @@ func _on_wave_started(wave: int) -> void:
 		_unlocked_this_run.append(c.title)
 		title += "\nKarakter baru terbuka: " + c.title + "!"
 	_show_message(title, 2.2 if title.contains("terbuka") else 1.6)
+	Sfx.play_music("boss" if _boss and is_instance_valid(_boss) else _map_track())
 	Sfx.play("wave_start", -2.0, 0.0)
 	$HUD/ControlsHint.visible = wave <= 2
 
@@ -217,6 +217,7 @@ func _on_wave_ended(wave: int) -> void:
 	joystick.hide()
 	if wave < waves.LAST_WAVE:
 		Sfx.play("wave_end", -4.0, 0.0)
+		Sfx.play_music("pasar")
 	if wave >= waves.LAST_WAVE:
 		_finish(true, wave)
 		return
@@ -269,6 +270,7 @@ func _finish(won: bool, wave: int) -> void:
 	$EndScreen/Panel/Box/Wait.visible = not host
 	end_screen.show()
 	Sfx.play("victory" if won else "game_over", 0.0, 0.0)
+	Sfx.play_music("desa" if won else "menu")  # menang: lagu pesta; kalah: kembali tenang
 
 
 # --- HUD ----------------------------------------------------------------------
@@ -335,8 +337,15 @@ func _set_pause(value: bool, by_name: String) -> void:
 		_pause_menu.hide()
 
 
+## Lagu latar medan yang sedang dipakai (lihat Map.MAPS[].layout & Sfx.MUSIC).
+func _map_track() -> String:
+	return map.MAPS[map.map_index].layout
+
+
 func _on_boss_changed(boss: Node) -> void:
 	_boss = boss
+	if state == State.PLAYING:
+		Sfx.play_music("boss" if boss else _map_track())
 	$HUD/Boss.visible = boss != null
 	if boss:
 		$HUD/Boss/Name.text = boss.def.boss

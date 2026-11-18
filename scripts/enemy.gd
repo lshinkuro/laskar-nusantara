@@ -44,7 +44,7 @@ func _ready() -> void:
 	hp = max_hp
 	target_pos = position
 	sprite.texture = def.tex
-	sprite.scale = Vector2.ONE * def.scale
+	sprite.scale = Vector2.ONE * def.scale / Art.SCALE
 	var shape := CircleShape2D.new()
 	shape.radius = def.radius
 	$CollisionShape2D.shape = shape

@@ -2,7 +2,7 @@ extends Node2D
 ## Warga terkurung. Prajurit lokal yang berdiri di dekatnya membebaskannya (progres lokal,
 ## host yang memutuskan siapa yang berhasil).
 
-const TEX := preload("res://assets/sprites/warga.png")
+const TEX := preload("res://assets/sprites/warga.svg")
 const RESCUE_RADIUS := 30.0
 const RESCUE_TIME := 1.5
 const LIFETIME := 22.0

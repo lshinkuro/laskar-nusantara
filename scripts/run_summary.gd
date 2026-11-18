@@ -67,7 +67,8 @@ func build(box: Container, player, wave: int, character: String) -> void:
 		var icon := TextureRect.new()
 		icon.texture = e[1].texture
 		icon.custom_minimum_size = Vector2(14, 10)
-		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		row.add_child(icon)
 		var name := _label(e[0], 8, Color(0.95, 0.89, 0.76))
 		name.custom_minimum_size = Vector2(62, 0)

@@ -24,14 +24,14 @@ const MENU_SCENE := "res://scenes/menu.tscn"
 
 ## Seragam yang bisa dipilih pemain ("ganti baju").
 const KERAJAAN := [
-	{"name": "Majapahit", "texture": preload("res://assets/sprites/prajurit_majapahit.png"), "color": Color(0.85, 0.2, 0.15)},
-	{"name": "Sriwijaya", "texture": preload("res://assets/sprites/prajurit_sriwijaya.png"), "color": Color(0.3, 0.55, 0.95)},
-	{"name": "Mataram", "texture": preload("res://assets/sprites/prajurit_mataram.png"), "color": Color(0.3, 0.75, 0.35)},
-	{"name": "Pajajaran", "texture": preload("res://assets/sprites/prajurit_pajajaran.png"), "color": Color(0.7, 0.4, 0.9)},
-	{"name": "Samudra Pasai", "texture": preload("res://assets/sprites/prajurit_samudra_pasai.png"), "color": Color(0.9, 0.3, 0.3)},
-	{"name": "Gowa", "texture": preload("res://assets/sprites/prajurit_gowa.png"), "color": Color(0.9, 0.7, 0.3)},
-	{"name": "Kutai", "texture": preload("res://assets/sprites/prajurit_kutai.png"), "color": Color(0.95, 0.55, 0.2)},
-	{"name": "Ternate", "texture": preload("res://assets/sprites/prajurit_ternate.png"), "color": Color(0.3, 0.75, 0.75)},
+	{"name": "Majapahit", "texture": preload("res://assets/sprites/prajurit_majapahit.svg"), "color": Color(0.85, 0.2, 0.15)},
+	{"name": "Sriwijaya", "texture": preload("res://assets/sprites/prajurit_sriwijaya.svg"), "color": Color(0.3, 0.55, 0.95)},
+	{"name": "Mataram", "texture": preload("res://assets/sprites/prajurit_mataram.svg"), "color": Color(0.3, 0.75, 0.35)},
+	{"name": "Pajajaran", "texture": preload("res://assets/sprites/prajurit_pajajaran.svg"), "color": Color(0.7, 0.4, 0.9)},
+	{"name": "Samudra Pasai", "texture": preload("res://assets/sprites/prajurit_samudra_pasai.svg"), "color": Color(0.9, 0.3, 0.3)},
+	{"name": "Gowa", "texture": preload("res://assets/sprites/prajurit_gowa.svg"), "color": Color(0.9, 0.7, 0.3)},
+	{"name": "Kutai", "texture": preload("res://assets/sprites/prajurit_kutai.svg"), "color": Color(0.95, 0.55, 0.2)},
+	{"name": "Ternate", "texture": preload("res://assets/sprites/prajurit_ternate.svg"), "color": Color(0.3, 0.75, 0.75)},
 ]
 
 ## Tingkat kesulitan (dipakai host saat spawn musuh): pengali HP, damage, dan jumlah musuh.

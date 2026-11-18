@@ -3,16 +3,16 @@ extends Node2D
 ## mendekat "mengklaim" ke host; host memberi ke pengklaim pertama.
 
 const Rempah := preload("res://scenes/rempah.tscn")
-const KETUPAT_TEXTURE := preload("res://assets/sprites/ketupat.png")
-const PETI_TEXTURE := preload("res://assets/sprites/peti_pusaka.png")
+const KETUPAT_TEXTURE := preload("res://assets/sprites/ketupat.svg")
+const PETI_TEXTURE := preload("res://assets/sprites/peti_pusaka.svg")
 ## Rempah tampil acak (nilainya sama): pala, cengkeh, lada, kayu manis, bunga lawang, kepeng.
 const REMPAH_TEXTURES := [
-	preload("res://assets/sprites/rempah.png"),
-	preload("res://assets/sprites/rempah_cengkeh.png"),
-	preload("res://assets/sprites/rempah_lada.png"),
-	preload("res://assets/sprites/rempah_kayu_manis.png"),
-	preload("res://assets/sprites/rempah_bunga_lawang.png"),
-	preload("res://assets/sprites/rempah_kepeng.png"),
+	preload("res://assets/sprites/rempah.svg"),
+	preload("res://assets/sprites/rempah_cengkeh.svg"),
+	preload("res://assets/sprites/rempah_lada.svg"),
+	preload("res://assets/sprites/rempah_kayu_manis.svg"),
+	preload("res://assets/sprites/rempah_bunga_lawang.svg"),
+	preload("res://assets/sprites/rempah_kepeng.svg"),
 ]
 
 ## Pemain lokal membuka Peti Pusaka (main memberi isinya).

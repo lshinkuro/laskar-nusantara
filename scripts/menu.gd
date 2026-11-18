@@ -142,6 +142,7 @@ func _build_characters() -> void:
 		var b := Button.new()
 		b.icon = c.portrait
 		b.expand_icon = true
+		b.add_theme_constant_override("icon_max_width", 34)
 		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		b.custom_minimum_size = Vector2(42, 46)
@@ -221,7 +222,9 @@ func _refresh() -> void:
 		var row := HBoxContainer.new()
 		var icon := TextureRect.new()
 		icon.texture = k.texture
-		icon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+		icon.custom_minimum_size = Vector2(24, 24)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		row.add_child(icon)
 		var l := Label.new()
 		l.text = "%s%s\n%s" % [Net.name_of(id), "  [host]" if id == 1 else "", Net.character_of(id).title]

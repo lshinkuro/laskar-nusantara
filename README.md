@@ -66,8 +66,8 @@ scenes/   menu, main (game), player, enemy, projectile, rempah
 scripts/  net (autoload lobby+signaling), sfx (autoload suara), map + obstacle (medan), main, player, weapon, enemies, pickups,
           projectiles, wave_manager, shop, menu, touch_joystick
 data/     characters/*.tres, items/*.tres, weapons/*.tres   (nambah konten = bikin file baru)
-assets/   sprites/ (tools/make_sprites.py), audio/ (tools/make_sounds.py, sintesis gamelan),
-          fonts/ (Pixelify Sans, OFL), ui/theme.tres
+assets/   sprites/ & icons/ (SVG gaya flat dari tools/make_art.py, diimpor 4x: Art.SCALE), audio/ (tools/make_sounds.py, sintesis gamelan),
+          fonts/ (Nunito ExtraBold, OFL), ui/theme.tres
 tests/    smoke_test (solo), level_test (XP, ilmu, ketupat, jeda), character_test (karakter & unlock), weapon_test (efek senjata), item_test (item unik & sinergi), semangat_test (warga & Pekik Merdeka), enemies2_test (musuh & map baru), music_test (pergantian lagu), tas_test (gabung/lepas & Peti Pusaka), boss_test (boss, musuh baru, ranjau, gabung senjata), touch_test, net_test (co-op 2 proses lewat ENet)
 ```
 

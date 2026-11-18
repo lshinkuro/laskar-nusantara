@@ -8,14 +8,14 @@
 [ext_resource type="Script" path="res://scripts/pickups.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/projectiles.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/shop.gd" id="8"]
-[ext_resource type="Texture2D" path="res://assets/sprites/rempah.png" id="9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/rempah.svg" id="9"]
 
 [ext_resource type="Script" path="res://scripts/level_up.gd" id="10"]
 [ext_resource type="Script" path="res://scripts/villagers.gd" id="11"]
 [ext_resource type="Script" path="res://scripts/warga_pointer.gd" id="12"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ikon_hati.png" id="13"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ikon_bintang.png" id="14"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ikon_bendera.png" id="15"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ikon_hati.svg" id="13"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ikon_bintang.svg" id="14"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ikon_bendera.svg" id="15"]
 
 [sub_resource type="StyleBoxFlat" id="semangat_fill"]
 bg_color = Color(0.85, 0.15, 0.12, 1)
@@ -116,7 +116,8 @@ offset_top = 1.0
 offset_right = 10.0
 offset_bottom = 9.0
 texture = ExtResource("13")
-stretch_mode = 3
+expand_mode = 1
+stretch_mode = 5
 
 [node name="XPBar" type="ProgressBar" parent="HUD/TopLeft"]
 custom_minimum_size = Vector2(92, 7)
@@ -142,7 +143,8 @@ offset_top = -0.5
 offset_right = 10.0
 offset_bottom = 7.5
 texture = ExtResource("14")
-stretch_mode = 3
+expand_mode = 1
+stretch_mode = 5
 
 [node name="SemangatBar" type="ProgressBar" parent="HUD/TopLeft"]
 custom_minimum_size = Vector2(92, 7)
@@ -168,15 +170,18 @@ offset_top = -0.5
 offset_right = 10.0
 offset_bottom = 7.5
 texture = ExtResource("15")
-stretch_mode = 3
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Rempah" type="HBoxContainer" parent="HUD/TopLeft"]
 layout_mode = 2
 
 [node name="Icon" type="TextureRect" parent="HUD/TopLeft/Rempah"]
+custom_minimum_size = Vector2(9, 9)
 layout_mode = 2
 texture = ExtResource("9")
-stretch_mode = 3
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Label" type="Label" parent="HUD/TopLeft/Rempah"]
 layout_mode = 2

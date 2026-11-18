@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/data/character_data.gd" id="1"]
 [ext_resource type="Resource" path="res://data/weapons/tombak.tres" id="2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/karakter_pecalang_bali.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/karakter_pecalang_bali.svg" id="3"]
 
 [resource]
 script = ExtResource("1")

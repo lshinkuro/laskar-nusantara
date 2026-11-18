@@ -1,7 +1,7 @@
 extends Node2D
 ## Ranjau dari Tukang Ranjau. Meledak saat prajurit lokal mendekat (host yang memutuskan).
 
-const TEX := preload("res://assets/sprites/ranjau.png")
+const TEX := preload("res://assets/sprites/ranjau.svg")
 const TRIGGER_RADIUS := 20.0
 
 var id := 0

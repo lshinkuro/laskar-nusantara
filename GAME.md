@@ -4,7 +4,7 @@ Roguelite arena shooter (co-op 1–4 pemain) bertema Nusantara. Prajurit dari 8 
 mengusir **Kekaisaran Besi**. Bertahan 20 wave, belanja di Pasar Rakyat di antara wave,
 dan kalahkan **Gubernur Jenderal Besi** di wave 20.
 
-- Mesin: Godot 4.7 (renderer Compatibility), resolusi dasar 640×360, pixel art.
+- Mesin: Godot 4.7 (renderer Compatibility), resolusi dasar 640×360, gambar flat berdetail (SVG dari `tools/make_art.py`), font Nunito.
 - Platform: Web (GitHub Pages), desktop, HP (kontrol sentuh).
 - Main: https://lshinkuro.github.io/laskar-nusantara/
 
@@ -50,7 +50,7 @@ setelah pernah mencapai wave tertentu (progres disimpan di `user://settings.cfg`
 | Jawara Betawi | Golok | HP Maks +50%, +20% damage jarak dekat | -20% kecepatan serang | wave 14 |
 | Senopati Majapahit | Meriam Lela | +1 peluru semua senjata, +20% damage | Armor -2, -10% kecepatan | wave 17 |
 
-Nambah karakter: buat `data/characters/<nama>.tres` dan potretnya di `tools/make_sprites.py` (`KARAKTER`).
+Nambah karakter: buat `data/characters/<nama>.tres` dan potretnya di `tools/make_art.py` (`KARAKTER`), lalu jalankan `python3 tools/make_art.py`.
 
 ## Tingkat kesulitan
 

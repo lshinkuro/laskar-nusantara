@@ -26,9 +26,10 @@ func _draw() -> void:
 		draw_circle(Vector2.ZERO, 6.0, Color(c, 0.35))
 		draw_arc(Vector2.ZERO, 6.0, 0, TAU, 16, c, 1.0)
 	var tex := icon_texture if icon_texture else data.texture
-	draw_texture(tex, -tex.get_size() / 2 + Vector2(-_kick, 0))
+	var size := tex.get_size() / Art.SCALE
+	draw_texture_rect(tex, Rect2(-size / 2 + Vector2(-_kick, 0), size), false)
 	if _flash > 0:  # kilatan moncong
-		var tip := Vector2(tex.get_size().x / 2 + 2 - _kick, 0)
+		var tip := Vector2(size.x / 2 + 2 - _kick, 0)
 		var r := 3.0 + _flash * 40.0
 		draw_circle(tip, r, Color(1, 0.95, 0.6, 0.9))
 		draw_circle(tip, r * 0.5, Color(1, 1, 1))

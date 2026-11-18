@@ -1,7 +1,7 @@
 extends Node2D
 ## Peluru musuh. Disimulasikan di tiap peer dari event host; hanya melukai prajurit lokal.
 
-const TEX := preload("res://assets/sprites/peluru_musuh.png")
+const TEX := preload("res://assets/sprites/peluru_musuh.svg")
 const HIT_RADIUS := 9.0
 
 var direction := Vector2.RIGHT

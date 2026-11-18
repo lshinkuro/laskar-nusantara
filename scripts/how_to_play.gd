@@ -4,15 +4,15 @@ extends Control
 signal closed
 
 const PAGES := [
-	{"title": "Bergerak & Menembak", "tex": "res://assets/sprites/prajurit_majapahit.png",
+	{"title": "Bergerak & Menembak", "tex": "res://assets/sprites/prajurit_majapahit.svg",
 		"text": "Gerak: WASD / tombol panah, atau sentuh & geser layar di HP.\nSenjata menembak OTOMATIS ke musuh terdekat - tugasmu menghindar!\nTiap senjata membidik musuh yang berbeda."},
-	{"title": "Rempah & Pasar Rakyat", "tex": "res://assets/sprites/rempah.png",
+	{"title": "Rempah & Pasar Rakyat", "tex": "res://assets/sprites/rempah.svg",
 		"text": "Musuh yang tumbang menjatuhkan rempah. Dekati untuk mengambil.\nSetelah tiap wave, belanja senjata & item di Pasar Rakyat.\nBeli senjata yang SAMA untuk menggabung: tier naik, peluru bertambah."},
-	{"title": "Naik Level & Sinergi", "tex": "res://assets/sprites/ikon_bintang.png",
+	{"title": "Naik Level & Sinergi", "tex": "res://assets/sprites/ikon_bintang.svg",
 		"text": "Rempah juga XP. Tiap naik level, pilih 1 ilmu di akhir wave (tombol 1-4).\nKumpulkan 3 senjata sejenis atau item berlabel sama (Kuliner, Busana,\nPusaka) untuk bonus SINERGI."},
-	{"title": "Semangat Rakyat", "tex": "res://assets/sprites/warga.png",
+	{"title": "Semangat Rakyat", "tex": "res://assets/sprites/warga.svg",
 		"text": "Warga terkurung muncul di peta (ikuti panah \"!\"). Berdiri di dekatnya\nuntuk membebaskan dan mengisi meter Semangat.\nMeter penuh: tekan SPASI atau tombol PEKIK MERDEKA!"},
-	{"title": "Boss & Kemenangan", "tex": "res://assets/sprites/gubernur_jenderal.png",
+	{"title": "Boss & Kemenangan", "tex": "res://assets/sprites/gubernur_jenderal.svg",
 		"text": "Tiap wave ada boss. Lingkaran merah = hantaman, menyingkirlah!\nKetupat hijau memulihkan HP. Esc / P untuk jeda.\nBertahan 20 wave & kalahkan Gubernur Jenderal Besi. MERDEKA!"},
 ]
 

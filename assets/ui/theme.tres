@@ -1,94 +1,94 @@
 [gd_resource type="Theme" load_steps=18 format=3]
 
-[ext_resource type="FontFile" path="res://assets/fonts/PixelifySans.ttf" id="1"]
+[ext_resource type="FontFile" path="res://assets/fonts/Nunito-ExtraBold.ttf" id="1"]
 
 [sub_resource type="StyleBoxFlat" id="panel"]
 content_margin_left = 10.0
 content_margin_top = 8.0
 content_margin_right = 10.0
 content_margin_bottom = 8.0
-bg_color = Color(0.08, 0.065, 0.055, 0.93)
+bg_color = Color(0.09, 0.1, 0.14, 0.94)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.3, 0.23, 0.16, 1)
+border_color = Color(0.2, 0.22, 0.29, 1)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
-shadow_color = Color(0, 0, 0, 0.45)
-shadow_size = 6
-shadow_offset = Vector2(0, 2)
-anti_aliasing = false
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="btn"]
 content_margin_left = 10.0
 content_margin_top = 4.0
 content_margin_right = 10.0
 content_margin_bottom = 5.0
-bg_color = Color(0.66, 0.22, 0.13, 1)
+bg_color = Color(0.89, 0.29, 0.25, 1)
 border_width_left = 0
 border_width_top = 0
 border_width_right = 0
-border_width_bottom = 3
+border_width_bottom = 0
 border_color = Color(0.36, 0.1, 0.06, 1)
 corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="btn_hover"]
 content_margin_left = 10.0
 content_margin_top = 4.0
 content_margin_right = 10.0
 content_margin_bottom = 5.0
-bg_color = Color(0.8, 0.3, 0.17, 1)
+bg_color = Color(0.96, 0.4, 0.33, 1)
 border_width_left = 0
 border_width_top = 0
 border_width_right = 0
-border_width_bottom = 3
+border_width_bottom = 0
 border_color = Color(0.42, 0.13, 0.07, 1)
 corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="btn_pressed"]
 content_margin_left = 10.0
-content_margin_top = 6.0
+content_margin_top = 4.0
 content_margin_right = 10.0
-content_margin_bottom = 3.0
-bg_color = Color(0.52, 0.16, 0.09, 1)
+content_margin_bottom = 5.0
+bg_color = Color(0.74, 0.21, 0.18, 1)
 border_width_left = 0
 border_width_top = 0
 border_width_right = 0
-border_width_bottom = 1
+border_width_bottom = 0
 border_color = Color(0.3, 0.08, 0.05, 1)
 corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="btn_disabled"]
 content_margin_left = 10.0
 content_margin_top = 4.0
 content_margin_right = 10.0
 content_margin_bottom = 5.0
-bg_color = Color(0.2, 0.17, 0.15, 0.9)
+bg_color = Color(0.22, 0.24, 0.3, 0.9)
 border_width_left = 0
 border_width_top = 0
 border_width_right = 0
-border_width_bottom = 3
+border_width_bottom = 0
 border_color = Color(0.12, 0.1, 0.09, 1)
 corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="focus"]
 content_margin_left = 8.0
@@ -106,31 +106,31 @@ corner_radius_top_left = 7
 corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="edit"]
 content_margin_left = 8.0
 content_margin_top = 4.0
 content_margin_right = 8.0
 content_margin_bottom = 4.0
-bg_color = Color(0.05, 0.04, 0.035, 0.95)
+bg_color = Color(0.06, 0.07, 0.1, 0.95)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.35, 0.27, 0.17, 1)
+border_color = Color(0.24, 0.26, 0.34, 1)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="edit_focus"]
 content_margin_left = 8.0
 content_margin_top = 4.0
 content_margin_right = 8.0
 content_margin_bottom = 4.0
-bg_color = Color(0.05, 0.04, 0.035, 0.95)
+bg_color = Color(0.06, 0.07, 0.1, 0.95)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -140,14 +140,14 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="bar_bg"]
 content_margin_left = 0.0
 content_margin_top = 0.0
 content_margin_right = 0.0
 content_margin_bottom = 0.0
-bg_color = Color(0.04, 0.03, 0.03, 0.85)
+bg_color = Color(0.06, 0.07, 0.1, 0.85)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -157,7 +157,7 @@ corner_radius_top_left = 5
 corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="bar_fill"]
 content_margin_left = 0.0
@@ -169,31 +169,31 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="card"]
 content_margin_left = 7.0
 content_margin_top = 6.0
 content_margin_right = 7.0
 content_margin_bottom = 6.0
-bg_color = Color(0.13, 0.105, 0.09, 0.96)
+bg_color = Color(0.14, 0.15, 0.2, 0.97)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.3, 0.24, 0.17, 1)
+border_color = Color(0.24, 0.26, 0.34, 1)
 corner_radius_top_left = 9
 corner_radius_top_right = 9
 corner_radius_bottom_right = 9
 corner_radius_bottom_left = 9
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="card_locked"]
 content_margin_left = 7.0
 content_margin_top = 6.0
 content_margin_right = 7.0
 content_margin_bottom = 6.0
-bg_color = Color(0.13, 0.105, 0.09, 0.96)
+bg_color = Color(0.14, 0.15, 0.2, 0.97)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
@@ -203,24 +203,24 @@ corner_radius_top_left = 9
 corner_radius_top_right = 9
 corner_radius_bottom_right = 9
 corner_radius_bottom_left = 9
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="slider_track"]
 content_margin_left = 0.0
 content_margin_top = 3.0
 content_margin_right = 0.0
 content_margin_bottom = 3.0
-bg_color = Color(0.04, 0.03, 0.03, 1)
+bg_color = Color(0.06, 0.07, 0.1, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.3, 0.24, 0.17, 1)
+border_color = Color(0.24, 0.26, 0.34, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="slider_fill"]
 content_margin_left = 0.0
@@ -232,14 +232,14 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxFlat" id="tooltip"]
 content_margin_left = 6.0
 content_margin_top = 4.0
 content_margin_right = 6.0
 content_margin_bottom = 4.0
-bg_color = Color(0.06, 0.05, 0.04, 0.97)
+bg_color = Color(0.09, 0.1, 0.14, 0.97)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -249,7 +249,7 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-anti_aliasing = false
+anti_aliasing = true
 
 [sub_resource type="StyleBoxEmpty" id="empty"]
 
@@ -262,25 +262,26 @@ Button/colors/font_pressed_color = Color(0.95, 0.85, 0.5, 1)
 Button/colors/font_disabled_color = Color(0.55, 0.5, 0.45, 1)
 Button/colors/font_focus_color = Color(1, 1, 1, 1)
 Button/colors/font_outline_color = Color(0.12, 0.04, 0.02, 1)
-Button/constants/outline_size = 3
+Button/constants/icon_max_width = 16
+Button/constants/outline_size = 0
 Button/styles/normal = SubResource("btn")
 Button/styles/hover = SubResource("btn_hover")
 Button/styles/pressed = SubResource("btn_pressed")
 Button/styles/disabled = SubResource("btn_disabled")
 Button/styles/focus = SubResource("focus")
-Label/colors/font_color = Color(0.97, 0.93, 0.84, 1)
+Label/colors/font_color = Color(0.96, 0.96, 0.98, 1)
 Label/colors/font_outline_color = Color(0.03, 0.02, 0.02, 1)
-Label/constants/outline_size = 3
+Label/constants/outline_size = 2
 RichTextLabel/colors/default_color = Color(0.97, 0.93, 0.84, 1)
 RichTextLabel/colors/font_outline_color = Color(0.03, 0.02, 0.02, 1)
-RichTextLabel/constants/outline_size = 3
+RichTextLabel/constants/outline_size = 1
 LineEdit/colors/font_color = Color(0.97, 0.93, 0.84, 1)
 LineEdit/colors/font_placeholder_color = Color(0.5, 0.44, 0.36, 1)
 LineEdit/colors/caret_color = Color(0.95, 0.85, 0.4, 1)
 LineEdit/styles/normal = SubResource("edit")
 LineEdit/styles/focus = SubResource("edit_focus")
 TooltipPanel/styles/panel = SubResource("tooltip")
-TooltipLabel/colors/font_color = Color(0.97, 0.93, 0.84, 1)
+TooltipLabel/colors/font_color = Color(0.96, 0.96, 0.98, 1)
 TooltipLabel/font_sizes/font_size = 9
 Panel/styles/panel = SubResource("panel")
 PanelContainer/styles/panel = SubResource("panel")
@@ -299,11 +300,11 @@ Clear/styles/panel = SubResource("empty")
 Title/base_type = &"Label"
 Title/colors/font_color = Color(0.98, 0.78, 0.3, 1)
 Title/colors/font_outline_color = Color(0.2, 0.06, 0.02, 1)
-Title/constants/outline_size = 6
+Title/constants/outline_size = 4
 Title/font_sizes/font_size = 22
 Hud/base_type = &"Label"
 Hud/constants/outline_size = 2
 Hud/font_sizes/font_size = 10
 Muted/base_type = &"Label"
-Muted/colors/font_color = Color(0.7, 0.62, 0.52, 1)
+Muted/colors/font_color = Color(0.62, 0.65, 0.74, 1)
 Muted/font_sizes/font_size = 8

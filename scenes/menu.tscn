@@ -70,6 +70,7 @@ text = "1. PEJUANGMU"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
+expand_mode = 1
 stretch_mode = 5
 
 [node name="OutfitName" type="Label" parent="Margin/Root/Columns/LeftPanel/V"]

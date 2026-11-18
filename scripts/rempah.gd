@@ -11,7 +11,7 @@ var _t := randf() * TAU
 
 func _physics_process(delta: float) -> void:
 	_t += delta * 4.0
-	offset.y = sin(_t) * 1.5  # melayang naik-turun pelan
+	offset.y = sin(_t) * 1.5 * Art.SCALE  # melayang naik-turun pelan (offset dalam piksel tekstur)
 	var player = get_parent().local_player
 	if player == null or not player.alive:
 		return

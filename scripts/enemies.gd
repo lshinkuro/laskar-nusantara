@@ -20,19 +20,19 @@ const KETUPAT_CHANCE := 0.06
 
 ## Jenis musuh: pengali stat dari nilai dasar wave + perilaku khusus.
 const TYPES := {
-	"serdadu": {"tex": preload("res://assets/sprites/serdadu_besi.png"), "hp": 1.0, "speed": 1.0, "dmg": 1.0, "scale": 1.5, "radius": 9.0},
-	"anjing": {"tex": preload("res://assets/sprites/anjing_pelacak.png"), "hp": 0.5, "speed": 1.8, "dmg": 0.7, "scale": 1.5, "radius": 8.0},
-	"penembak": {"tex": preload("res://assets/sprites/penembak.png"), "hp": 0.8, "speed": 0.8, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "ranged": true},
-	"perisai": {"tex": preload("res://assets/sprites/serdadu_perisai.png"), "hp": 3.0, "speed": 0.6, "dmg": 1.5, "scale": 1.8, "radius": 11.0},
-	"ranjau": {"tex": preload("res://assets/sprites/tukang_ranjau.png"), "hp": 0.9, "speed": 0.9, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "miner": true},
-	"kavaleri": {"tex": preload("res://assets/sprites/kavaleri_besi.png"), "hp": 1.3, "speed": 1.1, "dmg": 1.5, "scale": 1.7, "radius": 11.0},
-	"granat": {"tex": preload("res://assets/sprites/pelempar_granat.png"), "hp": 0.9, "speed": 0.8, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "ranged": true},
-	"tabib": {"tex": preload("res://assets/sprites/tabib_besi.png"), "hp": 1.2, "speed": 0.85, "dmg": 0.8, "scale": 1.5, "radius": 9.0, "ranged": true},
-	"raksasa": {"tex": preload("res://assets/sprites/raksasa_baja.png"), "hp": 6.0, "speed": 0.45, "dmg": 2.5, "scale": 2.4, "radius": 17.0},
-	"laksamana": {"tex": preload("res://assets/sprites/laksamana_besi.png"), "hp": 1.0, "speed": 0.8, "dmg": 2.0, "scale": 2.8, "radius": 18.0, "boss": "LAKSAMANA BESI"},
-	"komandan": {"tex": preload("res://assets/sprites/komandan_besi.png"), "hp": 1.0, "speed": 0.9, "dmg": 1.5, "scale": 2.6, "radius": 16.0, "boss": "KOMANDAN BESI"},
-	"mandor": {"tex": preload("res://assets/sprites/mandor_kejam.png"), "hp": 1.0, "speed": 0.8, "dmg": 2.0, "scale": 2.8, "radius": 18.0, "boss": "MANDOR KEJAM"},
-	"gubernur": {"tex": preload("res://assets/sprites/gubernur_jenderal.png"), "hp": 1.0, "speed": 0.85, "dmg": 2.5, "scale": 3.2, "radius": 20.0, "boss": "GUBERNUR JENDERAL BESI"},
+	"serdadu": {"tex": preload("res://assets/sprites/serdadu_besi.svg"), "hp": 1.0, "speed": 1.0, "dmg": 1.0, "scale": 1.5, "radius": 9.0},
+	"anjing": {"tex": preload("res://assets/sprites/anjing_pelacak.svg"), "hp": 0.5, "speed": 1.8, "dmg": 0.7, "scale": 1.5, "radius": 8.0},
+	"penembak": {"tex": preload("res://assets/sprites/penembak.svg"), "hp": 0.8, "speed": 0.8, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "ranged": true},
+	"perisai": {"tex": preload("res://assets/sprites/serdadu_perisai.svg"), "hp": 3.0, "speed": 0.6, "dmg": 1.5, "scale": 1.8, "radius": 11.0},
+	"ranjau": {"tex": preload("res://assets/sprites/tukang_ranjau.svg"), "hp": 0.9, "speed": 0.9, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "miner": true},
+	"kavaleri": {"tex": preload("res://assets/sprites/kavaleri_besi.svg"), "hp": 1.3, "speed": 1.1, "dmg": 1.5, "scale": 1.7, "radius": 11.0},
+	"granat": {"tex": preload("res://assets/sprites/pelempar_granat.svg"), "hp": 0.9, "speed": 0.8, "dmg": 1.0, "scale": 1.5, "radius": 9.0, "ranged": true},
+	"tabib": {"tex": preload("res://assets/sprites/tabib_besi.svg"), "hp": 1.2, "speed": 0.85, "dmg": 0.8, "scale": 1.5, "radius": 9.0, "ranged": true},
+	"raksasa": {"tex": preload("res://assets/sprites/raksasa_baja.svg"), "hp": 6.0, "speed": 0.45, "dmg": 2.5, "scale": 2.4, "radius": 17.0},
+	"laksamana": {"tex": preload("res://assets/sprites/laksamana_besi.svg"), "hp": 1.0, "speed": 0.8, "dmg": 2.0, "scale": 2.8, "radius": 18.0, "boss": "LAKSAMANA BESI"},
+	"komandan": {"tex": preload("res://assets/sprites/komandan_besi.svg"), "hp": 1.0, "speed": 0.9, "dmg": 1.5, "scale": 2.6, "radius": 16.0, "boss": "KOMANDAN BESI"},
+	"mandor": {"tex": preload("res://assets/sprites/mandor_kejam.svg"), "hp": 1.0, "speed": 0.8, "dmg": 2.0, "scale": 2.8, "radius": 18.0, "boss": "MANDOR KEJAM"},
+	"gubernur": {"tex": preload("res://assets/sprites/gubernur_jenderal.svg"), "hp": 1.0, "speed": 0.85, "dmg": 2.5, "scale": 3.2, "radius": 20.0, "boss": "GUBERNUR JENDERAL BESI"},
 }
 
 @export var players: Node2D  # World/Players

@@ -40,6 +40,8 @@ const SHAPES := {
 }
 
 const CENTER_CLEAR := 110.0
+## Lantai Lembah Sungai; sungai & jalannya digambar dengan rumus yang sama dengan _river_points().
+const LEMBAH := preload("res://assets/sprites/medan_lembah.svg")
 
 @export var arena_size := Vector2(960, 540)
 @export var map_index := 0
@@ -224,28 +226,8 @@ func _draw_ground() -> void:
 	var full := Rect2(Vector2.ZERO, arena_size)
 	match MAPS[map_index].layout:
 		"lembah":
-			g.draw_rect(full.grow(200), Color(0.26, 0.42, 0.2))
-			g.draw_rect(full, Color(0.36, 0.56, 0.28))
-			for i in 70:  # gradasi rumput alami
-				var c := Vector2(rng.randf() * arena_size.x, rng.randf() * arena_size.y)
-				var col := Color(0.42, 0.62, 0.3, 0.5) if rng.randf() < 0.5 else Color(0.3, 0.5, 0.24, 0.5)
-				g.draw_circle(c, rng.randf_range(20, 60), col)
-			for t in TERRACES:
-				_draw_terrace(g, t.c, t.r, t.seed, rng)
-			# Jalan setapak meliuk dari barat ke timur, menyeberang sungai lewat jembatan
-			var path := PackedVector2Array()
-			for i in 17:
-				var x := i * 60.0
-				path.append(Vector2(x, 300 + sin(i * 0.7) * 40 - i * 3))
-			g.draw_polyline(path, Color(0.5, 0.38, 0.22), 18.0)
-			g.draw_polyline(path, Color(0.62, 0.5, 0.32), 12.0)
-			_draw_river(g)
-			for i in 900:  # rumput & bunga liar
-				var p := Vector2(rng.randf() * arena_size.x, rng.randf() * arena_size.y)
-				if rng.randf() < 0.12:
-					g.draw_circle(p, 1.5, [Color(0.95, 0.3, 0.3), Color(1, 0.95, 0.9), Color(1, 0.85, 0.3), Color(0.8, 0.5, 0.95)][rng.randi() % 4])
-				else:
-					_tuft(g, p, Color(0.48, 0.7, 0.34) if rng.randf() < 0.6 else Color(0.28, 0.46, 0.2))
+			g.draw_rect(full.grow(200), Color(0.24, 0.48, 0.2))
+			g.draw_texture_rect(LEMBAH, full, false)  # sawah, sungai, jalan & jembatan (tools/make_art.py)
 		"hutan":
 			g.draw_rect(full.grow(200), Color(0.13, 0.22, 0.12))
 			g.draw_rect(full, Color(0.2, 0.33, 0.17))
@@ -330,45 +312,6 @@ func _draw_ground() -> void:
 	g.draw_rect(full, Color(0.2, 0.12, 0.06), false, 3.0)
 
 
-## Kelompok sawah terasering: pusat, radius (x, y), seed bentuk.
-const TERRACES := [
-	{"c": Vector2(190, 140), "r": Vector2(150, 110), "seed": 1.0},
-	{"c": Vector2(260, 450), "r": Vector2(140, 95), "seed": 2.5},
-	{"c": Vector2(880, 470), "r": Vector2(120, 90), "seed": 4.0},
-]
-const TERRACE_COLORS := [Color(0.42, 0.62, 0.62), Color(0.4, 0.64, 0.3), Color(0.82, 0.7, 0.32), Color(0.34, 0.56, 0.26), Color(0.45, 0.66, 0.66)]
-
-
-func _terrace_ring(c: Vector2, r: Vector2, k: float, seed_v: float) -> PackedVector2Array:
-	var pts := PackedVector2Array()
-	for i in 48:
-		var a := TAU * i / 48
-		var wobble := 1.0 + 0.09 * sin(3 * a + seed_v) + 0.05 * sin(5 * a + seed_v * 2)
-		pts.append(c + Vector2(cos(a) * r.x, sin(a) * r.y) * k * wobble)
-	return pts
-
-
-func _draw_terrace(g: Node2D, c: Vector2, r: Vector2, seed_v: float, rng: RandomNumberGenerator) -> void:
-	var rings := 8
-	for i in rings:
-		var k := 1.0 - i * 0.115
-		var ring := _terrace_ring(c, r, k, seed_v)
-		var col: Color = TERRACE_COLORS[(i + int(seed_v)) % TERRACE_COLORS.size()]
-		g.draw_colored_polygon(ring, col)
-		g.draw_polyline(ring + PackedVector2Array([ring[0]]), Color(0.48, 0.38, 0.22), 3.0)  # pematang
-		g.draw_polyline(ring + PackedVector2Array([ring[0]]), Color(0.6, 0.5, 0.3), 1.0)
-		# isi tiap lapis: padi atau kilau air
-		var inner := k - 0.06
-		for j in 30:
-			var a := rng.randf() * TAU
-			var wob := 1.0 + 0.09 * sin(3 * a + seed_v) + 0.05 * sin(5 * a + seed_v * 2)
-			var p := c + Vector2(cos(a) * r.x, sin(a) * r.y) * inner * wob
-			if col.b > 0.5:
-				g.draw_line(p, p + Vector2(8, 0), Color(0.85, 0.95, 0.95, 0.6), 1.0)
-			else:
-				_tuft(g, p, col.lightened(0.25))
-
-
 ## Jalur sungai berkelok dari utara ke selatan (sama di semua peer).
 func _river_points() -> PackedVector2Array:
 	var pts := PackedVector2Array()
@@ -376,24 +319,6 @@ func _river_points() -> PackedVector2Array:
 		var y := -20.0 + i * 20.0
 		pts.append(Vector2(640 + 50 * sin(y * 0.012) + 22 * sin(y * 0.031), y))
 	return pts
-
-
-func _draw_river(g: Node2D) -> void:
-	var river := _river_points()
-	g.draw_polyline(river, Color(0.78, 0.7, 0.48), 46.0)  # tepian pasir
-	g.draw_polyline(river, Color(0.24, 0.42, 0.52), 34.0)
-	g.draw_polyline(river, Color(0.32, 0.55, 0.65), 24.0)
-	for i in range(0, river.size(), 2):
-		var p := river[i] + Vector2(-8 + (i % 3) * 6, 4)
-		g.draw_line(p, p + Vector2(12, 0), Color(0.8, 0.92, 0.95, 0.7), 1.0)
-	# Jembatan kayu di tempat jalan setapak menyeberang
-	var bridge_y := 300 + sin(640 / 60.0 * 0.7) * 40 - 640 / 60.0 * 3
-	var bx := 640 + 50 * sin(bridge_y * 0.012) + 22 * sin(bridge_y * 0.031)
-	for k in 9:
-		g.draw_rect(Rect2(bx - 26 + k * 6, bridge_y - 9, 5, 18), Color(0.55, 0.38, 0.2))
-		g.draw_line(Vector2(bx - 26 + k * 6, bridge_y - 9), Vector2(bx - 26 + k * 6, bridge_y + 9), Color(0.35, 0.22, 0.1), 1.0)
-	g.draw_line(Vector2(bx - 27, bridge_y - 10), Vector2(bx + 27, bridge_y - 10), Color(0.35, 0.22, 0.1), 2.0)
-	g.draw_line(Vector2(bx - 27, bridge_y + 10), Vector2(bx + 27, bridge_y + 10), Color(0.35, 0.22, 0.1), 2.0)
 
 
 func _tuft(g: Node2D, p: Vector2, c: Color) -> void:

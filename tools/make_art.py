@@ -10,7 +10,9 @@ Semua sprite menghadap ke kanan.
 """
 import colorsys
 import hashlib
+import math
 import os
+import random
 import re
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
@@ -49,14 +51,14 @@ def rgrad(c):
     return f"url(#{gid})"
 
 
-def save(folder, name, w, h, body):
-    """w, h = ukuran logis; body digambar di koordinat 0..w*4, 0..h*4."""
+def save(folder, name, w, h, body, unit=SCALE, import_scale=SCALE):
+    """w, h = ukuran logis; body digambar di koordinat 0..w*unit, 0..h*unit; diimpor import_scale kali."""
     d = "".join(_defs[g] for g in dict.fromkeys(re.findall(r"url\(#(g\d+)\)", body)))
     path = os.path.join(folder, name + ".svg")
     with open(path, "w") as f:
-        f.write(f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w * SCALE} {h * SCALE}">'
+        f.write(f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w * unit} {h * unit}">'
                 f'<defs>{d}</defs>{body}</svg>')
-    _write_import(path)
+    _write_import(path, import_scale)
 
 
 IMPORT = """[remap]
@@ -104,7 +106,7 @@ editor/convert_colors_with_editor_theme=false
 """
 
 
-def _write_import(path):
+def _write_import(path, scale):
     rel = os.path.relpath(path, ROOT).replace(os.sep, "/")
     res = "res://" + rel
     name = os.path.basename(path)
@@ -113,7 +115,7 @@ def _write_import(path):
     if os.path.exists(imp):  # jangan ganti uid yang sudah dibuat Godot
         return
     with open(imp, "w") as f:
-        f.write(IMPORT.format(name=name, md5=md5, res=res, scale=SCALE))
+        f.write(IMPORT.format(name=name, md5=md5, res=res, scale=scale))
 
 
 # --- Orang (prajurit, karakter, serdadu, boss, warga) -----------------------------
@@ -761,6 +763,228 @@ ITEM_CUSTOM = {
 }
 
 
+# --- Medan: Lembah Sungai -------------------------------------------------------------
+# Koordinat dunia 960x540. Sungai, jalan, terasering, & jembatan memakai rumus yang sama
+# dengan scripts/map.gd supaya objek & penghalang tetap pas di atasnya.
+
+ARENA = (960, 540)
+TERASERING = [((190, 140), (150, 110), 1.0), ((260, 450), (140, 95), 2.5), ((880, 470), (120, 90), 4.0)]
+
+
+def _sungai():
+    pts = []
+    for i in range(31):
+        y = -20.0 + i * 20.0
+        pts.append((640 + 50 * math.sin(y * 0.012) + 22 * math.sin(y * 0.031), y))
+    return pts
+
+
+def _jalan():
+    return [(i * 60.0, 300 + math.sin(i * 0.7) * 40 - i * 3) for i in range(17)]
+
+
+def _halus(pts, tutup=False):
+    """Path kurva mulus (Catmull-Rom -> Bezier) lewat titik-titik."""
+    n = len(pts)
+    get = (lambda i: pts[i % n]) if tutup else (lambda i: pts[max(0, min(n - 1, i))])
+    d = f"M{pts[0][0]:.1f} {pts[0][1]:.1f}"
+    for i in range(n if tutup else n - 1):
+        p0, p1, p2, p3 = get(i - 1), get(i), get(i + 1), get(i + 2)
+        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
+        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
+        d += f" C{c1[0]:.1f} {c1[1]:.1f} {c2[0]:.1f} {c2[1]:.1f} {p2[0]:.1f} {p2[1]:.1f}"
+    return d + (" Z" if tutup else "")
+
+
+def _cincin(c, r, k, sv):
+    pts = []
+    for i in range(48):
+        a = math.tau * i / 48
+        w = 1.0 + 0.09 * math.sin(3 * a + sv) + 0.05 * math.sin(5 * a + sv * 2)
+        pts.append((c[0] + math.cos(a) * r[0] * k * w, c[1] + math.sin(a) * r[1] * k * w))
+    return pts
+
+
+def medan_lembah():
+    rnd = random.Random(7)
+    W, H = ARENA
+    s = f'<rect width="{W}" height="{H}" fill="{grad("#78c25e", 1.08, 0.92)}"/>'
+    for _ in range(26):  # bercak rumput lembut
+        x, y, r = rnd.uniform(0, W), rnd.uniform(0, H), rnd.uniform(50, 130)
+        c = rnd.choice(["#8fd46c", "#64ac4c", "#9ad877"])
+        s += f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="{r:.0f}" ry="{r * 0.6:.0f}" fill="{c}" opacity="0.35"/>'
+    # Sawah terasering: lapis bertingkat dengan bayangan undakan, hijau padi & air
+    warna = ["#9ccf5a", "#7dbd4a", "#a8d8c8", "#8cc850", "#b4dc6a"]
+    for c, r, sv in TERASERING:
+        s += f'<path d="{_halus(_cincin((c[0] + 4, c[1] + 6), r, 1.04, sv), True)}" fill="#3e7a34" opacity="0.35"/>'
+        for i in range(6):
+            k = 1.0 - i * 0.15
+            ring = _cincin(c, r, k, sv)
+            col = warna[(i + int(sv)) % len(warna)]
+            s += f'<path d="{_halus([(x, y + 3) for x, y in ring], True)}" fill="{shade(col, 0.72)}"/>'
+            s += f'<path d="{_halus(ring, True)}" fill="{col}" stroke="#e8f0b0" stroke-width="2.5"/>'
+            if col == "#a8d8c8":  # kilau air sawah
+                for _ in range(6):
+                    a = rnd.uniform(0, math.tau)
+                    x = c[0] + math.cos(a) * r[0] * (k - 0.07)
+                    y = c[1] + math.sin(a) * r[1] * (k - 0.07)
+                    s += f'<path d="M{x:.0f} {y:.0f} l10 0" stroke="#ffffff" stroke-width="2" opacity="0.7" stroke-linecap="round"/>'
+            else:  # barisan padi
+                for _ in range(int(40 * k)):
+                    a = rnd.uniform(0, math.tau)
+                    x = c[0] + math.cos(a) * r[0] * (k - 0.07)
+                    y = c[1] + math.sin(a) * r[1] * (k - 0.07)
+                    s += f'<path d="M{x:.0f} {y:.0f} l-2 -5 M{x:.0f} {y:.0f} l2 -5" stroke="{shade(col, 0.6)}" stroke-width="1.4" stroke-linecap="round"/>'
+    # Jalan setapak tanah
+    jalan = _halus(_jalan())
+    s += (f'<path d="{jalan}" fill="none" stroke="#9a6c3c" stroke-width="22" stroke-linecap="round"/>'
+          f'<path d="{jalan}" fill="none" stroke="#d8b07a" stroke-width="16" stroke-linecap="round"/>'
+          f'<path d="{jalan}" fill="none" stroke="#e8c896" stroke-width="5" stroke-linecap="round" stroke-dasharray="14 22" opacity="0.8"/>')
+    for x, y in _jalan():
+        for _ in range(3):
+            s += f'<circle cx="{x + rnd.uniform(-25, 25):.0f}" cy="{y + rnd.uniform(-5, 5):.0f}" r="{rnd.uniform(1.2, 2.2):.1f}" fill="#b08a5a"/>'
+    # Sungai: tepian pasir, air bergradasi, kilau, teratai, batu tepi
+    sungai = _halus(_sungai())
+    for width, col, extra in ((58, "#c8a868", ""), (50, "#efdca0", ""), (38, "#3a86b0", ""), (28, "#56a8cc", ""),
+                              (10, "#7cc4e0", ' opacity="0.7"')):
+        s += f'<path d="{sungai}" fill="none" stroke="{col}" stroke-width="{width}" stroke-linecap="round"{extra}/>'
+    for i, (x, y) in enumerate(_sungai()):
+        if i % 2 == 0:
+            s += f'<path d="M{x - 10 + (i % 3) * 6:.0f} {y:.0f} q6 -3 12 0" fill="none" stroke="#e8f8ff" stroke-width="2" opacity="0.8" stroke-linecap="round"/>'
+        if i % 5 == 1:
+            px = x + (12 if i % 2 else -12)
+            s += (f'<ellipse cx="{px:.0f}" cy="{y + 6:.0f}" rx="6" ry="4" fill="#5ab04a" stroke="#2e6a2a" stroke-width="1"/>'
+                  f'<circle cx="{px + 2:.0f}" cy="{y + 5:.0f}" r="2" fill="#ff8fba"/>')
+        if i % 4 == 2:
+            for side in (-27, 27):
+                s += f'<ellipse cx="{x + side:.0f}" cy="{y:.0f}" rx="{rnd.uniform(3, 5):.1f}" ry="2.5" fill="#a89a8a" stroke="#6a5a4a" stroke-width="0.8"/>'
+    # Jembatan kayu di tempat jalan menyeberang (sama dengan map.gd)
+    by = 300 + math.sin(640 / 60.0 * 0.7) * 40 - 640 / 60.0 * 3
+    bx = 640 + 50 * math.sin(by * 0.012) + 22 * math.sin(by * 0.031)
+    s += f'<rect x="{bx - 32:.1f}" y="{by - 10:.1f}" width="64" height="26" rx="3" fill="#000" opacity="0.2"/>'
+    papan = grad("#b07a40", 1.2, 0.8)
+    for k in range(10):
+        s += f'<rect x="{bx - 30 + k * 6:.1f}" y="{by - 11:.1f}" width="5.4" height="22" rx="1" fill="{papan}" stroke="#5a3214" stroke-width="0.8"/>'
+    for y in (by - 12, by + 11):
+        s += f'<path d="M{bx - 33:.1f} {y:.1f} L{bx + 33:.1f} {y:.1f}" stroke="#5a3214" stroke-width="3.2" stroke-linecap="round"/>'
+        s += f'<path d="M{bx - 33:.1f} {y:.1f} L{bx + 33:.1f} {y:.1f}" stroke="#c8873a" stroke-width="1.6" stroke-linecap="round"/>'
+    # Rumput & bunga liar (di luar sungai)
+    sungai_pts = _sungai()
+    for _ in range(260):
+        x, y = rnd.uniform(4, W - 4), rnd.uniform(6, H - 4)
+        if any(abs(x - sx) < 32 and abs(y - sy) < 14 for sx, sy in sungai_pts):
+            continue
+        if rnd.random() < 0.18:
+            c = rnd.choice(["#ff6a6a", "#ffffff", "#ffd23f", "#c890ff"])
+            s += "".join(f'<circle cx="{x + 2.2 * math.cos(a):.1f}" cy="{y + 2.2 * math.sin(a):.1f}" r="1.6" fill="{c}"/>' for a in (0, 1.26, 2.51, 3.77, 5.03))
+            s += f'<circle cx="{x:.1f}" cy="{y:.1f}" r="1.2" fill="#f2a020"/>'
+        else:
+            c = rnd.choice(["#4e9a3e", "#5aa846", "#a8e080"])
+            s += f'<path d="M{x:.0f} {y:.0f} l-3 -6 M{x:.0f} {y:.0f} l0 -7 M{x:.0f} {y:.0f} l3 -6" stroke="{c}" stroke-width="1.5" stroke-linecap="round"/>'
+    s += f'<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" fill="none" stroke="#3e7a34" stroke-width="3" rx="4"/>'
+    return s
+
+
+# Objek medan (dipakai obstacle.gd): kaki objek = tengah bawah gambar, 3 piksel di atas tepi bawah.
+def _bayang(cx, cy, rx, ry=None):
+    return f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry or rx * 0.3}" fill="#000" opacity="0.22"/>'
+
+
+def objek_semak():
+    return _bayang(48, 56, 40) + (
+        f'<circle cx="28" cy="40" r="17" fill="{rgrad("#4e9a3e")}" {O}/>'
+        f'<circle cx="68" cy="40" r="17" fill="{rgrad("#4e9a3e")}" {O}/>'
+        f'<circle cx="48" cy="30" r="20" fill="{rgrad("#64b04c")}" {O}/>'
+        '<path d="M36 22 Q44 14 54 16" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.35" stroke-linecap="round"/>'
+        f'<g fill="#ff6a8a" stroke="{INK}" stroke-width="1"><circle cx="32" cy="34" r="3"/><circle cx="60" cy="26" r="3"/><circle cx="70" cy="42" r="3"/></g>')
+
+
+def objek_batu():
+    return _bayang(48, 56, 40) + (
+        f'<path d="M8 54 L14 30 L34 14 L62 16 L84 34 L88 54 Z" fill="{grad("#a8a49c", 1.25, 0.7)}" {O}/>'
+        '<path d="M14 30 L34 14 L46 30 L30 40 Z" fill="#cfcac0" opacity="0.8"/>'
+        '<path d="M46 30 L62 16 L84 34 L64 40 Z" fill="#8a8680" opacity="0.6"/>'
+        f'<path d="M30 40 L46 30 L64 40 L60 54" fill="none" stroke="{INK}" stroke-width="1.4" opacity="0.5"/>'
+        '<path d="M16 44 Q30 38 40 46 Q30 52 16 50 Z" fill="#6aa040" opacity="0.85"/>')
+
+
+def objek_kelapa():
+    s = _bayang(80, 232, 34)
+    s += f'<path d="M78 232 Q76 150 96 64" fill="none" stroke="{INK}" stroke-width="14" stroke-linecap="round"/>'
+    s += f'<path d="M78 232 Q76 150 96 64" fill="none" stroke="{grad("#a8692e", 1.3, 0.8, False)}" stroke-width="10" stroke-linecap="round"/>'
+    for t in range(20, 160, 16):
+        s += f'<path d="M{70 + t * 0.06:.0f} {232 - t:.0f} l12 -2" stroke="#6a3a14" stroke-width="2"/>'
+    for a in (math.pi + 0.3, math.pi + 1.1, math.pi + 1.6, -0.9, -0.2, 0.5, 2.4):
+        ex, ey = 96 + math.cos(a) * 72, 60 + math.sin(a) * 40 + 14
+        c1 = (96 + math.cos(a) * 40, 60 + math.sin(a) * 24 - 16)
+        c2 = (96 + math.cos(a) * 44, 60 + math.sin(a) * 24 + 2)
+        s += (f'<path d="M96 60 Q{c1[0]:.0f} {c1[1]:.0f} {ex:.0f} {ey:.0f} Q{c2[0]:.0f} {c2[1]:.0f} 96 64 Z" fill="{grad("#4ea83a", 1.3, 0.75)}" {O1}/>'
+              f'<path d="M96 62 Q{c1[0]:.0f} {c1[1] + 6:.0f} {ex:.0f} {ey - 2:.0f}" fill="none" stroke="#2e6a2a" stroke-width="1.4"/>')
+    s += (f'<g {O1}><circle cx="88" cy="70" r="7" fill="{rgrad("#7a5a2a")}"/><circle cx="102" cy="72" r="7" fill="{rgrad("#6a4a1a")}"/>'
+          f'<circle cx="95" cy="78" r="7" fill="{rgrad("#8a6a3a")}"/></g>')
+    return s
+
+
+def objek_pisang():
+    return _bayang(64, 152, 30) + (
+        f'<rect x="56" y="80" width="16" height="74" rx="7" fill="{grad("#8ab04a", 1.3, 0.7, False)}" {O}/>'
+        '<path d="M60 96 L68 92 M60 116 L68 112 M60 136 L68 132" stroke="#5a7a2a" stroke-width="2"/>'
+        f'<path d="M64 84 Q20 70 6 100 Q34 102 64 90 Z" fill="{grad("#5ab83e", 1.3, 0.75)}" {O1}/>'
+        f'<path d="M64 84 Q108 60 124 92 Q94 98 64 90 Z" fill="{grad("#4ea83a", 1.3, 0.75)}" {O1}/>'
+        f'<path d="M64 84 Q40 30 64 4 Q84 40 66 86 Z" fill="{grad("#6ac84a", 1.3, 0.75)}" {O1}/>'
+        f'<path d="M64 84 Q92 40 120 34 Q106 70 68 88 Z" fill="{grad("#58b03e", 1.3, 0.75)}" {O1}/>'
+        f'<path d="M64 84 Q36 38 10 40 Q22 70 60 88 Z" fill="{grad("#4ea83a", 1.25, 0.75)}" {O1}/>'
+        '<path d="M64 84 Q60 46 64 8 M64 86 Q96 56 118 38 M64 86 Q34 56 12 42" fill="none" stroke="#2e6a2a" stroke-width="1.4"/>'
+        f'<g {O1}><path d="M76 98 Q90 102 92 116 Q82 112 76 104 Z" fill="#f2d84c"/><path d="M76 104 Q92 112 90 126 Q80 120 76 110 Z" fill="#e8c83a"/></g>'
+        '<path d="M74 94 Q80 92 78 100" fill="none" stroke="#7a3a20" stroke-width="2.5"/>')
+
+
+def objek_gubuk():
+    s = _bayang(96, 162, 80, 14)
+    s += f'<g stroke="{INK}" stroke-width="2" fill="#8a5a2a"><rect x="30" y="110" width="8" height="54"/><rect x="154" y="110" width="8" height="54"/><rect x="92" y="110" width="8" height="54"/></g>'
+    s += f'<rect x="22" y="104" width="148" height="10" rx="2" fill="{grad("#b07a40")}" {O}/>'
+    s += f'<rect x="34" y="62" width="124" height="44" fill="{grad("#e0c080", 1.15, 0.8)}" {O}/>'
+    s += "".join(f'<path d="M{x} 64 L{x} 104" stroke="#b08a50" stroke-width="2"/>' for x in range(42, 156, 8))
+    s += f'<rect x="84" y="70" width="26" height="36" rx="2" fill="{grad("#6a3a14")}" {O1}/>'
+    s += f'<rect x="44" y="72" width="24" height="18" rx="2" fill="#3a2410" {O1}/><path d="M56 72 L56 90 M44 81 L68 81" stroke="#b08a50" stroke-width="2"/>'
+    s += f'<path d="M8 66 L60 14 L132 14 L184 66 Z" fill="{grad("#d8a84a", 1.25, 0.7)}" {O}/>'
+    s += "".join(f'<path d="M{20 + i * 12} 64 L{62 + i * 5} 18" stroke="#a87a2a" stroke-width="1.6" opacity="0.8"/>' for i in range(14))
+    s += '<path d="M8 66 ' + " ".join(f"Q{14 + i * 12} 72 {20 + i * 12} 66" for i in range(14)) + '" fill="none" stroke="#a87a2a" stroke-width="3"/>'
+    s += f'<path d="M60 14 L132 14" stroke="{INK}" stroke-width="5" stroke-linecap="round"/><path d="M60 14 L132 14" stroke="#8a5a2a" stroke-width="3" stroke-linecap="round"/>'
+    s += '<path d="M26 56 L64 20" stroke="#ffffff" stroke-width="3" opacity="0.3" stroke-linecap="round"/>'
+    return s
+
+
+def objek_orang_orangan():
+    return _bayang(48, 136, 20) + (
+        f'<path d="M48 136 L48 40" stroke="{INK}" stroke-width="7" stroke-linecap="round"/><path d="M48 136 L48 40" stroke="#a8692e" stroke-width="4" stroke-linecap="round"/>'
+        f'<path d="M14 64 L82 64" stroke="{INK}" stroke-width="6" stroke-linecap="round"/><path d="M14 64 L82 64" stroke="#a8692e" stroke-width="3" stroke-linecap="round"/>'
+        f'<path d="M30 58 L66 58 L70 100 Q48 106 26 100 Z" fill="{grad("#d04a3a", 1.25, 0.75)}" {O}/>'
+        f'<rect x="34" y="74" width="10" height="10" fill="#f2c94c" {O1}/><rect x="52" y="84" width="10" height="9" fill="#5a8ad0" {O1}/>'
+        '<path d="M14 64 l-6 6 M14 64 l-6 -2 M82 64 l6 6 M82 64 l6 -2 M40 102 l-2 8 M48 104 l0 8 M56 102 l2 8" stroke="#e8c46a" stroke-width="2.5" stroke-linecap="round"/>'
+        f'<circle cx="48" cy="44" r="13" fill="{rgrad("#e8d8a0")}" {O}/>'
+        f'<path d="M42 42 l4 4 M46 42 l-4 4 M52 42 l4 4 M56 42 l-4 4" stroke="{INK}" stroke-width="1.6"/>'
+        f'<path d="M42 51 Q48 54 54 51" fill="none" stroke="{INK}" stroke-width="1.6"/>'
+        f'<path d="M18 38 L48 18 L78 38 Q48 44 18 38 Z" fill="{grad("#e8c46a", 1.25, 0.75)}" {O}/>'
+        '<path d="M48 18 L38 39 M48 18 L58 39" stroke="#a87a2a" stroke-width="1.2"/>')
+
+
+def objek_bebek():
+    return ('<ellipse cx="32" cy="40" rx="26" ry="6" fill="#3a86b0" opacity="0.5"/>'
+            f'<path d="M8 32 Q8 20 24 20 L40 22 Q50 24 48 34 Q40 44 22 42 Q8 40 8 32 Z" fill="{grad("#ffffff", 1.0, 0.82)}" {O}/>'
+            f'<path d="M4 26 L12 30 L8 34 Z" fill="#f3f3f3" {O1}/>'
+            '<path d="M18 30 Q28 26 36 32" fill="none" stroke="#c8ccd4" stroke-width="2"/>'
+            f'<circle cx="44" cy="16" r="9" fill="{rgrad("#ffffff")}" {O}/>'
+            f'<path d="M51 16 L62 18 L52 22 Z" fill="#f5a020" {O1}/>'
+            f'<circle cx="46" cy="14" r="1.8" fill="{INK}"/>')
+
+
+# nama: (lebar, tinggi logis, fungsi gambar)
+OBJEK = {"semak": (24, 16, objek_semak), "batu": (24, 16, objek_batu), "kelapa": (40, 60, objek_kelapa),
+         "pisang": (32, 40, objek_pisang), "gubuk": (48, 42, objek_gubuk), "orang_orangan": (24, 36, objek_orang_orangan),
+         "bebek": (16, 12, objek_bebek)}
+
+
 def main():
     os.makedirs(SPRITES, exist_ok=True)
     os.makedirs(ICONS, exist_ok=True)
@@ -784,6 +1008,9 @@ def main():
         save(SPRITES, f"peluru_{name}", w, h, body)
     for name, (w, h, body) in IKON.items():
         save(SPRITES, name, w, h, body)
+    save(SPRITES, "medan_lembah", *ARENA, medan_lembah(), unit=1, import_scale=2)
+    for name, (w, h, fn) in OBJEK.items():
+        save(SPRITES, f"objek_{name}", w, h, fn())
     names = list(ITEM_SIMPLE) + list(ITEM_CUSTOM)
     for name in names:
         save(ICONS, name, 16, 16, ikon_item(name))

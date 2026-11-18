@@ -8,6 +8,9 @@ signal wave_ended(wave: int)
 const LAST_WAVE := 20
 const MAX_ENEMIES := 150
 const MIN_SPAWN_DISTANCE := 150.0
+## Item & senjata pemain melipat-gandakan damage, jadi musuh juga tumbuh berlipat per wave.
+const HP_GROWTH := 1.08
+const DMG_GROWTH := 1.04
 
 @export var enemies: Node
 @export var pickups: Node
@@ -51,9 +54,9 @@ func _start(n: int) -> void:
 	_boss_spawned = false
 	_spawn_cooldown = 1.0
 	enemies.wave = n
-	enemies.base_hp = 6 + n * 3
+	enemies.base_hp = roundi((6 + n * 3) * _power(n, HP_GROWTH, "hp"))
 	enemies.base_speed = 45.0 + n * 2.0
-	enemies.base_damage = 2 + n / 4
+	enemies.base_damage = roundi((2 + n / 4) * _power(n, DMG_GROWTH, "dmg"))
 	running = true
 	wave_started.emit(n)
 
@@ -89,7 +92,7 @@ func _process(delta: float) -> void:
 		# shortcut: kurva kesulitan hardcode, pindah ke data/waves/*.tres di M4.
 		_spawn_cooldown = maxf(1.2 - wave * 0.08, 0.3)
 		var alive := _alive_players()
-		for i in roundi((1 + wave / 3) * player_factor):
+		for i in roundi((1 + wave / 3) * player_factor * Net.DIFFICULTIES[Net.difficulty].count):
 			if enemies.get_child_count() >= MAX_ENEMIES or alive.is_empty():
 				break
 			enemies.spawn_basic(_pick_kind(), _spawn_point(alive))
@@ -122,10 +125,14 @@ func _spawn_boss(player_factor: float) -> void:
 		return
 	var kind := "gubernur" if wave == LAST_WAVE else "mandor" if wave in [10, 15] \
 		else "laksamana" if wave in [9, 12, 17] else "komandan"
-	var hp: float = (30 + wave * 35) * player_factor * {"gubernur": 3.0, "mandor": 1.6, "laksamana": 1.8}.get(kind, 1.0)
+	var hp: float = (30 + wave * 35) * _power(wave, HP_GROWTH, "hp") * player_factor * {"gubernur": 3.0, "mandor": 1.6, "laksamana": 1.8}.get(kind, 1.0)
 	var t: Dictionary = enemies.TYPES[kind]
 	enemies.spawn(kind, map.resolve(_spawn_point(alive), t.radius), roundi(hp),
-		(45.0 + wave * 2.0) * t.speed, roundi((2 + wave / 4) * t.dmg))
+		(45.0 + wave * 2.0) * t.speed, roundi((2 + wave / 4) * _power(wave, DMG_GROWTH, "dmg") * t.dmg))
+
+
+func _power(n: int, growth: float, key: String) -> float:
+	return pow(growth, n) * Net.DIFFICULTIES[Net.difficulty][key]
 
 
 func _alive_players() -> Array:

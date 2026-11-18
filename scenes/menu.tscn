@@ -115,10 +115,19 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.69, 0.29, 1)
 text = "2. PILIH KARAKTER"
 
-[node name="CharList" type="VBoxContainer" parent="Margin/Root/Columns/CharPanel/V"]
+[node name="CharList" type="GridContainer" parent="Margin/Root/Columns/CharPanel/V"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 3
+theme_override_constants/h_separation = 3
+theme_override_constants/v_separation = 3
+columns = 5
+
+[node name="CharInfo" type="Label" parent="Margin/Root/Columns/CharPanel/V"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(226, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 8
+autowrap_mode = 3
 
 [node name="RightPanel" type="PanelContainer" parent="Margin/Root/Columns"]
 custom_minimum_size = Vector2(176, 0)
@@ -137,6 +146,16 @@ theme_override_constants/separation = 5
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.69, 0.29, 1)
 text = "3. MULAI BERPERANG"
+
+[node name="DiffHint" type="Label" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
+layout_mode = 2
+theme_type_variation = &"Muted"
+text = "Tingkat kesulitan:"
+
+[node name="DiffRow" type="HBoxContainer" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="SoloBtn" type="Button" parent="Margin/Root/Columns/RightPanel/V/MainPanel"]
 unique_name_in_owner = true

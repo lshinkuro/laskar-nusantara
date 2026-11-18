@@ -5,6 +5,15 @@ extends Node2D
 const Rempah := preload("res://scenes/rempah.tscn")
 const KETUPAT_TEXTURE := preload("res://assets/sprites/ketupat.png")
 const PETI_TEXTURE := preload("res://assets/sprites/peti_pusaka.png")
+## Rempah tampil acak (nilainya sama): pala, cengkeh, lada, kayu manis, bunga lawang, kepeng.
+const REMPAH_TEXTURES := [
+	preload("res://assets/sprites/rempah.png"),
+	preload("res://assets/sprites/rempah_cengkeh.png"),
+	preload("res://assets/sprites/rempah_lada.png"),
+	preload("res://assets/sprites/rempah_kayu_manis.png"),
+	preload("res://assets/sprites/rempah_bunga_lawang.png"),
+	preload("res://assets/sprites/rempah_kepeng.png"),
+]
 
 ## Pemain lokal membuka Peti Pusaka (main memberi isinya).
 signal chest_opened
@@ -32,6 +41,9 @@ func _spawn(id: int, pos: Vector2, value: int, kind: String) -> void:
 		r.texture = KETUPAT_TEXTURE
 	elif kind == "peti":
 		r.texture = PETI_TEXTURE
+	else:
+		r.texture = REMPAH_TEXTURES.pick_random()
+		r.flip_h = randf() < 0.5
 	add_child(r)
 
 

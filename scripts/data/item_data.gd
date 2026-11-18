@@ -15,6 +15,6 @@ extends Resource
 ## Label sinergi, mis. "kuliner", "busana", "pusaka" (lihat scripts/synergy.gd).
 @export var tags: PackedStringArray = []
 ## Efek khusus (lihat Player.apply_item): wayang, lifesteal, burn_chance, thorns, pulse,
-## death_save, rempah_heal. Nilainya di special_value.
+## death_save, rempah_heal, turret. Nilainya di special_value.
 @export var special := ""
 @export var special_value := 0.0

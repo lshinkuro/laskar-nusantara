@@ -44,7 +44,7 @@ var _cards: HBoxContainer
 var _reroll: Button
 var _stats: RichTextLabel
 var _weapons: HBoxContainer
-var _items: HBoxContainer
+var _items: HFlowContainer
 var _bag_detail: RichTextLabel
 var _combine_btn: Button
 var _sell_btn: Button
@@ -219,7 +219,7 @@ func _refresh_bag() -> void:
 		b.modulate = Color(1.3, 1.2, 0.6) if _sel.get("weapon") == w else Color.WHITE
 		b.pressed.connect(func(): _sel = {"weapon": w}; _refresh_bag())
 		_weapons.add_child(b)
-	_item_count.text = "Item %d/%d" % [player.items.size(), player.MAX_ITEMS]
+	_item_count.text = "Item %d" % player.items.size()
 	for i in player.items.size():
 		var it: ItemData = player.items[i]
 		var lv: int = player.item_levels[i]
@@ -395,10 +395,6 @@ func _card(i: int) -> Control:
 	elif is_weapon and not player.can_take_weapon(data):
 		buy.icon = null
 		buy.text = "Slot penuh"
-		buy.disabled = true
-	elif not is_weapon and not player.can_take_item():
-		buy.icon = null
-		buy.text = "Tas penuh"
 		buy.disabled = true
 	else:
 		buy.text = " %d" % price
@@ -654,14 +650,16 @@ func _build() -> void:
 	_weapons = HBoxContainer.new()
 	_weapons.add_theme_constant_override("separation", 2)
 	slots_row.add_child(_weapons)
-	# Item di baris sendiri supaya tas penuh tidak melebarkan panel melewati layar.
+	# Item tak terbatas: baris sendiri yang membungkus, supaya panel tidak melebar melewati layar.
 	var items_row := HBoxContainer.new()
 	items_row.add_theme_constant_override("separation", 3)
 	bag_box.add_child(items_row)
 	_item_count = _label("", 8)
 	items_row.add_child(_item_count)
-	_items = HBoxContainer.new()
-	_items.add_theme_constant_override("separation", 2)
+	_items = HFlowContainer.new()
+	_items.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_items.add_theme_constant_override("h_separation", 2)
+	_items.add_theme_constant_override("v_separation", 2)
 	items_row.add_child(_items)
 	var action_row := HBoxContainer.new()
 	bag_box.add_child(action_row)

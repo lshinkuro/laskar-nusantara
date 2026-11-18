@@ -1,6 +1,6 @@
 extends SceneTree
 ## Karakter: Pendekar mulai dengan keris & bonus melee/penalti ranged; panen +30% rempah;
-## menghindar maks 60%; karakter terbuka sesuai wave tertinggi.
+## menghindar maks 60%; karakter terbuka sesuai wave tertinggi; 10 karakter bergambar; tingkat kesulitan.
 ## Jalankan: godot --headless -s res://tests/character_test.gd
 
 var frames := 0
@@ -40,7 +40,17 @@ func _process(_delta: float) -> bool:
 	net.best_wave = 0
 	var unlocked: Array = net.record_wave(4).map(func(c): return c.title)
 	var unlocked2: Array = net.record_wave(8).map(func(c): return c.title)
-	checks.unlock = unlocked == ["Dukun"] and unlocked2 == ["Pelaut Bugis"] and net.record_wave(5).is_empty()
+	checks.unlock = unlocked == ["Pemburu Dayak", "Dukun"] and unlocked2 == ["Pecalang Bali", "Pelaut Bugis"] and net.record_wave(5).is_empty()
+	checks.portraits = net.characters.size() == 10 and net.characters.all(func(c): return c.portrait != null and c.start_weapon != null)
+	# Kesulitan: Neraka membuat musuh wave 10 jauh lebih tebal dari Mudah.
+	var hp := {}
+	for d in [0, 3]:
+		net.difficulty = d
+		main.waves._start(10)
+		hp[d] = main.enemies.base_hp
+	net.difficulty = 1
+	main.waves.stop()
+	checks.difficulty = hp[3] > hp[0] * 3
 	# Kembalikan progres asli.
 	net.best_wave = -1
 	net.record_wave(saved_best)

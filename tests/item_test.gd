@@ -1,6 +1,6 @@
 extends SceneTree
 ## Item unik & sinergi: bonus sinergi masuk sekali (tidak dobel), wayang menembak tanpa makan slot,
-## kalung taring, obor, jimat, gelang akar bahar, kentongan, lumbung, dan bobot kelangkaan toko.
+## kalung taring, obor, jimat, gelang akar bahar, kentongan, lumbung, meriam jaga, dan bobot kelangkaan toko.
 ## Jalankan: godot --headless --fixed-fps 60 -s res://tests/item_test.gd
 
 var frames := 0
@@ -67,6 +67,12 @@ func _process(_delta: float) -> bool:
 		p.hp = p.stats.max_hp - 3
 		p.collect_rempah(6)
 		checks.lumbung = p.hp >= p.stats.max_hp - 2
+		# Meriam Jaga: 2 item -> 2 meriam di arena saat wave mulai, dipasang ulang (tidak menumpuk).
+		p.apply_item(_item("meriam_jaga"))
+		p.apply_item(_item("meriam_jaga"))
+		p.revive()
+		p.revive()
+		checks.turret = p._turrets.size() == 2 and p._turrets.all(func(t): return t.turret and t.get_parent() == p.get_parent().get_parent())
 	if f == 3:
 		# Kentongan saja: matikan senjata & sekutu, picu gelombang, musuh dalam 90 px kena.
 		p.weapon_ring.process_mode = Node.PROCESS_MODE_DISABLED
@@ -83,7 +89,7 @@ func _process(_delta: float) -> bool:
 		shop.wave = 20
 		checks.rarity = shop._rarity_weight(3) > w1 * 2  # legendaris jauh lebih sering di wave akhir
 		checks.erase("melee_before")
-		var ok := checks.size() == 9 and checks.values().all(func(v): return v)
+		var ok := checks.size() == 10 and checks.values().all(func(v): return v)
 		print(checks, " -> ", "OK" if ok else "FAIL")
 		quit(0 if ok else 1)
 		return true

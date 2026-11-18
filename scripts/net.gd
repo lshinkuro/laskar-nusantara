@@ -34,11 +34,20 @@ const KERAJAAN := [
 	{"name": "Ternate", "texture": preload("res://assets/sprites/prajurit_ternate.png"), "color": Color(0.3, 0.75, 0.75)},
 ]
 
+## Tingkat kesulitan (dipakai host saat spawn musuh): pengali HP, damage, dan jumlah musuh.
+const DIFFICULTIES := [
+	{"name": "Mudah", "hp": 0.7, "dmg": 0.7, "count": 0.8, "color": Color(0.5, 0.85, 0.45)},
+	{"name": "Normal", "hp": 1.0, "dmg": 1.0, "count": 1.0, "color": Color(0.95, 0.85, 0.4)},
+	{"name": "Sulit", "hp": 1.6, "dmg": 1.4, "count": 1.3, "color": Color(0.95, 0.55, 0.25)},
+	{"name": "Neraka", "hp": 2.5, "dmg": 2.0, "count": 1.6, "color": Color(0.95, 0.25, 0.25)},
+]
+
 var players := {}  # peer_id -> {"name": String, "outfit": int, "char": int}
 var room_code := ""
 var my_name := "Pejuang"
 var my_outfit := 0
 var my_character := 0
+var difficulty := 1
 ## Karakter dari data/characters/, urut sesuai `order`.
 var characters: Array[CharacterData] = []
 ## Wave tertinggi yang pernah dicapai (membuka karakter baru), disimpan di settings.

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/character_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/weapons/sumpit.tres" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/karakter_pemburu_dayak.png" id="3"]
+
+[resource]
+script = ExtResource("1")
+title = "Pemburu Dayak"
+pros = "+30% damage jarak jauh, +20% jangkauan"
+portrait = ExtResource("3")
+cons = "-20% damage jarak dekat, Armor -1"
+stats = {"ranged_damage": 30, "range": 20, "melee_damage": -20, "armor": -1}
+start_weapon = ExtResource("2")
+unlock_wave = 2
+order = 2

@@ -64,6 +64,40 @@ KERAJAAN = {
     "ternate":       {"h": "f3e3c3", "C": "2a8a8a", "c": "1a4a5a"},
 }
 
+# Potret karakter (menu pilih karakter): template PRAJURIT dengan penutup kepala sendiri
+# (4 baris teratas diganti) dan warna sendiri. h = penutup kepala, C = selendang, c = kain,
+# s/S = kulit, m = bilah senjata.
+KEPALA = {
+    "udeng": None,  # pakai baris asli PRAJURIT
+    "caping": ["......kkkk......", "....khhhhhhk....", ".kkhhhhhhhhhhkk.", "...kkssssskk...."],
+    "songkok": ["....kkkkkk......", "....khhhhhk.....", "....khhhhhk.....", "...kkssssskk...."],
+    "sanggul": ["......kkk.......", "....kkhhhkrk....", "...khhhhhhkrk...", "...kkssssshhk..."],
+    "bulu": ["....k.k.k.......", "...kwkwkwk......", "...khhhhhhkk....", "...kkssssskk...."],
+    "mahkota": ["....k.k.k.......", "...kgkgkgk......", "...khhhhhhk.....", "...kkssssskk...."],
+}
+
+KARAKTER = {
+    "pendekar_silat":      ("udeng",   {"h": "1a1a1a", "C": "b0201c", "c": "2a2a2a"}),
+    "petani":              ("caping",  {"h": "d8b860", "C": "6aa040", "c": "5a4a2a", "m": "8a8a8a"}),
+    "dukun":               ("udeng",   {"h": "4a2a5a", "C": "9a4ab0", "c": "2a1a2a", "m": "f07a20"}),
+    "pelaut_bugis":        ("songkok", {"h": "c02828", "C": "f3e3c3", "c": "2a4a7a"}),
+    "penari_jaipong":      ("sanggul", {"h": "1a1a1a", "C": "e04a8a", "c": "d0306a", "s": "d9a070"}),
+    "pemburu_dayak":       ("bulu",    {"h": "c02828", "C": "1a1a1a", "c": "6a2a1a", "s": "a86a32"}),
+    "pecalang_bali":       ("udeng",   {"h": "f3e3c3", "C": "1a1a1a", "c": "3a3a3a"}),
+    "saudagar_minang":     ("songkok", {"h": "e0b04a", "C": "8a1a1a", "c": "3a1a10"}),
+    "jawara_betawi":       ("songkok", {"h": "1a1a1a", "C": "c02828", "c": "1a1a1a", "S": "7a4a22"}),
+    "senopati_majapahit":  ("mahkota", {"h": "b0201c", "C": "e0b04a", "c": "5a1414"}),
+}
+
+
+def potret(kepala):
+    rows = PRAJURIT.strip("\n").split("\n")
+    if KEPALA[kepala]:
+        rows[1:5] = KEPALA[kepala]
+        rows[5] = rows[5][:11] + "....."  # buang ekor udeng
+    return "\n".join(rows)
+
+
 SERDADU_BESI = """
 .......kk.......
 ......kmmk......
@@ -419,6 +453,75 @@ kRooOORk
 ..kkkk..
 """
 
+# Variasi rempah yang jatuh dari musuh (nilainya sama, cuma tampilan).
+REMPAH_LAIN = {
+    "cengkeh": """
+.k.kk.k.
+kOkOOkOk
+.kOOOOk.
+..kOOk..
+...kOk..
+...kOk..
+...kOk..
+....k...
+""",
+    "lada": """
+.kkk....
+kccck...
+kcMckkk.
+.kkkccck
+.kkkcMck
+kccckkk.
+kcMck...
+.kkk....
+""",
+    "kayu_manis": """
+........
+.kkkkkk.
+kOooooOk
+kOOOOOOk
+kOooooOk
+kOOOOOOk
+.kkkkkk.
+........
+""",
+    "bunga_lawang": """
+...kk...
+..kOOk..
+kkkOOkkk
+kOOooOOk
+kOOooOOk
+kkkOOkkk
+..kOOk..
+...kk...
+""",
+    "kepeng": """
+..kkkk..
+.kgyygk.
+kgyyyygk
+kgykkygk
+kgykkygk
+kgyyyygk
+.kggggk.
+..kkkk..
+""",
+}
+
+# Meriam Jaga (item turret): meriam di atas kereta kayu, menghadap kanan.
+MERIAM_JAGA = """
+..............
+.....kkkkkkkk.
+...kkMmmmmmmMk
+..kMMmmmmmmmMk
+..kMMMMMMMMMk.
+...kkkkkkkkk..
+..kbbbbbbbbk..
+.kbkkbbbbkkbk.
+.kkEEkkkkEEkk.
+..kEEk..kEEk..
+...kk....kk...
+"""
+
 KETUPAT = """
 ...kk...
 ..kgyk..
@@ -566,6 +669,8 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     for name, colors in KERAJAAN.items():
         png(os.path.join(OUT, f"prajurit_{name}.png"), PRAJURIT, {**BASE, **colors})
+    for name, (kepala, colors) in KARAKTER.items():
+        png(os.path.join(OUT, f"karakter_{name}.png"), potret(kepala), {**BASE, **colors})
     png(os.path.join(OUT, "serdadu_besi.png"), SERDADU_BESI, BASE)
     for name, rows in {"anjing_pelacak": ANJING, "penembak": PENEMBAK, "serdadu_perisai": PERISAI,
                        "tukang_ranjau": TUKANG_RANJAU, "ranjau": RANJAU, "komandan_besi": KOMANDAN,
@@ -576,6 +681,9 @@ def main():
                        "peti_pusaka": PETI_PUSAKA, "ikon_hati": IKON_HATI, "ikon_bendera": IKON_BENDERA, "ikon_bintang": IKON_BINTANG}.items():
         png(os.path.join(OUT, f"{name}.png"), rows, BASE)
     png(os.path.join(OUT, "rempah.png"), REMPAH, BASE)
+    for name, rows in REMPAH_LAIN.items():
+        png(os.path.join(OUT, f"rempah_{name}.png"), rows, BASE)
+    png(os.path.join(OUT, "meriam_jaga.png"), MERIAM_JAGA, BASE)
     png(os.path.join(OUT, "ketupat.png"), KETUPAT, {**BASE, "g": "6aa040", "y": "c8d870"})
     for name, rows in PELURU.items():
         png(os.path.join(OUT, f"peluru_{name}.png"), rows, BASE)

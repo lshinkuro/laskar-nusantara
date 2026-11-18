@@ -1,5 +1,5 @@
 extends SceneTree
-## Pasar dengan tas penuh harus tetap muat di layar (tombol Siap terlihat).
+## Pasar dengan tas berisi banyak item (tak terbatas) harus tetap muat di layar (tombol Siap terlihat).
 var f := 0
 func _process(_d):
 	f += 1
@@ -13,7 +13,7 @@ func _process(_d):
 		p.collect_rempah(500)
 		for w in ["keris", "panah", "kunai", "shuriken", "cakra"]:
 			p.add_weapon(load("res://data/weapons/%s.tres" % w))
-		for n in ["rendang", "ulos", "songket", "jamu_kunyit", "kopi_tubruk", "wayang_kulit", "batu_akik", "kentongan", "obor_bambu", "lurik", "gudeg", "kerupuk"]:
+		for n in ["rendang", "ulos", "songket", "jamu_kunyit", "kopi_tubruk", "wayang_kulit", "batu_akik", "kentongan", "obor_bambu", "lurik", "gudeg", "kerupuk", "rendang", "ulos", "songket", "jamu_kunyit", "kopi_tubruk", "batu_akik", "lurik", "gudeg", "kerupuk", "rendang", "ulos", "songket"]:
 			p.apply_item(load("res://data/items/%s.tres" % n))
 		m.waves.wave = 5
 		m.local_player.pending_levels = 0

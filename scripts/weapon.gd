@@ -11,6 +11,8 @@ var tier := 1
 ## Sekutu (wayang): ikon sendiri & mengorbit prajurit, bukan slot senjata.
 var icon_texture: Texture2D
 var orbit := false
+## Meriam Jaga: diam di arena & membidik dari posisinya sendiri, bukan dari prajurit.
+var turret := false
 var _orbit_t := randf() * TAU
 
 var _cooldown := 0.0
@@ -74,8 +76,9 @@ func _process(delta: float) -> void:
 func pick_target(attack_range: float) -> Node2D:
 	var in_range := []
 	var max_d := attack_range * attack_range
+	var origin: Vector2 = global_position if turret else player.global_position
 	for e: Node2D in get_tree().get_nodes_in_group("enemies"):
-		var d: float = player.global_position.distance_squared_to(e.global_position)
+		var d: float = origin.distance_squared_to(e.global_position)
 		if d < max_d:
 			in_range.append([d, e])
 	if in_range.is_empty():

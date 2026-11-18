@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/character_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/weapons/meriam_lela.tres" id="2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/karakter_senopati_majapahit.png" id="3"]
+
+[resource]
+script = ExtResource("1")
+title = "Senopati Majapahit"
+pros = "+1 peluru semua senjata, +20% damage"
+portrait = ExtResource("3")
+cons = "Armor -2, -10% kecepatan"
+stats = {"projectiles": 1, "damage": 20, "armor": -2, "speed": -10}
+start_weapon = ExtResource("2")
+unlock_wave = 17
+order = 9

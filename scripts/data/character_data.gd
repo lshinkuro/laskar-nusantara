@@ -5,6 +5,8 @@ extends Resource
 @export var title := ""
 @export var pros := ""
 @export var cons := ""
+## Gambar di kartu pilih karakter (assets/sprites/karakter_*.png, dari tools/make_sprites.py).
+@export var portrait: Texture2D
 ## Perubahan stat awal, kunci sesuai Player.BASE_STATS.
 @export var stats := {}
 @export var start_weapon: WeaponData

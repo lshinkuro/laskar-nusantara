@@ -15,6 +15,8 @@ const Synergy := preload("res://scripts/synergy.gd")
 const Fx := preload("res://scripts/fx.gd")
 const WAYANG := preload("res://data/allies/wayang.tres")
 const WAYANG_ICON := preload("res://assets/sprites/wayang.png")
+const TURRET := preload("res://data/allies/meriam_jaga.tres")
+const TURRET_ICON := preload("res://assets/sprites/meriam_jaga.png")
 const PULSE_INTERVAL := 6.0
 const SEMANGAT_MAX := 100.0
 const SEMANGAT_RADIUS := 170.0
@@ -23,7 +25,6 @@ const KENTONGAN_HIT := preload("res://data/allies/kentongan_hit.tres")
 const DamageNumber := preload("res://scripts/damage_number.gd")
 const OBJECT_SCALE := 1.5
 const MAX_TIER := 4
-const MAX_ITEMS := 12
 const MAX_ITEM_LEVEL := 3
 ## Pengali efek item per level (2 item Lv1 = 2x, digabung jadi Lv2 = 2.5x).
 const ITEM_MULT := [1.0, 2.5, 6.0]
@@ -74,6 +75,7 @@ var _synergy_applied := {}
 var _pulse := PULSE_INTERVAL
 var _death_save_ready := true
 var _rempah_heal_count := 0
+var _turrets: Array[Node] = []
 ## Meter Semangat Rakyat (0..100), hanya di pemain lokal.
 var semangat := 0.0
 var map: Node2D  # World/Map, diisi main
@@ -210,6 +212,26 @@ func revive() -> void:
 	_death_save_ready = true
 	if is_local():
 		_set_alive.rpc(true, stats.max_hp)
+		_place_turrets()
+
+
+## Meriam Jaga dipasang ulang di sekitar prajurit tiap awal wave (satu per nilai item).
+func _place_turrets() -> void:
+	for t in _turrets:
+		if is_instance_valid(t):
+			t.queue_free()
+	_turrets.clear()
+	var n := int(round(specials.get("turret", 0.0)))
+	for i in n:
+		var w := Weapon.new()
+		w.data = TURRET
+		w.player = self
+		w.icon_texture = TURRET_ICON
+		w.turret = true
+		w.scale = Vector2.ONE * OBJECT_SCALE
+		w.position = map.resolve(position + Vector2.from_angle(TAU * i / n) * 45.0, 10.0)
+		get_parent().get_parent().add_child(w)  # ke World, bukan daftar pemain
+		_turrets.append(w)
 
 
 @rpc("authority", "call_local", "reliable")
@@ -346,10 +368,6 @@ func spend(amount: int) -> bool:
 
 # --- Tas Pusaka: item berlevel, bisa dilepas & digabung -------------------------
 
-func can_take_item() -> bool:
-	return items.size() < MAX_ITEMS
-
-
 func apply_item(item: ItemData, level := 1) -> void:
 	items.append(item)
 	item_levels.append(level)
@@ -458,18 +476,18 @@ func _layout_weapons() -> void:
 		weapon_ring.get_child(i).position = Vector2.from_angle(TAU * i / n - PI / 2) * (19.0 + maxi(0, n - 3) * 3.0)
 
 
-## Isi Peti Pusaka: item atau senjata acak (kalau tas penuh, jadi rempah).
+## Isi Peti Pusaka: item atau senjata acak (kalau slot senjata penuh, jadi rempah).
 func receive_loot(wave: int) -> String:
 	var Loot := preload("res://scripts/loot.gd")
 	var data: Resource = Loot.pick(wave, stats.luck)
 	if data is WeaponData and can_take_weapon(data):
 		add_weapon(data)
 		return data.title
-	if data is ItemData and can_take_item():
+	if data is ItemData:
 		apply_item(data)
 		return data.title
 	collect_rempah(20)
-	return "20 rempah (tas penuh)"
+	return "20 rempah (slot penuh)"
 
 
 ## Terapkan selisih bonus sinergi (yang baru aktif ditambah, yang hilang dikurangi).

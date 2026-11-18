@@ -32,6 +32,10 @@ var _dash := 0.0
 var _dash_dir := Vector2.ZERO
 var _ring_offset := 0.0
 var _status_particles: CPUParticles2D
+## Gaya jalan acak (host): 0 lurus, 1 zig-zag, 2 mengapit dari samping, 3 ragu-ragu.
+var _style := 0
+var _wobble := randf() * TAU
+var _side := 1.0 if randf() < 0.5 else -1.0
 
 @onready var sprite: Sprite2D = $Sprite
 
@@ -45,6 +49,9 @@ func _ready() -> void:
 	shape.radius = def.radius
 	$CollisionShape2D.shape = shape
 	$Shadow.scale = Vector2.ONE * def.scale / 1.5
+	if not is_boss():
+		_style = randi() % 4
+		speed *= randf_range(0.85, 1.15)
 	for k in ["shoot", "mine", "dash", "ring", "summon", "slam"]:
 		_timers[k] = randf_range(1.5, 3.0)
 	# Muncul pelan supaya pemain sempat menghindar.
@@ -132,7 +139,7 @@ func _simulate(delta: float) -> void:
 	var to := _target.position - position
 	var dir := to.normalized()
 	var spd := speed * (0.5 if statuses.has("slow") else 1.0)
-	var move := dir * spd
+	var move := _steer(dir, to.length(), delta) * spd
 	if _dash > 0:
 		_dash -= delta
 		move = _dash_dir * spd * (4.5 if kind == "kavaleri" else 3.5)
@@ -146,6 +153,20 @@ func _simulate(delta: float) -> void:
 		move = dir.orthogonal() * spd * 0.5  # jaga jarak sambil bergeser
 	position = map.resolve(position + move * delta, def.radius * 0.8)
 	_abilities(delta, dir)
+
+
+## Arah jalan sesuai gaya; bidikan kemampuan tetap memakai arah lurus ke target.
+func _steer(dir: Vector2, dist: float, delta: float) -> Vector2:
+	_wobble += delta
+	match _style:
+		1:
+			return dir.rotated(sin(_wobble * 4.0) * 0.9)
+		2:  # makin dekat makin lurus, supaya tetap sampai ke pemain
+			return dir.rotated(_side * clampf(dist / 200.0, 0.0, 1.0) * 0.9)
+		3:  # tiap 2.5 dtk menyimpang pelan sebentar
+			if fmod(_wobble, 2.5) < 0.5:
+				return dir.rotated(_side * 1.4) * 0.6
+	return dir
 
 
 func _abilities(delta: float, dir: Vector2) -> void:

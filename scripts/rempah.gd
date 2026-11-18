@@ -6,9 +6,12 @@ var value := 1
 var kind := "rempah"  # rempah / ketupat / peti
 var granted := false  # dipakai host
 var _claimed := false
+var _t := randf() * TAU
 
 
 func _physics_process(delta: float) -> void:
+	_t += delta * 4.0
+	offset.y = sin(_t) * 1.5  # melayang naik-turun pelan
 	var player = get_parent().local_player
 	if player == null or not player.alive:
 		return

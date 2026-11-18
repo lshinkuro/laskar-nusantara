@@ -2,16 +2,17 @@
 
 Roguelite arena shooter co-op bertema Nusantara (Godot 4.7, renderer Compatibility).
 Prajurit dari 8 kerajaan Nusantara bersatu melawan Kekaisaran Besi.
-Rencana lengkap: [PLAN.md](PLAN.md).
+Rencana lengkap: [PLAN.md](PLAN.md). Dokumen game (karakter, kesulitan, senjata, item, musuh): [GAME.md](GAME.md).
 
 **Main:** https://lshinkuro.github.io/laskar-nusantara/
 
 ## Cara main
-Menu: **1. Pejuangmu** (baju & nama) → **2. Pilih Karakter** → **3. Mulai** (sendiri / online).
+Menu: **1. Pejuangmu** (baju & nama) → **2. Pilih Karakter** (kartu bergambar) → **3. Mulai** (kesulitan Mudah/Normal/Sulit/Neraka, sendiri / online).
 Tombol **? Cara Main** (juga di layar jeda) menjelaskan semuanya dengan gambar; muncul otomatis saat pertama kali main.
 - **Gerak:** WASD / panah, atau sentuh & geser layar (HP). Senjata menembak otomatis.
-- **Karakter:** Pendekar Silat, Petani (terbuka dari awal), Dukun (capai wave 4), Pelaut Bugis (wave 8),
-  Penari Jaipong (wave 12). Tiap karakter punya kelebihan, kekurangan, dan senjata awal sendiri;
+- **Karakter (10):** Pendekar Silat, Petani (terbuka dari awal), Pemburu Dayak (wave 2), Dukun (wave 4),
+  Pecalang Bali (wave 6), Pelaut Bugis (wave 8), Saudagar Minang (wave 10), Penari Jaipong (wave 12),
+  Jawara Betawi (wave 14), Senopati Majapahit (wave 17). Tiap karakter punya potret, kelebihan, kekurangan, dan senjata awal sendiri;
   progres tersimpan di `user://`.
 - **Ganti baju:** pilih seragam kerajaan (Majapahit, Sriwijaya, Mataram, Pajajaran, Samudra Pasai,
   Gowa, Kutai, Ternate) dengan tombol `<` `>` di menu/lobby.
@@ -35,14 +36,16 @@ Tombol **? Cara Main** (juga di layar jeda) menjelaskan semuanya dengan gambar; 
 - **13 senjata** (jarak dekat/jauh/magis), masing-masing dengan efek saat kena: terbakar (Mantra Api), racun (Sumpit),
   berdarah (Keris, Kunai, Bambu Runcing), lambat (Ketapel), dorong (Tombak, Golok), ledakan (Meriam Lela),
   memantul (Shuriken, Kujang, Cakra). Senjata jarak dekat memunculkan efek tebasan.
-- **30 item** dengan kelangkaan Biasa/Langka/Epik/Legendaris (peluang naik dengan wave & Hoki), termasuk
-  item unik: Wayang Kulit (sekutu menembak), Kalung Taring (pulih saat kena), Obor Bambu (membakar),
+- **31 item** dengan kelangkaan Biasa/Langka/Epik/Legendaris (peluang naik dengan wave & Hoki), termasuk
+  item unik: Wayang Kulit (sekutu menembak), Meriam Jaga (turret dipasang tiap awal wave), Kalung Taring (pulih saat kena), Obor Bambu (membakar),
   Gelang Akar Bahar (balas damage), Kentongan (gelombang dorong), Jimat Rajah (selamat dari maut), Lumbung Padi.
 - **Sinergi:** Jurus Silat / Barisan Pemanah / Ilmu Kebatinan (3 senjata sejenis), Kuliner Nusantara &
   Busana Adat (3 item berlabel), Pusaka Leluhur (2 item pusaka).
+- **Kesulitan:** pengali HP/damage/jumlah musuh per tingkat (pilihan host berlaku di co-op), plus musuh
+  tumbuh berlipat tiap wave (HP x1.08, damage x1.04) supaya build kuat tetap ditantang.
 - **Rangkuman run:** kill, damage per senjata, pukulan terkuat, rempah, waktu, sinergi.
 - **Tas Pusaka** (di Pasar Rakyat, tiap selesai wave): klik senjata/item lalu **Gabung** (2 sama & setara → naik
-  tier/level; item Lv2 = 2.5x efek, Lv3 = 6x) atau **Lepas** (dijual ±40%). Maks 6 senjata & 12 item.
+  tier/level; item Lv2 = 2.5x efek, Lv3 = 6x) atau **Lepas** (dijual ±40%). Maks 6 senjata, item tanpa batas.
   Boss menjatuhkan **Peti Pusaka** (satu per pemain) berisi item/senjata acak yang condong langka.
 - **Senjata bertingkat:** tier abu → biru → ungu → merah, tiap tier +1 peluru & damage x1.5 (kalau slot penuh,
   senjata yang sama otomatis digabung). *Busur Arjuna* (item) dan *Hujan Panah* (ilmu) menambah peluru semua senjata.

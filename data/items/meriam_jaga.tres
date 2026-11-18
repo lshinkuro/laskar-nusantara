@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/meriam_jaga.png" id="icon"]
+[ext_resource type="Script" path="res://scripts/data/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "Meriam Jaga"
+description = "Tiap awal wave, sebuah meriam dipasang di dekatmu dan menembak musuh sendiri (ledakan kecil)."
+price = 50
+color = Color(0.42, 0.45, 0.49, 1)
+stats = {}
+rarity = 2
+tags = PackedStringArray()
+special = "turret"
+special_value = 1.0
+icon = ExtResource("icon")

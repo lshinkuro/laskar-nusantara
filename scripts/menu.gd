@@ -28,6 +28,7 @@ func _ready() -> void:
 		Net.my_name = cfg.get_value("player", "name", Net.my_name)
 		Net.my_outfit = cfg.get_value("player", "outfit", Net.my_outfit)
 		Net.my_character = cfg.get_value("player", "character", Net.my_character)
+		Net.difficulty = clampi(cfg.get_value("player", "difficulty", Net.difficulty), 0, Net.DIFFICULTIES.size() - 1)
 		first_time = not cfg.get_value("player", "tutorial_seen", false)
 	if not Net.is_unlocked(Net.characters[Net.my_character % Net.characters.size()]):
 		Net.my_character = 0
@@ -37,6 +38,7 @@ func _ready() -> void:
 
 	_build_outfits()
 	_build_characters()
+	_build_difficulty()
 	%SettingsPanel.add_child(AudioSettings.new())
 	%SettingsPanel.hide()
 	%SettingsBtn.pressed.connect(func(): %SettingsPanel.visible = not %SettingsPanel.visible)
@@ -110,6 +112,7 @@ func _save() -> void:
 	cfg.set_value("player", "name", Net.my_name)
 	cfg.set_value("player", "outfit", Net.my_outfit)
 	cfg.set_value("player", "character", Net.my_character)
+	cfg.set_value("player", "difficulty", Net.difficulty)
 	cfg.save(SETTINGS)
 
 
@@ -132,15 +135,21 @@ func _build_outfits() -> void:
 		%OutfitGrid.add_child(b)
 
 
+## Kartu bergambar; detail (kelebihan, kekurangan, senjata) tampil di bawah grid saat dipilih/disorot.
 func _build_characters() -> void:
 	for i in Net.characters.size():
 		var c: CharacterData = Net.characters[i]
 		var b := Button.new()
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.icon = c.start_weapon.texture
-		b.custom_minimum_size = Vector2(0, 30)
-		b.add_theme_font_size_override("font_size", 8)
+		b.icon = c.portrait
+		b.expand_icon = true
+		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		b.custom_minimum_size = Vector2(42, 46)
+		b.clip_text = true
+		b.add_theme_font_size_override("font_size", 7)
 		b.focus_mode = Control.FOCUS_NONE
+		b.mouse_entered.connect(func(): _show_char_info(i))
+		b.mouse_exited.connect(func(): _show_char_info(Net.my_character))
 		b.pressed.connect(func():
 			Net.set_character(i)
 			_save()
@@ -148,6 +157,29 @@ func _build_characters() -> void:
 			UiAnim.bump(b, 1.08)
 			UiAnim.bump(%Preview, 1.2))
 		%CharList.add_child(b)
+
+
+func _show_char_info(i: int) -> void:
+	var c: CharacterData = Net.characters[i]
+	%CharInfo.text = "%s\n+ %s\n- %s\nSenjata awal: %s" % [c.title, c.pros, c.cons, c.start_weapon.title] \
+		if Net.is_unlocked(c) else "%s (terkunci)\nCapai wave %d untuk membuka (terbaik: %d)" % [c.title, c.unlock_wave, Net.best_wave]
+
+
+func _build_difficulty() -> void:
+	for i in Net.DIFFICULTIES.size():
+		var d: Dictionary = Net.DIFFICULTIES[i]
+		var b := Button.new()
+		b.text = d.name
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.add_theme_font_size_override("font_size", 7)
+		b.tooltip_text = "HP musuh x%.1f, damage musuh x%.1f, jumlah musuh x%.1f" % [d.hp, d.dmg, d.count]
+		b.focus_mode = Control.FOCUS_NONE
+		b.pressed.connect(func():
+			Net.difficulty = i
+			_save()
+			_refresh()
+			UiAnim.bump(b, 1.1))
+		%DiffRow.add_child(b)
 
 
 func _refresh() -> void:
@@ -165,10 +197,11 @@ func _refresh() -> void:
 		var unlocked := Net.is_unlocked(c)
 		var picked := i == Net.my_character
 		b.disabled = not unlocked
-		b.text = ("> " if picked else "") + c.title + "\n" + (
-			"%s   |   %s" % [c.pros, c.cons] if unlocked else "Terkunci: capai wave %d (terbaik %d)" % [c.unlock_wave, Net.best_wave])
-		b.tooltip_text = "Senjata awal: %s" % c.start_weapon.title
-		b.modulate = SELECTED if picked else Color.WHITE
+		b.text = c.title.get_slice(" ", 0) if unlocked else "W%d" % c.unlock_wave
+		b.modulate = SELECTED if picked else Color.WHITE if unlocked else Color(0.35, 0.35, 0.4)
+	_show_char_info(Net.my_character)
+	for i in %DiffRow.get_child_count():
+		%DiffRow.get_child(i).modulate = Net.DIFFICULTIES[i].color if i == Net.difficulty else Color(1, 1, 1, 0.55)
 
 	var online := Net.online
 	main_panel.visible = not online

@@ -165,6 +165,11 @@ Boss menjatuhkan **Peti Pusaka** berisi item/senjata acak yang condong langka.
 bergabung lewat kode atau link. Host menjalankan wave, musuh, dan kesulitan; tiap pemain mengurus
 prajurit, senjata, dan belanjanya sendiri. HP boss dan jumlah musuh naik 60% per pemain tambahan.
 
+**Obrolan suara**: tombol *Mik* di kanan bawah (atau tombol **V**) menyalakan mikrofon; suara teman
+selalu terdengar. Memakai WebRTC suara milik browser (peredam gema & bising), jadi hanya di versi web.
+**Chat**: kolom *Obrolan* di Pasar Rakyat (jeda antar wave), 6 pesan terakhir. Enter di kolom kosong =
+keluar dari kolom, Enter lagi = Siap Berperang.
+
 **Bantuan mengejar**: pemain yang levelnya tertinggal dari teman tertinggi mendapat +30% rempah/XP
 per level tertinggal (maks 4 level = +120%), plus bonus (2 + wave) rempah per level tertinggal di
 akhir wave. Yang mati di awal wave pun tetap kebagian bonus ini.

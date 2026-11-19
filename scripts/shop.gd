@@ -59,6 +59,11 @@ var _rempah_tween: Tween
 var _synergies: Label
 var _ready_label: Label
 var _ready_btn: Button
+var _chat_log: Label
+var _chat_edit: LineEdit
+var _chat_lines: PackedStringArray = []
+const CHAT_LINES := 6
+const CHAT_MAX_LEN := 80
 
 
 func _ready() -> void:
@@ -160,6 +165,26 @@ func _on_reroll() -> void:
 		_roll()
 		_refresh()
 		_deal_cards()
+
+
+func _on_chat_submit(text: String) -> void:
+	text = text.strip_edges()
+	_chat_edit.clear()
+	if text == "":
+		_chat_edit.release_focus()  # Enter lagi = Siap Berperang
+		return
+	_chat.rpc(text)
+
+
+@rpc("any_peer", "call_local", "reliable")
+func _chat(text: String) -> void:
+	var who := Net.name_of(multiplayer.get_remote_sender_id())
+	_chat_lines.append("%s: %s" % [who, text.left(CHAT_MAX_LEN)])
+	if _chat_lines.size() > CHAT_LINES:
+		_chat_lines = _chat_lines.slice(-CHAT_LINES)
+	_chat_log.text = "\n".join(_chat_lines)
+	if visible:
+		Sfx.play("click", -8.0, 0.0)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -735,6 +760,24 @@ func _build() -> void:
 	_synergies = _label("", 8)
 	_synergies.mouse_filter = Control.MOUSE_FILTER_STOP
 	info.add_child(_synergies)
+	# Chat co-op: hanya saat main bareng, ngobrol di jeda antar wave.
+	var chat := VBoxContainer.new()
+	chat.visible = Net.online
+	chat.add_theme_constant_override("separation", 2)
+	info.add_child(chat)
+	var chat_title := _label("Obrolan", 10)
+	chat_title.modulate = GOLD
+	chat.add_child(chat_title)
+	_chat_log = _label("", 7)
+	_chat_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_chat_log.custom_minimum_size.x = 108
+	chat.add_child(_chat_log)
+	_chat_edit = LineEdit.new()
+	_chat_edit.placeholder_text = "Ketik pesan..."
+	_chat_edit.max_length = CHAT_MAX_LEN
+	_chat_edit.add_theme_font_size_override("font_size", 8)
+	_chat_edit.text_submitted.connect(_on_chat_submit)
+	chat.add_child(_chat_edit)
 
 	var footer := HBoxContainer.new()
 	root.add_child(footer)

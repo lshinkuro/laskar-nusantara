@@ -6,7 +6,6 @@ enum State { WAITING, PLAYING, SHOP, OVER }
 
 const PlayerScene := preload("res://scenes/player.tscn")
 const PauseMenu := preload("res://scripts/pause_menu.gd")
-const Voice := preload("res://scripts/voice.gd")
 const RunSummary := preload("res://scripts/run_summary.gd")
 const UiAnim := preload("res://scripts/ui_anim.gd")
 
@@ -84,9 +83,6 @@ func _ready() -> void:
 	_pause_menu = PauseMenu.new()
 	_pause_menu.resume_pressed.connect(_request_pause.bind(false))
 	add_child(_pause_menu)
-	var voice := Voice.new()
-	voice.name = "Voice"  # nama tetap: RPC sinyal suara mencari node ini di semua peer
-	add_child(voice)
 	_on_xp_changed(0, local_player.xp_needed(), 1)
 	local_player.apply_character(Net.character_of(multiplayer.get_unique_id()))
 	_on_hp_changed(local_player.hp, local_player.stats.max_hp)
@@ -207,8 +203,6 @@ func _on_wave_started(wave: int) -> void:
 	level_up.hide()
 	joystick.show()
 	local_player.revive()
-	if wave == 1 and has_node("Voice"):
-		$Voice.connect_peers()
 	Net.expose_state({"wave": wave, "players_in_game": players.get_child_count()})
 	var title := "WAVE TERAKHIR!" if wave == waves.LAST_WAVE else "WAVE %d" % wave
 	var map_index: int = map.index_for_wave(wave)

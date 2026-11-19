@@ -15,14 +15,16 @@ const SIGNALING_URL := "wss://broker.emqx.io:8084/mqtt"
 const TOPIC := "laskarnus/v1/%s/%s"  # room, id signaling penerima
 const CODE_CHARS := "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 const MAX_PLAYERS := 4
-const JOIN_TIMEOUT := 12.0
-## STUN cukup untuk jaringan biasa. TURN = jalur cadangan lewat server relay saat dua pemain di
-## jaringan berbeda yang ketat (data seluler, Wi-Fi kantor). Isi dari akun TURN gratis, contoh:
-## {"urls": ["turn:global.relay.metered.ca:80", "turns:global.relay.metered.ca:443?transport=tcp"],
-##  "username": "...", "credential": "..."}
-## shortcut: kredensial TURN ikut terbaca di build web publik; pindah ke kredensial sementara dari
-## server sendiri kalau kuotanya disalahgunakan.
-const TURN_SERVERS := []
+const JOIN_TIMEOUT := 20.0  # lewat relay TURN butuh waktu sambung lebih lama
+## STUN cukup untuk jaringan biasa. TURN (ExpressTURN gratis) = jalur cadangan lewat server relay
+## saat dua pemain di jaringan berbeda yang ketat (data seluler, Wi-Fi kantor); UDP & TCP port 3478.
+## shortcut: kredensial TURN ikut terbaca di build web publik; ganti kredensial di dashboard
+## ExpressTURN kalau kuotanya disalahgunakan.
+const TURN_SERVERS := [{
+	"urls": ["turn:free.expressturn.com:3478", "turn:free.expressturn.com:3478?transport=tcp"],
+	"username": "000000002110472825",
+	"credential": "kK2pHRN82C8FZWOy4sAU/AGp3II=",
+}]
 const ICE_CONFIG := {"iceServers": [{"urls": ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"]}] + TURN_SERVERS}
 const GAME_SCENE := "res://scenes/main.tscn"
 const CHARACTER_DIR := "res://data/characters/"

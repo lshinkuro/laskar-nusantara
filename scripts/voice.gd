@@ -82,7 +82,7 @@ window.lnVoice = (() => {
 
 var _js: JavaScriptObject
 var _callbacks := []  # referensi callback JS harus disimpan supaya tidak dibuang
-var _button: Button
+var _button: TextureButton
 var _on := false
 
 
@@ -97,10 +97,11 @@ func _ready() -> void:
 	_js.send = _callbacks[0]
 	_js.onstate = _callbacks[1]
 	multiplayer.peer_disconnected.connect(func(id): _js.drop(id))
-	_button = Button.new()
+	# TextureButton, bukan Button: margin isi tema tombol (10px kiri-kanan) menelan ikon sekecil ini.
+	_button = TextureButton.new()
 	_button.focus_mode = Control.FOCUS_NONE
-	_button.flat = true
-	_button.expand_icon = true
+	_button.ignore_texture_size = true
+	_button.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 	_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_button.offset_left = -24
 	_button.offset_top = 4
@@ -110,11 +111,6 @@ func _ready() -> void:
 	_button.pressed.connect(toggle)
 	add_child(_button)
 	_update_button("off")
-	get_tree().create_timer(3.0).timeout.connect(func():  # DIAG sementara
-		JavaScriptBridge.eval("window.lnVoiceBtn = %s" % JSON.stringify({"pos": str(_button.global_position), "size": str(_button.size),
-			"vis": _button.is_visible_in_tree(), "icon": _button.icon != null, "vp": str(get_viewport().get_visible_rect()),
-			"anchors": str([_button.anchor_left, _button.anchor_right]), "offsets": str([_button.offset_left, _button.offset_right]),
-			"inside": _button.is_inside_tree(), "parent": str(_button.get_parent().name), "layer": layer})))
 
 
 ## Dipanggil main di awal wave 1 (semua peer sudah memuat game): id kecil menawarkan ke id besar.
@@ -155,7 +151,7 @@ func _signal(json: String) -> void:
 
 func _update_button(state: String) -> void:
 	_on = state == "on"
-	_button.icon = ICON_ON if _on else ICON_OFF
+	_button.texture_normal = ICON_ON if _on else ICON_OFF
 	_button.modulate = Color(1, 0.5, 0.5) if state == "denied" else Color.WHITE
 	if state == "denied":
 		_button.tooltip_text = "Izin mikrofon ditolak browser"

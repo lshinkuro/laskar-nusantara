@@ -49,18 +49,17 @@ func _process(delta: float) -> void:
 	_cooldown -= delta
 	if _cooldown > 0:
 		return
-	var stats: Dictionary = player.stats
-	var attack_range := data.attack_range * maxf(0.3, 1.0 + stats.range / 100.0)
+	var attack_range := shot_range()
 	# Cari target hanya saat siap menembak, bukan tiap frame.
 	var target := pick_target(attack_range)
 	if target == null:
 		return
-	_cooldown = data.fire_interval / maxf(0.2, 1.0 + stats.attack_speed / 100.0)
-	var damage := maxi(1, roundi(data.damage * (1.0 + 0.5 * (tier - 1)) * player.damage_multiplier(data.category)))
+	_cooldown = shot_interval()
+	var damage := shot_damage()
 	var dir := global_position.direction_to(target.global_position)
 	if not orbit:
 		rotation = dir.angle()
-	var count: int = data.projectile_count + (tier - 1) + stats.projectiles
+	var count := shot_count()
 	var spread := data.spread if data.spread > 0 else SPREAD_DEFAULT
 	var dirs := PackedVector2Array()
 	for i in count:
@@ -70,6 +69,23 @@ func _process(delta: float) -> void:
 	_flash = 0.07
 	_kick = 3.0
 	queue_redraw()
+
+
+# Angka tembakan dengan tier & stat prajurit saat ini (dipakai juga tooltip Tas Pusaka).
+func shot_damage() -> int:
+	return maxi(1, roundi(data.damage * (1.0 + 0.5 * (tier - 1)) * player.damage_multiplier(data.category)))
+
+
+func shot_count() -> int:
+	return data.projectile_count + (tier - 1) + player.stats.projectiles
+
+
+func shot_interval() -> float:
+	return data.fire_interval / maxf(0.2, 1.0 + player.stats.attack_speed / 100.0)
+
+
+func shot_range() -> float:
+	return data.attack_range * maxf(0.3, 1.0 + player.stats.range / 100.0)
 
 
 ## Tiap senjata membidik musuh berbeda: senjata ke-i mengambil musuh terdekat ke-i

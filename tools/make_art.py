@@ -985,6 +985,405 @@ OBJEK = {"semak": (24, 16, objek_semak), "batu": (24, 16, objek_batu), "kelapa":
          "bebek": (16, 12, objek_bebek)}
 
 
+# --- Medan lain: Hutan, Desa, Pelabuhan, Benteng --------------------------------------
+# Angka posisi (dermaga, laut, alun-alun, jalan) sama dengan scripts/map.gd.
+
+SEA_TOP = 445
+
+
+def _rumput(rnd, n, warna, hindari=lambda x, y: False):
+    s = ""
+    W, H = ARENA
+    for _ in range(n):
+        x, y = rnd.uniform(4, W - 4), rnd.uniform(6, H - 4)
+        if hindari(x, y):
+            continue
+        c = rnd.choice(warna)
+        s += f'<path d="M{x:.0f} {y:.0f} l-3 -6 M{x:.0f} {y:.0f} l0 -7 M{x:.0f} {y:.0f} l3 -6" stroke="{c}" stroke-width="1.5" stroke-linecap="round"/>'
+    return s
+
+
+def _bercak(rnd, n, warna, rmin, rmax, op=0.35):
+    W, H = ARENA
+    s = ""
+    for _ in range(n):
+        x, y, r = rnd.uniform(0, W), rnd.uniform(0, H), rnd.uniform(rmin, rmax)
+        s += f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="{r:.0f}" ry="{r * 0.6:.0f}" fill="{rnd.choice(warna)}" opacity="{op}"/>'
+    return s
+
+
+def medan_hutan():
+    rnd = random.Random(11)
+    W, H = ARENA
+    s = f'<rect width="{W}" height="{H}" fill="{grad("#3f7a3a", 1.05, 0.85)}"/>'
+    s += _bercak(rnd, 30, ["#4e8e40", "#2f6a30", "#5a9a44"], 40, 110)
+    for _ in range(12):  # sinar matahari menembus kanopi
+        x, y, r = rnd.uniform(0, W), rnd.uniform(0, H), rnd.uniform(30, 70)
+        s += f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="{r:.0f}" ry="{r * 0.55:.0f}" fill="#e8f0a0" opacity="0.18"/>'
+    jalan = _halus([(i * 60.0, H / 2 + math.sin(i * 0.8) * 70) for i in range(17)])
+    s += (f'<path d="{jalan}" fill="none" stroke="#5a3e22" stroke-width="26" stroke-linecap="round"/>'
+          f'<path d="{jalan}" fill="none" stroke="#8a6438" stroke-width="20" stroke-linecap="round"/>'
+          f'<path d="{jalan}" fill="none" stroke="#a07a48" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 26" opacity="0.8"/>')
+    for _ in range(6):  # genangan air
+        x, y = rnd.uniform(60, W - 60), rnd.uniform(60, H - 60)
+        s += (f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="22" ry="10" fill="#2e5a6a" stroke="#1e3a2a" stroke-width="2"/>'
+              f'<path d="M{x - 10:.0f} {y - 3:.0f} q6 -3 12 0" stroke="#a8d8e8" stroke-width="2" fill="none" opacity="0.7"/>')
+    for _ in range(120):  # pakis & daun gugur
+        x, y = rnd.uniform(4, W - 4), rnd.uniform(6, H - 4)
+        if rnd.random() < 0.45:
+            c = rnd.choice(["#d88a2a", "#c0502a", "#e8b040"])
+            s += f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="3.5" ry="2" fill="{c}" transform="rotate({rnd.uniform(0, 180):.0f} {x:.0f} {y:.0f})"/>'
+        else:
+            s += "".join(f'<path d="M{x:.0f} {y:.0f} q{d * 5} -6 {d * 10} -4" stroke="#6ab84a" stroke-width="2" fill="none" stroke-linecap="round"/>' for d in (-1, 1))
+            s += f'<path d="M{x:.0f} {y:.0f} l0 -10" stroke="#6ab84a" stroke-width="2" stroke-linecap="round"/>'
+    for _ in range(10):  # jamur
+        x, y = rnd.uniform(20, W - 20), rnd.uniform(20, H - 20)
+        s += (f'<rect x="{x - 1.5:.0f}" y="{y - 4:.0f}" width="3" height="5" fill="#f3e3c3"/>'
+              f'<path d="M{x - 5:.0f} {y - 3:.0f} Q{x:.0f} {y - 11:.0f} {x + 5:.0f} {y - 3:.0f} Z" fill="#e0402a" stroke="{INK}" stroke-width="0.8"/>'
+              f'<circle cx="{x - 1:.0f}" cy="{y - 6:.0f}" r="1" fill="#ffffff"/>')
+    s += _rumput(rnd, 160, ["#2a5a26", "#5aa846", "#3e7a34"])
+    s += f'<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" fill="none" stroke="#1e3a1e" stroke-width="3" rx="4"/>'
+    return s
+
+
+def medan_desa():
+    rnd = random.Random(13)
+    W, H = ARENA
+    s = f'<rect width="{W}" height="{H}" fill="{grad("#c8a46a", 1.08, 0.9)}"/>'
+    s += _bercak(rnd, 24, ["#a8c860", "#8ab04a", "#d8b880"], 50, 120, 0.4)
+    jalan = "#e0c48e"
+    s += (f'<rect x="0" y="{H / 2 - 22}" width="{W}" height="44" fill="#a8844e"/><rect x="0" y="{H / 2 - 19}" width="{W}" height="38" fill="{jalan}"/>'
+          f'<rect x="{W / 2 - 22}" y="0" width="44" height="{H}" fill="#a8844e"/><rect x="{W / 2 - 19}" y="0" width="38" height="{H}" fill="{jalan}"/>')
+    for _ in range(80):  # kerikil di jalan
+        if rnd.random() < 0.5:
+            x, y = rnd.uniform(0, W), H / 2 + rnd.uniform(-16, 16)
+        else:
+            x, y = W / 2 + rnd.uniform(-16, 16), rnd.uniform(0, H)
+        s += f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{rnd.uniform(1, 2):.1f}" fill="#b89a6a"/>'
+    px, py, pw, ph = W / 2 - 150, H / 2 - 90, 300, 180
+    s += f'<rect x="{px - 4}" y="{py + 2}" width="{pw + 8}" height="{ph + 6}" rx="10" fill="#000" opacity="0.15"/>'
+    s += f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="8" fill="{grad("#b8b0a0", 1.1, 0.85)}" stroke="#6a6052" stroke-width="3"/>'
+    for gx in range(int(px) + 4, int(px + pw) - 4, 20):  # ubin batu alun-alun
+        for gy in range(int(py) + 4, int(py + ph) - 4, 20):
+            c = rnd.choice(["#c8c0b0", "#bab2a2", "#d0c8b8"])
+            s += f'<rect x="{gx}" y="{gy}" width="18" height="18" rx="3" fill="{c}"/>'
+    cx, cy = W / 2, H / 2
+    s += f'<circle cx="{cx}" cy="{cy}" r="56" fill="#a89a84" stroke="#6a6052" stroke-width="2"/>'
+    for i in range(8):  # motif kawung di tengah alun-alun
+        a = math.tau * i / 8
+        x, y = cx + math.cos(a) * 34, cy + math.sin(a) * 34
+        s += f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="14" ry="8" fill="#c8a46a" stroke="#6a4a2a" stroke-width="1.5" transform="rotate({math.degrees(a):.0f} {x:.1f} {y:.1f})"/>'
+    s += f'<circle cx="{cx}" cy="{cy}" r="14" fill="{rgrad(GOLD)}" stroke="#6a4a2a" stroke-width="2"/>'
+    for _ in range(26):  # bunga kecil di luar alun-alun
+        x, y = rnd.uniform(10, W - 10), rnd.uniform(10, H - 10)
+        if px - 10 < x < px + pw + 10 and py - 10 < y < py + ph + 10:
+            continue
+        c = rnd.choice(["#ff6a6a", "#ffffff", "#ffd23f", "#ff8fba"])
+        s += "".join(f'<circle cx="{x + 2.2 * math.cos(a):.1f}" cy="{y + 2.2 * math.sin(a):.1f}" r="1.6" fill="{c}"/>' for a in (0, 1.26, 2.51, 3.77, 5.03))
+    s += _rumput(rnd, 200, ["#6a9a3a", "#8ab04a", "#5a8a32"],
+                 lambda x, y: (px - 6 < x < px + pw + 6 and py - 6 < y < py + ph + 6) or abs(y - H / 2) < 24 or abs(x - W / 2) < 24)
+    s += f'<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" fill="none" stroke="#7a5a32" stroke-width="3" rx="4"/>'
+    return s
+
+
+def medan_pelabuhan():
+    rnd = random.Random(17)
+    W, H = ARENA
+    s = f'<rect width="{W}" height="{H}" fill="{grad("#f0d8a0", 1.05, 0.9)}"/>'
+    s += _bercak(rnd, 20, ["#e8cc90", "#f8e4b0", "#d8bc80"], 40, 100, 0.5)
+    for _ in range(90):  # kerang & jejak di pasir
+        x, y = rnd.uniform(8, W - 8), rnd.uniform(8, SEA_TOP - 12)
+        if 60 < x < 900 and 225 < y < 405:
+            continue
+        if rnd.random() < 0.3:
+            s += f'<path d="M{x - 3:.0f} {y:.0f} Q{x:.0f} {y - 6:.0f} {x + 3:.0f} {y:.0f} Z" fill="#ffd8c8" stroke="#b8786a" stroke-width="0.8"/>'
+        else:
+            s += f'<ellipse cx="{x:.0f}" cy="{y:.0f}" rx="2" ry="1.4" fill="#c8a870"/>'
+    # Laut dengan gradasi, buih, & ombak
+    s += f'<rect x="0" y="{SEA_TOP}" width="{W}" height="{H - SEA_TOP}" fill="{grad("#3aa0c8", 1.15, 0.75)}"/>'
+    buih = "M0 %d " % (SEA_TOP + 2) + " ".join(f"Q{x + 15} {SEA_TOP + (8 if (x // 30) % 2 else -2)} {x + 30} {SEA_TOP + 2}" for x in range(0, W, 30))
+    s += f'<path d="{buih}" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>'
+    s += f'<rect x="0" y="{SEA_TOP - 10}" width="{W}" height="10" fill="#d8b878" opacity="0.6"/>'
+    for _ in range(60):
+        x, y = rnd.uniform(0, W), rnd.uniform(SEA_TOP + 14, H - 6)
+        s += f'<path d="M{x:.0f} {y:.0f} q6 -4 12 0 q6 4 12 0" fill="none" stroke="#bfe8f8" stroke-width="2" opacity="0.7" stroke-linecap="round"/>'
+    # Tiang dermaga menjorok ke laut
+    for x in (280, 640):
+        s += f'<rect x="{x - 2}" y="{SEA_TOP - 4}" width="30" height="64" fill="#000" opacity="0.18"/>'
+        s += f'<rect x="{x}" y="{SEA_TOP - 6}" width="26" height="62" rx="2" fill="{grad("#a8703a", 1.2, 0.8)}" stroke="#4a2a10" stroke-width="1.5"/>'
+        s += "".join(f'<path d="M{x} {y} L{x + 26} {y}" stroke="#6a4020" stroke-width="1.2"/>' for y in range(SEA_TOP + 2, SEA_TOP + 56, 8))
+        s += f'<rect x="{x - 3}" y="{SEA_TOP + 52}" width="6" height="12" fill="#4a2a10"/><rect x="{x + 23}" y="{SEA_TOP + 52}" width="6" height="12" fill="#4a2a10"/>'
+    # Lantai dermaga kayu
+    dx, dy, dw, dh = 60, 230, 840, 170
+    s += f'<rect x="{dx - 2}" y="{dy + 4}" width="{dw + 4}" height="{dh + 4}" rx="4" fill="#000" opacity="0.2"/>'
+    s += f'<rect x="{dx}" y="{dy}" width="{dw}" height="{dh}" rx="4" fill="{grad("#b47c44", 1.15, 0.85)}" stroke="#4a2a10" stroke-width="3"/>'
+    for i, y in enumerate(range(dy, dy + dh, 12)):
+        s += f'<path d="M{dx} {y} L{dx + dw} {y}" stroke="#6a4020" stroke-width="1.4"/>'
+        for x in range(dx + (i % 2) * 36, dx + dw, 72):
+            s += f'<path d="M{x} {y} L{x} {y + 12}" stroke="#6a4020" stroke-width="1.2"/><circle cx="{x + 4}" cy="{y + 6}" r="1" fill="#3a2010"/>'
+        if i % 3 == 1:
+            s += f'<path d="M{dx + 4} {y + 3} L{dx + dw - 4} {y + 3}" stroke="#d8a868" stroke-width="1.2" opacity="0.5"/>'
+    for x, y in ((140, 250), (820, 380), (470, 390)):  # gulungan tambang
+        s += (f'<circle cx="{x}" cy="{y}" r="9" fill="#d8b878" stroke="#7a5a2a" stroke-width="1.5"/>'
+              f'<circle cx="{x}" cy="{y}" r="5" fill="none" stroke="#7a5a2a" stroke-width="1.5"/>')
+    s += f'<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" fill="none" stroke="#a8844e" stroke-width="3" rx="4"/>'
+    return s
+
+
+def medan_benteng():
+    rnd = random.Random(19)
+    W, H = ARENA
+    s = f'<rect width="{W}" height="{H}" fill="#3a3a44"/>'
+    for x in range(0, W, 40):  # ubin batu besar dengan nat
+        for y in range(0, H, 40):
+            v = rnd.uniform(0.9, 1.1)
+            s += f'<rect x="{x + 1.5}" y="{y + 1.5}" width="37" height="37" rx="4" fill="{grad(shade("#6a6a76", v), 1.12, 0.88)}"/>'
+            if rnd.random() < 0.2:
+                s += f'<path d="M{x + 8} {y + 10} l8 6 l-2 8 l6 6" fill="none" stroke="#2e2e36" stroke-width="1.4"/>'
+            if rnd.random() < 0.12:
+                s += f'<ellipse cx="{x + 20}" cy="{y + 22}" rx="{rnd.uniform(4, 9):.0f}" ry="4" fill="#8a4a2a" opacity="0.45"/>'
+    # Karpet merah lambang Kekaisaran menuju tengah
+    for r in ((W / 2 - 16, 0, 32, H), (0, H / 2 - 16, W, 32)):
+        s += f'<rect x="{r[0]}" y="{r[1]}" width="{r[2]}" height="{r[3]}" fill="#7a1e1a"/>'
+    s += f'<rect x="{W / 2 - 13}" y="0" width="26" height="{H}" fill="#a82a22"/><rect x="0" y="{H / 2 - 13}" width="{W}" height="26" fill="#a82a22"/>'
+    s += f'<path d="M{W / 2 - 9} 0 L{W / 2 - 9} {H} M{W / 2 + 9} 0 L{W / 2 + 9} {H} M0 {H / 2 - 9} L{W} {H / 2 - 9} M0 {H / 2 + 9} L{W} {H / 2 + 9}" stroke="{GOLD}" stroke-width="1.5" opacity="0.8"/>'
+    cx, cy = W / 2, H / 2
+    s += f'<circle cx="{cx}" cy="{cy}" r="66" fill="{rgrad("#4a4a56")}" stroke="#1e1e26" stroke-width="3"/>'
+    s += f'<circle cx="{cx}" cy="{cy}" r="58" fill="none" stroke="#9aa0ac" stroke-width="3"/>'
+    gigi = " ".join(f"M{cx + math.cos(a) * 40:.1f} {cy + math.sin(a) * 40:.1f} L{cx + math.cos(a) * 50:.1f} {cy + math.sin(a) * 50:.1f}"
+                    for a in (math.tau * i / 16 for i in range(16)))
+    s += f'<path d="{gigi}" stroke="#7a7e8a" stroke-width="7"/>'
+    s += f'<circle cx="{cx}" cy="{cy}" r="40" fill="{rgrad("#7a7e8a")}" stroke="#1e1e26" stroke-width="2"/>'
+    s += f'<circle cx="{cx}" cy="{cy}" r="22" fill="{rgrad("#c0302a")}" stroke="#1e1e26" stroke-width="2"/>'
+    s += f'<path d="M{cx} {cy - 14} L{cx + 12} {cy + 8} L{cx - 12} {cy + 8} Z" fill="#2e2e36"/>'
+    for x, y in ((40, 40), (W - 40, 40), (40, H - 40), (W - 40, H - 40)):  # pelat besi berpaku di sudut
+        s += f'<rect x="{x - 26}" y="{y - 26}" width="52" height="52" rx="4" fill="{grad("#7a7e8a", 1.2, 0.75)}" stroke="#1e1e26" stroke-width="2"/>'
+        s += "".join(f'<circle cx="{x + dx}" cy="{y + dy}" r="2.5" fill="#c8ccd4" stroke="#1e1e26" stroke-width="0.8"/>' for dx in (-18, 18) for dy in (-18, 18))
+    s += f'<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" fill="none" stroke="#1e1e26" stroke-width="4" rx="4"/>'
+    return s
+
+
+# --- Objek medan lain ---------------------------------------------------------------
+
+def objek_pohon():
+    s = _bayang(64, 182, 44)
+    s += f'<path d="M56 182 L58 116 Q64 110 70 116 L72 182 Z" fill="{grad("#8a5a2a", 1.3, 0.75, False)}" {O}/>'
+    s += f'<path d="M62 150 Q50 136 44 120 M66 140 Q78 128 86 118" fill="none" stroke="{INK}" stroke-width="6" stroke-linecap="round"/>'
+    s += f'<path d="M62 150 Q50 136 44 120 M66 140 Q78 128 86 118" fill="none" stroke="#8a5a2a" stroke-width="3.5" stroke-linecap="round"/>'
+    for cx, cy, r, c in ((40, 100, 30, "#3e8a34"), (88, 98, 30, "#3e8a34"), (64, 70, 44, "#4ea83a"),
+                         (44, 64, 26, "#5ab83e"), (84, 58, 24, "#5ab83e"), (64, 40, 22, "#6ac84a")):
+        s += f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{rgrad(c)}" {O}/>'
+    s += '<path d="M44 34 Q54 22 68 24" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.35" stroke-linecap="round"/>'
+    s += f'<g {O1}><circle cx="52" cy="92" r="5" fill="#f2a020"/><circle cx="80" cy="80" r="5" fill="#f2a020"/><circle cx="70" cy="104" r="5" fill="#f2a020"/></g>'
+    return s
+
+
+def objek_beringin():
+    s = _bayang(136, 294, 110, 22)
+    s += f'<path d="M108 294 Q114 230 116 190 L156 190 Q158 230 164 294 Z" fill="{grad("#7a4a22", 1.3, 0.7, False)}" {O}/>'
+    s += "".join(f'<path d="M{x} 294 Q{x + 8} 260 {x + 14} 240" fill="none" stroke="#5a3214" stroke-width="5" stroke-linecap="round"/>' for x in (100, 150, 170))
+    for x in (54, 76, 96, 178, 198, 220):  # akar gantung
+        s += f'<path d="M{x} 150 Q{x + 4} 220 {x} 290" fill="none" stroke="#5a3214" stroke-width="2.5"/>'
+    for cx, cy, r, c in ((60, 140, 56, "#2f7a2e"), (212, 140, 56, "#2f7a2e"), (136, 120, 92, "#3e8a34"), (78, 96, 50, "#4ea83a"),
+                         (196, 92, 50, "#4ea83a"), (136, 66, 60, "#5ab83e"), (110, 40, 32, "#6ac84a"), (170, 44, 30, "#6ac84a")):
+        s += f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{rgrad(c)}" {O}/>'
+    s += '<path d="M90 30 Q110 12 140 14" fill="none" stroke="#ffffff" stroke-width="6" opacity="0.3" stroke-linecap="round"/>'
+    return s
+
+
+def objek_joglo():
+    s = _bayang(136, 198, 120, 16)
+    s += f'<rect x="44" y="128" width="184" height="68" fill="{grad("#f3e3c0", 1.05, 0.85)}" {O}/>'
+    for x in (44, 96, 168, 220):
+        s += f'<rect x="{x}" y="128" width="8" height="68" fill="{grad("#7a4a22", 1.2, 0.8, False)}" {O1}/>'
+    s += f'<rect x="120" y="148" width="32" height="48" rx="2" fill="{grad("#8a4a1c", 1.2, 0.75)}" {O1}/><circle cx="146" cy="174" r="2" fill="{GOLD}"/>'
+    for x in (62, 186):
+        s += f'<rect x="{x}" y="146" width="24" height="22" rx="2" fill="#4a2a14" {O1}/>'
+        s += f'<path d="M{x} 157 L{x + 24} 157 M{x + 12} 146 L{x + 12} 168" stroke="#c8873a" stroke-width="2"/>'
+    s += f'<rect x="36" y="192" width="200" height="8" rx="2" fill="#a89a84" {O1}/>'
+    s += f'<path d="M12 140 L260 140 L212 84 L60 84 Z" fill="{grad("#c0502a", 1.25, 0.75)}" {O}/>'
+    s += "".join(f'<path d="M{24 + i * 8} {132 - i * 9} L{248 - i * 8} {132 - i * 9}" stroke="#8a3218" stroke-width="2"/>' for i in range(5))
+    s += f'<path d="M76 88 L196 88 L164 24 L108 24 Z" fill="{grad("#a8401e", 1.3, 0.75)}" {O}/>'
+    s += "".join(f'<path d="M{88 + i * 6} {78 - i * 12} L{184 - i * 6} {78 - i * 12}" stroke="#7a2a12" stroke-width="2"/>' for i in range(4))
+    s += f'<path d="M104 24 L168 24" stroke="{INK}" stroke-width="6" stroke-linecap="round"/><path d="M104 24 L168 24" stroke="{GOLD}" stroke-width="3.5" stroke-linecap="round"/>'
+    s += f'<path d="M100 24 Q96 12 106 10 M172 24 Q176 12 166 10" fill="none" stroke="{GOLD}" stroke-width="3" stroke-linecap="round"/>'
+    s += '<path d="M24 134 L66 92" stroke="#ffffff" stroke-width="3" opacity="0.3" stroke-linecap="round"/>'
+    return s
+
+
+def objek_lumbung():
+    s = _bayang(64, 174, 50, 10)
+    for x in (34, 54, 74, 94):
+        s += f'<rect x="{x - 3}" y="136" width="6" height="38" fill="#5a3214" {O1}/>'
+        s += f'<ellipse cx="{x}" cy="138" rx="7" ry="3" fill="#8a8680" {O1}/>'
+    s += f'<rect x="26" y="88" width="76" height="50" rx="3" fill="{grad("#b07a40", 1.25, 0.75)}" {O}/>'
+    s += "".join(f'<path d="M26 {y} L102 {y}" stroke="#6a3a14" stroke-width="1.6"/>' for y in (100, 112, 124))
+    s += f'<rect x="54" y="100" width="20" height="24" rx="2" fill="#4a2a10" {O1}/>'
+    s += f'<path d="M10 96 Q64 104 118 96 L96 22 Q64 0 32 22 Z" fill="{grad("#e0b050", 1.25, 0.7)}" {O}/>'
+    s += "".join(f'<path d="M{20 + i * 10} 98 Q{40 + i * 3} 50 {50 + i * 2} 14" fill="none" stroke="#a87a2a" stroke-width="1.6" opacity="0.8"/>' for i in range(9))
+    s += f'<g fill="{GOLD}" {O1}><ellipse cx="18" cy="160" rx="6" ry="10"/><ellipse cx="110" cy="160" rx="6" ry="10"/></g>'
+    s += '<path d="M28 80 Q36 40 52 24" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.3" stroke-linecap="round"/>'
+    return s
+
+
+def objek_peti():
+    s = _bayang(48, 70, 40)
+    s += f'<rect x="10" y="12" width="76" height="58" rx="3" fill="{grad("#c08a4a", 1.25, 0.75)}" {O}/>'
+    s += "".join(f'<path d="M10 {y} L86 {y}" stroke="#7a4a20" stroke-width="1.6"/>' for y in (26, 41, 56))
+    s += f'<path d="M14 16 L82 66 M82 16 L14 66" stroke="#7a4a20" stroke-width="5"/>'
+    s += "".join(f'<rect x="{x}" y="{y}" width="10" height="10" fill="#7d8696" {O1}/>' for x in (10, 76) for y in (12, 60))
+    s += '<path d="M18 18 L48 18" stroke="#ffffff" stroke-width="2.5" opacity="0.35" stroke-linecap="round"/>'
+    s += f'<rect x="36" y="32" width="24" height="14" rx="2" fill="#f3e3c3" {O1}/><path d="M40 39 L56 39" stroke="#d02828" stroke-width="2"/>'
+    return s
+
+
+def objek_tong():
+    s = _bayang(36, 70, 28)
+    s += f'<path d="M12 14 Q6 40 12 66 Q36 74 60 66 Q66 40 60 14 Q36 6 12 14 Z" fill="{grad("#a8602a", 1.3, 0.7, False)}" {O}/>'
+    s += "".join(f'<path d="M{x} 12 Q{x + (x - 36) * 0.12:.0f} 40 {x} 68" fill="none" stroke="#6a3a14" stroke-width="1.4"/>' for x in (22, 36, 50))
+    for y in (22, 56):
+        s += f'<path d="M9 {y} Q36 {y + 6} 63 {y}" fill="none" stroke="{INK}" stroke-width="6"/><path d="M9 {y} Q36 {y + 6} 63 {y}" fill="none" stroke="#9aa3b2" stroke-width="3.5"/>'
+    s += f'<ellipse cx="36" cy="13" rx="24" ry="6" fill="{grad("#8a4a1c")}" {O1}/>'
+    s += '<path d="M18 26 L18 52" stroke="#ffffff" stroke-width="3" opacity="0.3" stroke-linecap="round"/>'
+    return s
+
+
+def objek_mercusuar():
+    s = _bayang(80, 326, 62, 14)
+    s += f'<path d="M32 324 L128 324 L112 92 L48 92 Z" fill="{grad("#f6f2ea", 1.05, 0.8, False)}" {O}/>'
+    for i in range(3):
+        y0, y1 = 280 - i * 72, 250 - i * 72
+        w0, w1 = 48 - (324 - y0) * 16 / 232, 48 - (324 - y1) * 16 / 232
+        s += f'<path d="M{80 - w0:.1f} {y0} L{80 + w0:.1f} {y0} L{80 + w1:.1f} {y1} L{80 - w1:.1f} {y1} Z" fill="{grad("#d0322a", 1.2, 0.8, False)}"/>'
+    s += f'<path d="M32 324 L128 324 L112 92 L48 92 Z" fill="none" {O}/>'
+    s += f'<rect x="68" y="290" width="24" height="34" rx="10" fill="#4a2a14" {O1}/>'
+    s += f'<rect x="72" y="200" width="16" height="20" rx="6" fill="#7ac8f0" {O1}/>'
+    s += f'<rect x="36" y="84" width="88" height="10" rx="2" fill="#4a4f5c" {O}/>'
+    s += f'<circle cx="80" cy="60" r="44" fill="#fff6a0" opacity="0.25"/>'
+    s += f'<rect x="52" y="44" width="56" height="40" rx="4" fill="{rgrad("#ffe36a")}" {O}/>'
+    s += f'<path d="M66 44 L66 84 M80 44 L80 84 M94 44 L94 84" stroke="{INK}" stroke-width="2"/>'
+    s += f'<path d="M44 46 L116 46 L80 8 Z" fill="{grad("#d0322a", 1.3, 0.7)}" {O}/>'
+    s += f'<circle cx="80" cy="6" r="4" fill="{GOLD}" {O1}/>'
+    s += '<path d="M56 300 L62 110" stroke="#ffffff" stroke-width="4" opacity="0.4" stroke-linecap="round"/>'
+    return s
+
+
+def objek_pinisi():
+    s = '<ellipse cx="160" cy="268" rx="150" ry="14" fill="#1e5a7a" opacity="0.45"/>'
+    for m, top in ((116, 30), (204, 46)):
+        s += f'<path d="M{m} 226 L{m} {top}" stroke="{INK}" stroke-width="7" stroke-linecap="round"/><path d="M{m} 226 L{m} {top}" stroke="#8a5a2a" stroke-width="4" stroke-linecap="round"/>'
+        s += f'<path d="M{m + 4} {top + 10} Q{m + 66} {top + 70} {m + 60} {top + 150} L{m + 4} {top + 160} Z" fill="{grad("#fbf4e4", 1.0, 0.82, False)}" {O1}/>'
+        s += f'<path d="M{m - 4} {top + 16} Q{m - 50} {top + 80} {m - 44} {top + 150} L{m - 4} {top + 154} Z" fill="{grad("#efe4cc", 1.0, 0.82, False)}" {O1}/>'
+        s += f'<path d="M{m} {top} L{m} {top - 14}" stroke="{INK}" stroke-width="2"/><rect x="{m + 1}" y="{top - 14}" width="16" height="6" fill="#e8283a"/><rect x="{m + 1}" y="{top - 8}" width="16" height="6" fill="#ffffff"/>'
+    s += f'<path d="M260 196 L314 150" stroke="{INK}" stroke-width="4"/><path d="M262 196 L312 152" stroke="#8a5a2a" stroke-width="2"/>'
+    s += f'<path d="M14 196 L300 186 Q316 186 312 198 L284 256 Q160 272 44 258 Z" fill="{grad("#8a4a1c", 1.3, 0.7)}" {O}/>'
+    s += f'<path d="M18 206 L304 196" stroke="{GOLD}" stroke-width="4"/><path d="M28 226 L296 216" stroke="#c0502a" stroke-width="3"/>'
+    s += "".join(f'<circle cx="{x}" cy="{238 - (x - 60) * 0.03:.0f}" r="4" fill="#4a2a10" {O1}/>' for x in range(70, 280, 30))
+    s += f'<path d="M14 196 Q4 180 20 172" fill="none" stroke="#8a4a1c" stroke-width="6" stroke-linecap="round"/>'
+    s += '<path d="M30 262 q20 -8 40 0 q20 8 40 0 M200 264 q20 -8 40 0 q20 8 40 0" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.7" stroke-linecap="round"/>'
+    return s
+
+
+def _bata(x0, y0, x1, y1, c="#7a7e8a", h=12, w=24):
+    s = f'<rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{y1 - y0}" fill="{grad(c, 1.2, 0.75)}" {O}/>'
+    for i, y in enumerate(range(y0 + h, y1, h)):
+        s += f'<path d="M{x0} {y} L{x1} {y}" stroke="#3a3e48" stroke-width="1.4"/>'
+    for i, y in enumerate(range(y0, y1 - 2, h)):
+        for x in range(x0 + (i % 2) * w // 2 + w, x1, w):
+            s += f'<path d="M{x} {y} L{x} {min(y + h, y1)}" stroke="#3a3e48" stroke-width="1.2"/>'
+    return s
+
+
+def objek_tembok():
+    s = _bayang(176, 134, 170, 12)
+    s += _bata(16, 44, 336, 132)
+    for x in range(16, 336, 40):
+        s += f'<rect x="{x}" y="22" width="24" height="24" fill="{grad("#8a8e9a", 1.2, 0.8)}" {O1}/>'
+    s += f'<rect x="16" y="104" width="320" height="10" fill="#a82a22" stroke="{INK}" stroke-width="1.2"/>'
+    s += "".join(f'<circle cx="{x}" cy="109" r="2.5" fill="#d8dce4"/>' for x in range(36, 336, 40))
+    s += '<path d="M24 52 L328 52" stroke="#ffffff" stroke-width="3" opacity="0.25"/>'
+    return s
+
+
+def objek_tembok_v():
+    s = _bayang(32, 294, 26, 8)
+    s += _bata(10, 24, 54, 292, "#6a6e7a", 16, 22)
+    s += f'<rect x="4" y="10" width="56" height="18" rx="2" fill="{grad("#8a8e9a", 1.2, 0.8)}" {O}/>'
+    s += f'<rect x="10" y="244" width="44" height="48" fill="{grad("#7a7e8a", 1.25, 0.8)}" {O1}/>'
+    s += f'<rect x="10" y="236" width="44" height="8" fill="#a82a22" stroke="{INK}" stroke-width="1"/>'
+    return s
+
+
+def objek_meriam_benteng():
+    s = _bayang(80, 94, 60, 8)
+    s += f'<g transform="rotate(-18 60 54)"><path d="M30 42 L140 34 Q150 34 150 44 L150 58 Q150 66 140 66 L30 64 Q18 64 18 53 Q18 42 30 42 Z" fill="{grad("#4a4f5c", 1.4, 0.6)}" {O}/>'
+    s += f'<rect x="138" y="30" width="12" height="40" rx="3" fill="{grad("#4a4f5c", 1.3, 0.7)}" {O1}/><circle cx="18" cy="53" r="8" fill="#2a2e38" {O1}/>'
+    s += f'<path d="M50 40 L50 66 M80 38 L80 66" stroke="#a82a22" stroke-width="4"/><path d="M34 46 Q80 40 130 40" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.35" stroke-linecap="round"/></g>'
+    s += f'<path d="M20 64 L120 64 L110 86 L28 86 Z" fill="{grad("#8a5a2a", 1.25, 0.75)}" {O}/>'
+    for x in (40, 104):
+        s += f'<circle cx="{x}" cy="84" r="12" fill="{rgrad("#6a4020")}" {O}/><circle cx="{x}" cy="84" r="4" fill="#9aa3b2" {O1}/>'
+    s += f'<g {O1}><circle cx="140" cy="88" r="6" fill="{rgrad("#3a3f4b")}"/><circle cx="150" cy="80" r="6" fill="{rgrad("#3a3f4b")}"/></g>'
+    return s
+
+
+def objek_menara():
+    s = _bayang(80, 334, 64, 14)
+    s += _bata(28, 96, 132, 332, "#6a6e7a", 14, 26)
+    s += f'<rect x="64" y="288" width="32" height="44" rx="14" fill="#1e1e26" {O1}/>'
+    s += "".join(f'<rect x="76" y="{y}" width="8" height="20" rx="3" fill="#1e1e26"/>' for y in (150, 210))
+    s += f'<rect x="16" y="76" width="128" height="22" rx="2" fill="{grad("#8a8e9a", 1.25, 0.8)}" {O}/>'
+    for x in range(16, 144, 26):
+        s += f'<rect x="{x}" y="56" width="18" height="22" fill="{grad("#8a8e9a", 1.2, 0.8)}" {O1}/>'
+    s += f'<rect x="28" y="120" width="104" height="8" fill="#a82a22"/>'
+    s += f'<path d="M80 56 L80 6" stroke="{INK}" stroke-width="4"/>'
+    s += f'<path d="M82 8 L130 18 Q120 24 130 32 L82 40 Z" fill="{grad("#c0302a", 1.25, 0.75)}" {O1}/>'
+    s += f'<circle cx="100" cy="24" r="6" fill="#9aa3b2" stroke="{INK}" stroke-width="1"/>'
+    s += '<path d="M36 104 L36 320" stroke="#ffffff" stroke-width="4" opacity="0.2"/>'
+    return s
+
+
+def objek_panji():
+    s = _bayang(40, 174, 14)
+    s += f'<path d="M30 174 L50 174 L46 164 L34 164 Z" fill="#4a4f5c" {O1}/>'
+    s += f'<path d="M40 166 L40 12" stroke="{INK}" stroke-width="6" stroke-linecap="round"/><path d="M40 166 L40 12" stroke="#7a7e8a" stroke-width="3.5" stroke-linecap="round"/>'
+    s += f'<circle cx="40" cy="10" r="5" fill="{rgrad(GOLD)}" {O1}/>'
+    s += f'<path d="M42 18 L76 18 L76 92 L59 80 L42 92 Z" fill="{grad("#c0302a", 1.25, 0.7)}" {O1}/>'
+    s += f'<circle cx="59" cy="48" r="11" fill="#9aa3b2" stroke="{INK}" stroke-width="1.2"/><circle cx="59" cy="48" r="5" fill="#4a4f5c"/>'
+    s += f'<path d="M42 24 L76 24" stroke="{GOLD}" stroke-width="2"/>'
+    return s
+
+
+def objek_candi():
+    s = _bayang(168, 366, 160, 18)
+    batu = "#9a8a7a"
+    for i, (x0, x1, y0, y1) in enumerate(((24, 312, 324, 364), (52, 284, 284, 324), (80, 256, 244, 284))):
+        s += f'<rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{y1 - y0}" fill="{grad(shade(batu, 1 + i * 0.05), 1.2, 0.75)}" {O}/>'
+        s += f'<path d="M{x0} {y0 + 10} L{x1} {y0 + 10}" stroke="#5a4e44" stroke-width="1.6"/>'
+        s += "".join(f'<rect x="{x}" y="{y0 + 16}" width="16" height="16" rx="2" fill="#7a6e62" stroke="#5a4e44" stroke-width="1"/>' for x in range(x0 + 12, x1 - 20, 34))
+    s += f'<rect x="108" y="140" width="120" height="104" fill="{grad(batu, 1.25, 0.75)}" {O}/>'
+    s += f'<path d="M140 244 L140 172 Q168 146 196 172 L196 244 Z" fill="#2a2420" {O1}/>'
+    s += f'<path d="M140 172 Q168 134 196 172" fill="none" stroke="{GOLD}" stroke-width="2.5"/>'
+    s += f'<circle cx="168" cy="152" r="8" fill="#b8a898" stroke="#5a4e44" stroke-width="1.4"/><circle cx="165" cy="150" r="1.5" fill="{INK}"/><circle cx="171" cy="150" r="1.5" fill="{INK}"/>'
+    for i, (x0, x1, y0, y1) in enumerate(((100, 236, 116, 140), (116, 220, 92, 116), (132, 204, 70, 92))):
+        s += f'<rect x="{x0}" y="{y0}" width="{x1 - x0}" height="{y1 - y0}" fill="{grad(shade(batu, 1.08), 1.2, 0.8)}" {O1}/>'
+        s += "".join(f'<path d="M{x} {y0} Q{x + 6} {y0 - 12} {x + 12} {y0}" fill="{shade(batu, 1.1)}" stroke="{INK}" stroke-width="1.2"/>' for x in range(x0 + 4, x1 - 10, 22))
+    s += f'<path d="M144 70 Q144 30 168 26 Q192 30 192 70 Z" fill="{grad(batu, 1.3, 0.75)}" {O}/>'
+    s += f'<path d="M168 26 L168 4" stroke="{INK}" stroke-width="5" stroke-linecap="round"/><path d="M168 26 L168 4" stroke="#b8a898" stroke-width="3" stroke-linecap="round"/>'
+    s += f'<path d="M144 364 L192 364 L188 244 L148 244 Z" fill="{grad("#8a7a6a", 1.1, 0.8)}" {O1}/>'
+    s += "".join(f'<path d="M{146 + (364 - y) * 0.03:.0f} {y} L{190 - (364 - y) * 0.03:.0f} {y}" stroke="#5a4e44" stroke-width="1.4"/>' for y in range(256, 364, 10))
+    s += "".join(f'<path d="M{x} {y} q6 -4 12 0" fill="#6aa040" opacity="0.8"/>' for x, y in ((30, 330), (270, 292), (90, 252), (230, 130), (120, 120)))
+    s += '<path d="M116 150 L116 236" stroke="#ffffff" stroke-width="4" opacity="0.25" stroke-linecap="round"/>'
+    return s
+
+
+OBJEK.update({"pohon": (32, 48, objek_pohon), "beringin": (68, 76, objek_beringin), "joglo": (68, 52, objek_joglo),
+              "lumbung": (32, 46, objek_lumbung), "peti": (24, 20, objek_peti), "tong": (18, 20, objek_tong),
+              "mercusuar": (40, 84, objek_mercusuar), "pinisi": (80, 70, objek_pinisi), "tembok": (88, 36, objek_tembok),
+              "tembok_v": (16, 76, objek_tembok_v), "meriam_benteng": (40, 26, objek_meriam_benteng),
+              "menara": (40, 86, objek_menara), "panji": (20, 46, objek_panji), "candi": (84, 94, objek_candi)})
+MEDAN = {"lembah": medan_lembah, "hutan": medan_hutan, "desa": medan_desa, "pelabuhan": medan_pelabuhan, "benteng": medan_benteng}
+
+
 def main():
     os.makedirs(SPRITES, exist_ok=True)
     os.makedirs(ICONS, exist_ok=True)
@@ -1008,7 +1407,8 @@ def main():
         save(SPRITES, f"peluru_{name}", w, h, body)
     for name, (w, h, body) in IKON.items():
         save(SPRITES, name, w, h, body)
-    save(SPRITES, "medan_lembah", *ARENA, medan_lembah(), unit=1, import_scale=2)
+    for name, fn in MEDAN.items():
+        save(SPRITES, f"medan_{name}", *ARENA, fn(), unit=1, import_scale=2)
     for name, (w, h, fn) in OBJEK.items():
         save(SPRITES, f"objek_{name}", w, h, fn())
     names = list(ITEM_SIMPLE) + list(ITEM_CUSTOM)

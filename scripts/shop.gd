@@ -215,7 +215,9 @@ func _refresh_bag() -> void:
 	_weapon_count.text = "Senjata %d/%d" % [weapon_nodes.size(), player.MAX_WEAPONS]
 	for w in weapon_nodes:
 		var b := _slot_button(w.data.texture, "" if w.tier == 1 else str(w.tier), w.TIER_COLORS[w.tier - 1])
-		b.tooltip_text = "%s (Tier %d)" % [w.data.title, w.tier]
+		b.tooltip_text = "%s (Tier %d)\nDamage %d x %d peluru\n%.1f serangan/dtk, jarak %d%s" % [w.data.title, w.tier,
+			w.shot_damage(), w.shot_count(), 1.0 / w.shot_interval(), w.shot_range(),
+			"\nEfek: " + _effect_name(w.data) if _effect_name(w.data) != "" else ""]
 		b.modulate = Color(1.3, 1.2, 0.6) if _sel.get("weapon") == w else Color.WHITE
 		b.pressed.connect(func(): _sel = {"weapon": w}; _refresh_bag())
 		_weapons.add_child(b)
@@ -224,7 +226,7 @@ func _refresh_bag() -> void:
 		var it: ItemData = player.items[i]
 		var lv: int = player.item_levels[i]
 		var b := _slot_button(_icon_of(it), "" if lv == 1 else str(lv), RARITY_COLORS[it.rarity])
-		b.tooltip_text = "%s (Lv%d)" % [it.title, lv]
+		b.tooltip_text = "%s (Lv%d)\n%s" % [it.title, lv, _item_effect(i, false).replace(", ", "\n")]
 		b.modulate = Color(1.3, 1.2, 0.6) if _sel.get("item", -1) == i else Color.WHITE
 		b.pressed.connect(func(): _sel = {"item": i}; _refresh_bag())
 		_items.add_child(b)
@@ -243,12 +245,7 @@ func _refresh_bag() -> void:
 		var i: int = _sel.item
 		var it: ItemData = player.items[i]
 		var lv: int = player.item_levels[i]
-		var scaled := {}
-		for k in it.stats:
-			scaled[k] = roundi(it.stats[k] * player.ITEM_MULT[lv - 1])
-		var effect := _effects_dict(scaled, true)
-		if it.special != "":
-			effect += (", " if effect != "" else "") + "[color=#7fe07f]efek khusus x%.1f[/color]" % player.ITEM_MULT[lv - 1]
+		var effect := _item_effect(i, true)
 		var hint := "bisa digabung jadi Lv%d!" % (lv + 1) if player.item_combine_partner(i) >= 0 \
 			else ("level maks" if lv >= player.MAX_ITEM_LEVEL else "gabung butuh 1 lagi yang selevel")
 		_bag_detail.text = "[color=#e0b04a]%s[/color] Lv%d: %s  -  %s" % [it.title, lv, effect, hint]
@@ -425,8 +422,7 @@ func _effect_lines(data: Resource) -> PackedStringArray:
 			lines.append("Peluru [color=#f0d860]x%d[/color]" % data.projectile_count)
 		if data.pierce > 0 and data.effect != "bounce":
 			lines.append("Tembus [color=#f0d860]%d[/color]" % data.pierce)
-		var effect_text: String = {"burn": "Membakar", "poison": "Meracun", "bleed": "Berdarah", "slow": "Memperlambat",
-			"knockback": "Mendorong", "explode": "Meledak", "bounce": "Memantul %dx" % data.pierce}.get(data.effect, "")
+		var effect_text := _effect_name(data)
 		if effect_text != "":
 			lines.append("[color=#ffb070]%s[/color]" % effect_text)
 		return lines
@@ -542,6 +538,36 @@ func _show_stats(preview: Dictionary) -> void:
 	_stats.text = "\n".join(lines)
 
 
+## Efek item di tas sesuai levelnya (stat dikali ITEM_MULT; efek khusus ditulis dari deskripsinya).
+func _item_effect(i: int, colored: bool) -> String:
+	var it: ItemData = player.items[i]
+	var m: float = player.ITEM_MULT[player.item_levels[i] - 1]
+	var scaled := {}
+	for k in it.stats:
+		scaled[k] = roundi(it.stats[k] * m)
+	var effect := _effects_dict(scaled, colored)
+	if it.special != "":
+		var special: String = SPECIAL_TEXT[it.special] % roundi(it.special_value * m) if SPECIAL_TEXT.has(it.special) else it.description
+		effect += (", " if effect != "" else "") + ("[color=#7fe07f]%s[/color]" % special if colored else special)
+	return effect
+
+
+## Efek khusus item dengan angka yang sudah dikali level (sisanya memakai deskripsi item).
+const SPECIAL_TEXT := {
+	"pulse": "Gelombang %d damage tiap 6 dtk",
+	"thorns": "Balas %d damage saat terluka",
+	"lifesteal": "%d%% peluang pulih 1 HP saat kena",
+	"burn_chance": "%d%% peluang membakar",
+	"wayang": "%d sekutu wayang",
+	"turret": "%d Meriam Jaga tiap wave",
+}
+
+
+func _effect_name(data: WeaponData) -> String:
+	return {"burn": "Membakar", "poison": "Meracun", "bleed": "Berdarah", "slow": "Memperlambat",
+		"knockback": "Mendorong", "explode": "Meledak", "bounce": "Memantul %dx" % data.pierce}.get(data.effect, "")
+
+
 func _effects(data: Resource) -> String:
 	if data is WeaponData:
 		var kind_name: String = {"melee": "Dekat", "ranged": "Jauh", "magic": "Magis"}[data.category]
@@ -550,8 +576,7 @@ func _effects(data: Resource) -> String:
 			s += "  |  x%d" % data.projectile_count
 		if data.pierce > 0 and data.effect != "bounce":
 			s += "  |  Tembus %d" % data.pierce
-		var effect_text: String = {"burn": "Membakar", "poison": "Meracun", "bleed": "Berdarah", "slow": "Memperlambat",
-			"knockback": "Mendorong", "explode": "Meledak", "bounce": "Memantul %dx" % data.pierce}.get(data.effect, "")
+		var effect_text := _effect_name(data)
 		if effect_text != "":
 			s += "\nEfek: " + effect_text
 		return s

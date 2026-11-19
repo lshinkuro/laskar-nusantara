@@ -24,6 +24,7 @@ const SEMANGAT_HIT := preload("res://data/allies/semangat_hit.tres")
 const KENTONGAN_HIT := preload("res://data/allies/kentongan_hit.tres")
 const DamageNumber := preload("res://scripts/damage_number.gd")
 const OBJECT_SCALE := 1.5
+const SPRITE_SCALE := 0.375  # sama dengan Sprite di player.tscn
 const MAX_TIER := 4
 const MAX_ITEM_LEVEL := 3
 ## Pengali efek item per level (2 item Lv1 = 2x, digabung jadi Lv2 = 2.5x).
@@ -224,6 +225,10 @@ func _animate(delta: float, moving: bool, dir_x: float) -> void:
 		sprite.flip_h = dir_x < 0
 	_bob = _bob + delta * 14.0 if moving else 0.0
 	sprite.position.y = -absf(sin(_bob)) * 2.0
+	# Condong ke arah lari + memanjang-memendek tiap langkah.
+	sprite.rotation = lerpf(sprite.rotation, (signf(dir_x) if absf(dir_x) > 0.1 else 0.0) * 0.15 if moving else 0.0, minf(1.0, delta * 12.0))
+	var squash := 1.0 + 0.06 * sin(_bob * 2.0) if moving else 1.0
+	sprite.scale = Vector2(2.0 - squash, squash) * SPRITE_SCALE
 
 
 @rpc("authority", "unreliable_ordered")

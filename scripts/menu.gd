@@ -29,6 +29,8 @@ func _ready() -> void:
 		Net.my_outfit = cfg.get_value("player", "outfit", Net.my_outfit)
 		Net.my_character = cfg.get_value("player", "character", Net.my_character)
 		Net.difficulty = clampi(cfg.get_value("player", "difficulty", Net.difficulty), 0, Net.DIFFICULTIES.size() - 1)
+		if not Net.difficulty_unlocked(Net.difficulty):
+			Net.difficulty = Net.NERAKA - 1
 		first_time = not cfg.get_value("player", "tutorial_seen", false)
 	if not Net.is_unlocked(Net.characters[Net.my_character % Net.characters.size()]):
 		Net.my_character = 0
@@ -157,13 +159,21 @@ func _build_characters() -> void:
 			_refresh()
 			UiAnim.bump(b, 1.08)
 			UiAnim.bump(%Preview, 1.2))
+		var medal := ColorRect.new()  # warna kesulitan tertinggi yang dimenangkan (diatur _refresh)
+		medal.name = "Medal"
+		medal.size = Vector2(6, 6)
+		medal.position = Vector2(34, 2)
+		medal.rotation = PI / 4
+		medal.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(medal)
 		%CharList.add_child(b)
 
 
 func _show_char_info(i: int) -> void:
 	var c: CharacterData = Net.characters[i]
-	%CharInfo.text = "%s\n+ %s\n- %s\nSenjata awal: %s" % [c.title, c.pros, c.cons, c.start_weapon.title] \
-		if Net.is_unlocked(c) else "%s (terkunci)\nCapai wave %d untuk membuka (terbaik: %d)" % [c.title, c.unlock_wave, Net.best_wave]
+	var won := Net.best_win(c)
+	%CharInfo.text = "%s%s\n+ %s\n- %s\nSenjata awal: %s" % [c.title, "  (menang: %s)" % Net.DIFFICULTIES[won].name if won >= 0 else "",
+			c.pros, c.cons, c.start_weapon.title] if Net.is_unlocked(c) else "%s (terkunci)\nCapai wave %d untuk membuka (terbaik: %d)" % [c.title, c.unlock_wave, Net.best_wave]
 
 
 func _build_difficulty() -> void:
@@ -176,6 +186,9 @@ func _build_difficulty() -> void:
 		b.tooltip_text = "HP musuh x%.1f, damage musuh x%.1f, jumlah musuh x%.1f" % [d.hp, d.dmg, d.count]
 		if d.bekal > 0:
 			b.tooltip_text += "\nBekal perang: +%d rempah tiap akhir wave 1-5" % d.bekal
+		if not Net.difficulty_unlocked(i):
+			b.disabled = true
+			b.tooltip_text = "Terkunci: menangkan satu run di tingkat Sulit"
 		b.focus_mode = Control.FOCUS_NONE
 		b.pressed.connect(func():
 			Net.difficulty = i
@@ -202,6 +215,10 @@ func _refresh() -> void:
 		b.disabled = not unlocked
 		b.text = c.title.get_slice(" ", 0) if unlocked else "W%d" % c.unlock_wave
 		b.modulate = SELECTED if picked else Color.WHITE if unlocked else Color(0.35, 0.35, 0.4)
+		var won := Net.best_win(c)
+		b.get_node("Medal").visible = won >= 0
+		if won >= 0:
+			b.get_node("Medal").color = Net.DIFFICULTIES[won].color
 	_show_char_info(Net.my_character)
 	for i in %DiffRow.get_child_count():
 		%DiffRow.get_child(i).modulate = Net.DIFFICULTIES[i].color if i == Net.difficulty else Color(1, 1, 1, 0.55)

@@ -363,6 +363,17 @@ def main():
     for i, d in enumerate([0, 2, 3, 5, 3, 5, 7, 10]):
         mix(vic, bilah(note(440, d), 0.6, 5), i * 0.16)
     save("victory", mix(vic, gong(62, 2.5), 1.3, 0.8))
+    # Suara serangan per jenis senjata (dipetakan di scripts/weapon.gd).
+    save("w_tebas", mix(noise(0.12, 22, 0.8, 0.12), sweep(900, 300, 0.1, 25, 0.25), 0))
+    save("w_tusuk", mix(noise(0.07, 40, 0.6, 0.2), kendang_tak(0.05), 0.02, 0.8))
+    save("w_lempar", [v * (0.55 + 0.45 * math.sin(2 * math.pi * 45 * i / RATE)) for i, v in enumerate(noise(0.14, 18, 0.8, 0.35))])
+    save("w_panah", mix(sweep(520, 380, 0.12, 22, 0.6), noise(0.06, 50, 0.4, 0.5), 0.01))
+    save("w_ketapel", mix(sweep(220, 120, 0.08, 30, 0.8), kendang_tak(0.05), 0))
+    save("w_meriam", mix(mix(bedug(0.5), noise(0.4, 9, 0.9, 0.08), 0), sweep(140, 50, 0.3, 10, 0.6), 0))
+    save("w_api", mix(noise(0.25, 10, 0.7, 0.06), sweep(200, 420, 0.2, 8, 0.25), 0))
+    save("crit", mix(dentang(1320, 0.3), noise(0.05, 60, 0.6, 0.6), 0, 0.8))
+    save("merge", mix(mix(bilah(note(660, 0), 0.4, 8), bilah(note(660, 2), 0.4, 8), 0.06), bilah(note(660, 5), 0.7, 5), 0.12))
+    save("boss_die", mix(mix(gong(55, 2.5, 1.2), bedug(0.8), 0), noise(0.8, 4, 0.6, 0.05), 0))
     print("suara dibuat di", os.path.normpath(OUT))
 
 

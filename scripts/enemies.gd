@@ -94,6 +94,12 @@ func boss() -> Node:
 	return null
 
 
+## Serangan kritis pemain lokal: peluang dasar + 1/4 dari luck, damage x2.
+const CRIT_CHANCE := 0.08
+const CRIT_MULT := 2
+## Boss tumbang: game melambat sebentar (detik nyata).
+const BOSS_SLOWMO := 0.8
+
 ## Lama tiap efek status (detik).
 const STATUS_DURATION := {"burn": 2.5, "poison": 3.5, "bleed": 2.0, "slow": 1.5}
 
@@ -106,8 +112,14 @@ func hit(enemy: Node, amount: int, data: WeaponData = null, dir := Vector2.ZERO)
 		var mod: Array = local_player.modify_hit(effect, power)
 		effect = mod[0]
 		power = mod[1]
+	var crit := local_player != null and randf() < CRIT_CHANCE + local_player.stats.luck / 400.0
+	if crit:
+		amount *= CRIT_MULT
+		Sfx.play("crit", -6.0)
+		local_player.shake(2.0)
+	if local_player:
 		local_player.on_hit(amount)
-	enemy.flash(amount)
+	enemy.flash(amount, crit)
 	Fx.spark(get_parent(), enemy.position + Vector2(0, -8), Fx.EFFECT_COLORS.get(effect, Color(1, 0.9, 0.5)))
 	if data and data.category == "melee":
 		Fx.slash(get_parent(), enemy.position + Vector2(0, -8), dir.angle())
@@ -201,7 +213,13 @@ func _kill(id: int, killer: int) -> void:
 	Fx.spark(get_parent(), e.position, Color(0.75, 0.78, 0.82), 10 if not e.is_boss() else 40)
 	if e.is_boss():
 		Fx.explosion(get_parent(), e.position, 40)
+		Fx.ring(get_parent(), e.position, 120.0, Color(1, 0.85, 0.4))
 		boss_changed.emit(null)
+		Sfx.play("boss_die", 2.0, 0.0)
+		if local_player:
+			local_player.shake(10.0)
+		Engine.time_scale = 0.25
+		get_tree().create_timer(BOSS_SLOWMO, true, false, true).timeout.connect(func(): Engine.time_scale = 1.0)
 	e.die()
 
 

@@ -51,6 +51,13 @@ func _process(_delta: float) -> bool:
 	net.difficulty = 1
 	main.waves.stop()
 	checks.difficulty = hp[3] > hp[0] * 3
+	# Neraka terkunci sampai ada kemenangan di Sulit (tanpa menyimpan ke file).
+	var saved_wins: Dictionary = net.wins
+	net.wins = {"x": 1}
+	var locked: bool = not net.difficulty_unlocked(3) and net.difficulty_unlocked(2)
+	net.wins = {"x": 2}
+	checks.neraka = locked and net.difficulty_unlocked(3)
+	net.wins = saved_wins
 	# Kembalikan progres asli.
 	net.best_wave = -1
 	net.record_wave(saved_best)

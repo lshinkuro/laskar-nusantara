@@ -30,6 +30,7 @@ var _timers := {}
 var _telegraph := 0.0
 var _dash := 0.0
 var _dash_dir := Vector2.ZERO
+var _aim: Node2D  # penembak: sasaran yang sedang dibidik
 var _ring_offset := 0.0
 var _status_particles: CPUParticles2D
 ## Gaya jalan acak (host): 0 lurus, 1 zig-zag, 2 mengapit dari samping, 3 ragu-ragu.
@@ -108,6 +109,17 @@ func _update_statuses(delta: float) -> void:
 
 func start_telegraph() -> void:
 	_telegraph = 0.7
+	if kind == "penembak":  # bidik dulu: garis merah ke prajurit terdekat
+		_aim = _nearest_alive_player()
+
+
+## Garis bidik penembak selama aba-aba (tampil di semua peer).
+func _draw() -> void:
+	if _telegraph > 0 and is_instance_valid(_aim):
+		var to := (_aim.position - position).limit_length(150.0)
+		var a := 0.25 + 0.5 * (1.0 - _telegraph / 0.7)
+		draw_line(Vector2(0, -6), to, Color(1, 0.2, 0.15, a), 1.0)
+		draw_circle(to, 3.0, Color(1, 0.2, 0.15, a * 0.6))
 
 
 func _physics_process(delta: float) -> void:
@@ -123,6 +135,10 @@ func _physics_process(delta: float) -> void:
 		sprite.flip_h = dx < 0
 	_bob += delta * (16.0 if _dash > 0 else 10.0)
 	sprite.position.y = -absf(sin(_bob)) * def.scale
+	if _aim != null:
+		queue_redraw()
+		if _telegraph <= 0:
+			_aim = null
 	if _telegraph > 0:
 		sprite.modulate = Color(2.5, 0.6, 0.6) if fmod(_telegraph, 0.2) < 0.1 else Color.WHITE
 	elif sprite.modulate == Color(2.5, 0.6, 0.6):
@@ -146,7 +162,9 @@ func _simulate(delta: float) -> void:
 	elif _telegraph > 0:
 		_telegraph -= delta
 		move = Vector2.ZERO
-		if _telegraph <= 0:
+		if _telegraph <= 0 and kind == "penembak":
+			enemies.fire_bullets(position, PackedVector2Array([dir]), 160.0, damage)
+		elif _telegraph <= 0:
 			_dash = 0.6 if kind == "kavaleri" else 0.5
 			_dash_dir = dir
 	elif def.get("ranged", false) and to.length() < (170.0 if kind == "tabib" else 150.0):
@@ -173,8 +191,8 @@ func _abilities(delta: float, dir: Vector2) -> void:
 	for k in _timers:
 		_timers[k] -= delta
 	if def.get("ranged", false) and _timers.shoot <= 0 and kind == "penembak":
-		_timers.shoot = 2.2
-		enemies.fire_bullets(position, PackedVector2Array([dir]), 140.0, damage)
+		_timers.shoot = 2.6
+		enemies.telegraph.rpc(id)  # tembakan keluar saat aba-aba habis (_simulate)
 	if def.get("miner", false) and _timers.mine <= 0:
 		_timers.mine = 4.0
 		enemies.place_mine(position)
@@ -250,10 +268,13 @@ func _nearest_alive_player() -> Node2D:
 	return best
 
 
-func flash(amount: int) -> void:
+func flash(amount: int, crit := false) -> void:
 	sprite.modulate = Color(4, 4, 4)
 	create_tween().tween_property(sprite, "modulate", Color.WHITE, 0.12)
-	DamageNumber.spawn(get_parent(), position + Vector2(0, -12 - def.radius), amount)
+	if crit:
+		DamageNumber.spawn(get_parent(), position + Vector2(0, -14 - def.radius), amount, Color(1, 0.35, 0.2), "", true)
+	else:
+		DamageNumber.spawn(get_parent(), position + Vector2(0, -12 - def.radius), amount)
 
 
 func die() -> void:

@@ -276,6 +276,12 @@ func _finish(won: bool, wave: int) -> void:
 		else "Pasukan bertahan sampai wave %d dari %d." % [wave, waves.LAST_WAVE]
 	if not _unlocked_this_run.is_empty():
 		$EndScreen/Panel/Box/Sub.text += "\nKarakter baru: " + ", ".join(_unlocked_this_run)
+	if won:
+		var neraka_before := Net.difficulty_unlocked(Net.NERAKA)
+		if Net.record_win(Net.character_of(multiplayer.get_unique_id()), Net.difficulty):
+			$EndScreen/Panel/Box/Sub.text += "\nMedali %s untuk karakter ini!" % Net.DIFFICULTIES[Net.difficulty].name
+		if not neraka_before and Net.difficulty_unlocked(Net.NERAKA):
+			$EndScreen/Panel/Box/Sub.text += "\nTingkat NERAKA terbuka!"
 	run.build($EndScreen/Panel/Box/Stats, local_player, wave, Net.character_of(multiplayer.get_unique_id()).title)
 	var host := multiplayer.is_server()
 	$EndScreen/Panel/Box/Buttons/Again.visible = host

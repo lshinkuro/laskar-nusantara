@@ -49,6 +49,9 @@ var my_name := "Pejuang"
 var my_outfit := 0
 var my_character := 0
 var difficulty := 1
+## Kemenangan: path karakter -> tingkat kesulitan tertinggi yang pernah dimenangkan.
+var wins := {}
+const NERAKA := 3  # terbuka setelah menang sekali di Sulit
 ## Karakter dari data/characters/, urut sesuai `order`.
 var characters: Array[CharacterData] = []
 ## Wave tertinggi yang pernah dicapai (membuka karakter baru), disimpan di settings.
@@ -81,6 +84,7 @@ func _ready() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(SETTINGS) == OK:
 		best_wave = cfg.get_value("progress", "best_wave", 0)
+		wins = cfg.get_value("progress", "wins", {})
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -157,6 +161,26 @@ func _request_character(index: int) -> void:
 
 func is_unlocked(c: CharacterData) -> bool:
 	return best_wave >= c.unlock_wave
+
+
+func best_win(c: CharacterData) -> int:
+	return wins.get(c.resource_path, -1)
+
+
+func difficulty_unlocked(i: int) -> bool:
+	return i < NERAKA or wins.values().any(func(d): return d >= NERAKA - 1)
+
+
+## Catat kemenangan; true kalau ini rekor baru karakter tsb.
+func record_win(c: CharacterData, diff: int) -> bool:
+	if diff <= best_win(c):
+		return false
+	wins[c.resource_path] = diff
+	var cfg := ConfigFile.new()
+	cfg.load(SETTINGS)
+	cfg.set_value("progress", "wins", wins)
+	cfg.save(SETTINGS)
+	return true
 
 
 ## Catat wave yang dicapai; kembalikan karakter yang baru terbuka karenanya.

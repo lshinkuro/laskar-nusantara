@@ -267,8 +267,9 @@ func _on_combine() -> void:
 		ok = player.combine_item(_sel.item)
 		_sel = {"item": player.items.size() - 1} if ok and player.items.back() == it and player.item_levels.back() == lv else {}
 	if ok:
-		Sfx.play("levelup", -4.0, 0.0)
+		Sfx.play("merge", -2.0, 0.0)
 		_refresh()
+		UiAnim.bump(_bag_detail, 1.3)
 
 
 func _on_sell() -> void:

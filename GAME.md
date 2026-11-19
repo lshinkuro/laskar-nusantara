@@ -65,6 +65,9 @@ Dipilih di menu (untuk co-op, yang berlaku pilihan host).
 
 *Bekal perang* diberikan di akhir wave 1–5 supaya bisa belanja cukup sebelum musuh membesar.
 
+**Neraka terkunci** sampai kamu menang sekali di Sulit. Setiap kemenangan memberi karakter itu
+*medali* (belah ketupat di kartu karakter) berwarna tingkat kesulitan tertinggi yang dimenangkan.
+
 Selain itu musuh **tumbuh berlipat tiap wave**: HP ×1.08 dan damage ×1.04 per wave (di atas
 kenaikan linear), karena item dan senjata pemain juga berlipat. Di wave 20, HP musuh ±4.7× dan
 damage ±2.2× dibanding kurva lama, supaya build yang sudah kuat tetap ditantang.
@@ -75,6 +78,7 @@ Angkanya ada di `Net.DIFFICULTIES` (`scripts/net.gd`) dan `HP_GROWTH`/`DMG_GROWT
 - **Rempah** dari musuh = uang belanja sekaligus XP. Tampilannya acak: pala, cengkeh, lada, kayu manis,
   bunga lawang, atau kepeng (koin), melayang naik-turun. Harga di Pasar naik 12% tiap wave.
 - **Naik level**: HP Maks +1, lalu pilih 1 dari 4 *ilmu* (upgrade stat) per level di akhir wave.
+- **Kritis**: tiap pukulan 8% (+ luck/4 %) jadi kritis, damage ×2, angka merah besar.
 - **Aura**: kekuatan perlengkapan (jumlah level item + 2 × tier senjata di atas 1) ≥ 12 → aura emas,
   ≥ 24 → emas berkobar, ≥ 40 → aura biru berkilat. Teman co-op juga melihatnya.
 - **Ketupat**: kadang jatuh dari musuh, +3 HP.
@@ -130,7 +134,7 @@ sekali tiap wave), Lumbung Padi (rempah memulihkan HP), Busur Arjuna (+1 peluru 
 |---|---|---|
 | Serdadu Besi | 1 | dasar |
 | Anjing Pelacak | 3 | cepat, rapuh |
-| Penembak | 5 | menembak dari jauh |
+| Penembak | 5 | berhenti & membidik (garis merah) lalu menembak |
 | Kavaleri Besi | 6 | menyeruduk |
 | Serdadu Perisai | 7 | tebal, lambat |
 | Pelempar Granat | 8 | granat area |

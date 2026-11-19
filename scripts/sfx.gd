@@ -18,6 +18,16 @@ const SOUNDS := {
 	"wave_end": preload("res://assets/audio/wave_end.wav"),
 	"game_over": preload("res://assets/audio/game_over.wav"),
 	"victory": preload("res://assets/audio/victory.wav"),
+	"w_tebas": preload("res://assets/audio/w_tebas.wav"),
+	"w_tusuk": preload("res://assets/audio/w_tusuk.wav"),
+	"w_lempar": preload("res://assets/audio/w_lempar.wav"),
+	"w_panah": preload("res://assets/audio/w_panah.wav"),
+	"w_ketapel": preload("res://assets/audio/w_ketapel.wav"),
+	"w_meriam": preload("res://assets/audio/w_meriam.wav"),
+	"w_api": preload("res://assets/audio/w_api.wav"),
+	"crit": preload("res://assets/audio/crit.wav"),
+	"merge": preload("res://assets/audio/merge.wav"),
+	"boss_die": preload("res://assets/audio/boss_die.wav"),
 }
 
 ## Volume 0..1 per bus, disimpan di settings.

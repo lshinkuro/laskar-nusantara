@@ -4,6 +4,14 @@ extends Node2D
 
 const TIER_COLORS := [Color(0.7, 0.7, 0.7), Color(0.35, 0.6, 1.0), Color(0.75, 0.4, 1.0), Color(1.0, 0.3, 0.25)]
 const SPREAD_DEFAULT := 10.0
+## Suara serangan per senjata (nama file .tres); yang tidak terdaftar memakai "shoot".
+const SOUNDS := {
+	"keris": "w_tebas", "golok": "w_tebas", "kujang": "w_tebas",
+	"tombak": "w_tusuk", "bambu_runcing": "w_tusuk",
+	"shuriken": "w_lempar", "kunai": "w_lempar", "cakra": "w_lempar",
+	"panah": "w_panah", "sumpit": "w_panah", "ketapel": "w_ketapel",
+	"meriam_lela": "w_meriam", "meriam_jaga": "w_meriam", "mantra_api": "w_api",
+}
 
 var data: WeaponData
 var player  # Player pemilik
@@ -65,7 +73,7 @@ func _process(delta: float) -> void:
 	for i in count:
 		dirs.append(dir.rotated(deg_to_rad((i - (count - 1) / 2.0) * spread)))
 	player.projectiles.fire(global_position, dirs, data, damage, attack_range)
-	Sfx.play("shoot", -14.0, 0.15)
+	Sfx.play(SOUNDS.get(data.resource_path.get_file().get_basename(), "shoot"), -14.0, 0.15)
 	_flash = 0.07
 	_kick = 3.0
 	queue_redraw()

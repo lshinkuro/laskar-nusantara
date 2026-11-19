@@ -2,17 +2,22 @@ extends RefCounted
 ## Angka damage/heal yang melayang lalu hilang.
 
 
-static func spawn(parent: Node, pos: Vector2, amount: int, color := Color(1, 0.9, 0.5), prefix := "") -> void:
+static func spawn(parent: Node, pos: Vector2, amount: int, color := Color(1, 0.9, 0.5), prefix := "", big := false) -> void:
 	var n := Label.new()
 	n.text = prefix + (str(amount) if amount != 0 else "")
 	n.theme_type_variation = &"Hud"
-	n.add_theme_font_size_override("font_size", 8)
+	n.add_theme_font_size_override("font_size", 13 if big else 8)
 	n.add_theme_color_override("font_color", color)
 	n.position = pos - Vector2(10, 6)
 	n.size = Vector2(20, 10)
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	n.z_index = 10
 	parent.get_parent().add_child(n)  # ke World, supaya tidak ikut daftar musuh/pemain
+	if big:  # kritis: membesar lalu mengecil, sedikit miring
+		n.pivot_offset = n.size / 2
+		n.rotation = randf_range(-0.2, 0.2)
+		n.scale = Vector2.ONE * 1.8
+		n.create_tween().tween_property(n, "scale", Vector2.ONE, 0.15)
 	var t := n.create_tween()
 	t.set_parallel()
 	t.tween_property(n, "position:y", n.position.y - 12, 0.5)

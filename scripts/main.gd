@@ -228,6 +228,12 @@ func _on_wave_ended(wave: int) -> void:
 		_finish(true, wave)
 		return
 	state = State.SHOP
+	# Bekal tingkat sulit (wave awal) + bantuan untuk yang tertinggal level dari teman.
+	var bonus: int = (Net.DIFFICULTIES[Net.difficulty].bekal if wave <= 5 else 0) \
+			+ mini(local_player.levels_behind(), 4) * (2 + wave)
+	if bonus > 0:
+		local_player.rempah += bonus
+		local_player.rempah_changed.emit(local_player.rempah)
 	if local_player.pending_levels > 0:
 		level_up.open(local_player)
 	else:

@@ -32,6 +32,11 @@ const MAX_WEAPONS := 6
 const BASE_SPEED := 120.0
 const BASE_PICKUP_RANGE := 40.0
 const SYNC_INTERVAL := 0.05
+## Batas kekuatan (jumlah level item + 2 x tier senjata di atas 1) untuk aura emas, emas berkobar, biru.
+const AURA_STEPS := [12, 24, 40]
+const AURA_COLORS := [Color(1, 0.82, 0.2), Color(1, 0.62, 0.1), Color(0.3, 0.75, 1)]
+## Co-op: tiap level tertinggal dari teman terkuat = +30% rempah/XP (maks 4 level).
+const CATCH_UP_PER_LEVEL := 30
 const BASE_STATS := {
 	"max_hp": 20,
 	"hp_regen": 0,      # tiap poin = 0.2 HP/detik
@@ -76,6 +81,9 @@ var _pulse := PULSE_INTERVAL
 var _death_save_ready := true
 var _rempah_heal_count := 0
 var _turrets: Array[Node] = []
+var aura := 0  # 0..3, ikut disinkronkan supaya teman juga melihat
+var _aura_t := 0.0
+var _aura_drawn := false
 ## Meter Semangat Rakyat (0..100), hanya di pemain lokal.
 var semangat := 0.0
 var map: Node2D  # World/Map, diisi main
@@ -121,6 +129,54 @@ func _process(delta: float) -> void:
 	if _shake > 0:
 		_shake = maxf(_shake - delta * 25.0, 0.0)
 		$Camera2D.offset = Vector2(randf_range(-1, 1), randf_range(-1, 1)) * _shake
+	if aura > 0 or _aura_drawn:
+		_aura_t += delta
+		_aura_drawn = aura > 0
+		queue_redraw()
+
+
+## Kekuatan perlengkapan (level item + tier senjata) -> tingkat aura 0..3.
+func _aura_level() -> int:
+	var power := 0
+	for l in item_levels:
+		power += l
+	for w in weapon_ring.get_children():
+		power += (w.tier - 1) * 2
+	var n := 0
+	for step in AURA_STEPS:
+		if power >= step:
+			n += 1
+	return n
+
+
+## Aura menyala di belakang prajurit: lidah api yang naik + percikan, makin besar tiap tingkat.
+func _draw() -> void:
+	if aura <= 0 or not alive:
+		return
+	var col: Color = AURA_COLORS[aura - 1]
+	var center := Vector2(0, -3)
+	var r := 11.0 + aura * 3.0
+	for layer in 2:
+		var k := 1.0 - layer * 0.35
+		var pts := PackedVector2Array()
+		for i in 28:
+			var a := TAU * i / 28
+			var up := maxf(0.0, -sin(a))  # lidah api hanya ke atas
+			var flick := 0.6 + 0.4 * sin(_aura_t * 14.0 + i * 2.3 + layer)
+			var rad := r * k * (1.0 + up * 0.9 * flick)
+			pts.append(center + Vector2(cos(a) * rad * 0.8, sin(a) * rad))
+		var c := col.lightened(0.5 * layer)
+		c.a = (0.3 + 0.25 * layer) * (0.85 + 0.15 * sin(_aura_t * 6.0))
+		draw_colored_polygon(pts, c)
+	for i in aura * 4:  # percikan naik
+		var ph := fmod(_aura_t * 0.9 + i * 0.37, 1.0)
+		var p := center + Vector2(sin(i * 12.9) * r * 0.7, r * 0.6 - ph * r * 2.2)
+		draw_circle(p, 1.2, Color(col.lightened(0.6), 1.0 - ph))
+	if aura >= 3 and fmod(_aura_t, 0.6) < 0.1:  # kilat
+		var z := PackedVector2Array()
+		for i in 5:
+			z.append(center + Vector2((-4 if i % 2 else 4) + sin(_aura_t * 40) * 3, -r + i * r * 0.45))
+		draw_polyline(z, Color(0.85, 0.95, 1), 1.0)
 
 
 func is_local() -> bool:
@@ -159,7 +215,8 @@ func _physics_process(delta: float) -> void:
 	_sync -= delta
 	if _sync <= 0:
 		_sync = SYNC_INTERVAL
-		_sync_state.rpc(position, hp, stats.max_hp)
+		aura = _aura_level()
+		_sync_state.rpc(position, hp, stats.max_hp, level, aura)
 
 
 func _animate(delta: float, moving: bool, dir_x: float) -> void:
@@ -170,8 +227,10 @@ func _animate(delta: float, moving: bool, dir_x: float) -> void:
 
 
 @rpc("authority", "unreliable_ordered")
-func _sync_state(pos: Vector2, new_hp: int, max_hp: int) -> void:
+func _sync_state(pos: Vector2, new_hp: int, max_hp: int, new_level: int, new_aura: int) -> void:
 	_target_pos = pos
+	level = new_level
+	aura = new_aura
 	if new_hp != hp or max_hp != stats.max_hp:
 		hp = new_hp
 		stats.max_hp = max_hp
@@ -255,7 +314,7 @@ func collect_rempah(value: int) -> void:
 	if randf() * 100.0 < stats.luck:
 		value *= 2
 	# Bonus panen pecahan dibulatkan secara acak (30% -> kadang +1).
-	var bonus: float = value * stats.harvest / 100.0
+	var bonus: float = value * (stats.harvest + CATCH_UP_PER_LEVEL * mini(levels_behind(), 4)) / 100.0
 	value = maxi(0, value + int(bonus) + (1 if randf() < bonus - int(bonus) else 0))
 	rempah += value
 	rempah_total += value
@@ -267,6 +326,14 @@ func collect_rempah(value: int) -> void:
 			heal(1, false)
 	rempah_changed.emit(rempah)
 	gain_xp(value)
+
+
+## Selisih level dengan teman tertinggi (0 saat solo).
+func levels_behind() -> int:
+	var top := level
+	for p in get_parent().get_children():
+		top = maxi(top, p.level)
+	return top - level
 
 
 func xp_needed() -> int:

@@ -35,11 +35,12 @@ const KERAJAAN := [
 ]
 
 ## Tingkat kesulitan (dipakai host saat spawn musuh): pengali HP, damage, dan jumlah musuh.
+## bekal = rempah tambahan tiap akhir wave 1-5, supaya tingkat sulit tidak mati di awal.
 const DIFFICULTIES := [
-	{"name": "Mudah", "hp": 0.7, "dmg": 0.7, "count": 0.8, "color": Color(0.5, 0.85, 0.45)},
-	{"name": "Normal", "hp": 1.0, "dmg": 1.0, "count": 1.0, "color": Color(0.95, 0.85, 0.4)},
-	{"name": "Sulit", "hp": 1.6, "dmg": 1.4, "count": 1.3, "color": Color(0.95, 0.55, 0.25)},
-	{"name": "Neraka", "hp": 2.5, "dmg": 2.0, "count": 1.6, "color": Color(0.95, 0.25, 0.25)},
+	{"name": "Mudah", "hp": 0.7, "dmg": 0.7, "count": 0.8, "bekal": 0, "color": Color(0.5, 0.85, 0.45)},
+	{"name": "Normal", "hp": 1.0, "dmg": 1.0, "count": 1.0, "bekal": 0, "color": Color(0.95, 0.85, 0.4)},
+	{"name": "Sulit", "hp": 1.6, "dmg": 1.4, "count": 1.3, "bekal": 15, "color": Color(0.95, 0.55, 0.25)},
+	{"name": "Neraka", "hp": 2.5, "dmg": 2.0, "count": 1.6, "bekal": 25, "color": Color(0.95, 0.25, 0.25)},
 ]
 
 var players := {}  # peer_id -> {"name": String, "outfit": int, "char": int}
@@ -232,7 +233,7 @@ func start_game() -> void:
 		return
 	in_game = true
 	_close_signaling()  # room ditutup untuk pemain baru
-	_load_game.rpc()
+	_load_game.rpc(difficulty)
 
 
 func leave(message := "") -> void:
@@ -300,7 +301,8 @@ func _set_players(new_players: Dictionary) -> void:
 
 
 @rpc("authority", "call_local", "reliable")
-func _load_game() -> void:
+func _load_game(diff: int) -> void:
+	difficulty = diff  # client ikut tingkat kesulitan host
 	in_game = true
 	_close_signaling()
 	get_tree().paused = false

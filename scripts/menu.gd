@@ -174,6 +174,8 @@ func _build_difficulty() -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.add_theme_font_size_override("font_size", 7)
 		b.tooltip_text = "HP musuh x%.1f, damage musuh x%.1f, jumlah musuh x%.1f" % [d.hp, d.dmg, d.count]
+		if d.bekal > 0:
+			b.tooltip_text += "\nBekal perang: +%d rempah tiap akhir wave 1-5" % d.bekal
 		b.focus_mode = Control.FOCUS_NONE
 		b.pressed.connect(func():
 			Net.difficulty = i

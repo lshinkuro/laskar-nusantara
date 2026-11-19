@@ -1,6 +1,7 @@
 extends SceneTree
 ## XP & level up: 30 XP -> level 3 (butuh 10 + 15), 2 pilihan ilmu tertunda.
 ## Akhir wave: layar ilmu muncul dulu, setelah 2 pilihan baru toko terbuka.
+## Aura menyala saat item kuat.
 ## Ketupat: heal +3 tapi tidak lewat HP maks. Jeda: game berhenti & lanjut lagi.
 ## Jalankan: godot --headless -s res://tests/level_test.gd
 
@@ -37,6 +38,10 @@ func _process(_delta: float) -> bool:
 	ok = ok and p.hp == hurt + 3
 	p.heal(100)
 	ok = ok and p.hp == p.stats.max_hp
+	# Aura: 4 item level 3 = kekuatan 12 -> aura emas; solo tidak pernah "tertinggal".
+	var aura_none: int = p._aura_level()
+	p.item_levels.append_array([3, 3, 3, 3])
+	ok = ok and aura_none == 0 and p._aura_level() == 1 and p.levels_behind() == 0
 	print("pause=%s " % pause_ok, "level=%d xp=%d max_hp=%d damage=%d shop=%s -> %s" % [p.level, p.xp, p.stats.max_hp, p.stats.damage, main.shop.visible, "OK" if ok else "FAIL"])
 	quit(0 if ok else 1)
 	return true

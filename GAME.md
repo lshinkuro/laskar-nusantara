@@ -56,12 +56,14 @@ Nambah karakter: buat `data/characters/<nama>.tres` dan potretnya di `tools/make
 
 Dipilih di menu (untuk co-op, yang berlaku pilihan host).
 
-| Kesulitan | HP musuh | Damage musuh | Jumlah musuh |
-|---|---|---|---|
-| Mudah | ×0.7 | ×0.7 | ×0.8 |
-| Normal | ×1.0 | ×1.0 | ×1.0 |
-| Sulit | ×1.6 | ×1.4 | ×1.3 |
-| Neraka | ×2.5 | ×2.0 | ×1.6 |
+| Kesulitan | HP musuh | Damage musuh | Jumlah musuh | Bekal perang |
+|---|---|---|---|---|
+| Mudah | ×0.7 | ×0.7 | ×0.8 | – |
+| Normal | ×1.0 | ×1.0 | ×1.0 | – |
+| Sulit | ×1.6 | ×1.4 | ×1.3 | +15 rempah |
+| Neraka | ×2.5 | ×2.0 | ×1.6 | +25 rempah |
+
+*Bekal perang* diberikan di akhir wave 1–5 supaya bisa belanja cukup sebelum musuh membesar.
 
 Selain itu musuh **tumbuh berlipat tiap wave**: HP ×1.08 dan damage ×1.04 per wave (di atas
 kenaikan linear), karena item dan senjata pemain juga berlipat. Di wave 20, HP musuh ±4.7× dan
@@ -73,6 +75,8 @@ Angkanya ada di `Net.DIFFICULTIES` (`scripts/net.gd`) dan `HP_GROWTH`/`DMG_GROWT
 - **Rempah** dari musuh = uang belanja sekaligus XP. Tampilannya acak: pala, cengkeh, lada, kayu manis,
   bunga lawang, atau kepeng (koin), melayang naik-turun. Harga di Pasar naik 12% tiap wave.
 - **Naik level**: HP Maks +1, lalu pilih 1 dari 4 *ilmu* (upgrade stat) per level di akhir wave.
+- **Aura**: kekuatan perlengkapan (jumlah level item + 2 × tier senjata di atas 1) ≥ 12 → aura emas,
+  ≥ 24 → emas berkobar, ≥ 40 → aura biru berkilat. Teman co-op juga melihatnya.
 - **Ketupat**: kadang jatuh dari musuh, +3 HP.
 - **Semangat Rakyat**: selamatkan warga terkurung & kalahkan musuh untuk mengisi meter. Penuh →
   *Pekik Merdeka*: gelombang merah putih melukai & mendorong musuh, pulih 30% HP, kebal sebentar.
@@ -156,3 +160,7 @@ Boss menjatuhkan **Peti Pusaka** berisi item/senjata acak yang condong langka.
 2–4 pemain lewat WebRTC (signaling MQTT publik). Host membuat room dengan kode 5 huruf, teman
 bergabung lewat kode atau link. Host menjalankan wave, musuh, dan kesulitan; tiap pemain mengurus
 prajurit, senjata, dan belanjanya sendiri. HP boss dan jumlah musuh naik 60% per pemain tambahan.
+
+**Bantuan mengejar**: pemain yang levelnya tertinggal dari teman tertinggi mendapat +30% rempah/XP
+per level tertinggal (maks 4 level = +120%), plus bonus (2 + wave) rempah per level tertinggal di
+akhir wave. Yang mati di awal wave pun tetap kebagian bonus ini.

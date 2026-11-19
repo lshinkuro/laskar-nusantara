@@ -112,7 +112,7 @@ func hit(enemy: Node, amount: int, data: WeaponData = null, dir := Vector2.ZERO)
 		var mod: Array = local_player.modify_hit(effect, power)
 		effect = mod[0]
 		power = mod[1]
-	var crit := local_player != null and randf() < CRIT_CHANCE + local_player.stats.luck / 400.0
+	var crit: bool = local_player != null and randf() < CRIT_CHANCE + local_player.stats.luck / 400.0
 	if crit:
 		amount *= CRIT_MULT
 		Sfx.play("crit", -6.0)

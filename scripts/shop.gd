@@ -27,6 +27,7 @@ const STAT_NAMES := {
 const GOLD := Color(0.88, 0.69, 0.29)
 const REMPAH_ICON := preload("res://assets/sprites/rempah.svg")
 const Synergy := preload("res://scripts/synergy.gd")
+const UiAnim := preload("res://scripts/ui_anim.gd")
 const RARITY_NAMES := ["Biasa", "Langka", "Epik", "Legendaris"]
 const RARITY_COLORS := [Color(0.75, 0.7, 0.62), Color(0.4, 0.65, 1.0), Color(0.75, 0.45, 1.0), Color(1.0, 0.6, 0.2)]
 const WEAPON_COLOR := Color(0.95, 0.6, 0.45)

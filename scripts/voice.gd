@@ -1,7 +1,10 @@
 extends CanvasLayer
 ## Obrolan suara co-op (web saja). Suara memakai RTCPeerConnection milik browser (Opus, peredam
 ## gema), terpisah dari WebRTC data game; tukar SDP/ICE-nya menumpang RPC game yang sudah tersambung.
-## Mik mati sampai pemain menekan tombol Mik (atau tombol V); suara teman selalu terdengar.
+## Mik mati sampai pemain menekan ikon mik di kanan atas (atau tombol V); suara teman selalu terdengar.
+
+const ICON_ON := preload("res://assets/ui/mic_on.svg")
+const ICON_OFF := preload("res://assets/ui/mic_off.svg")
 
 const JS := """
 window.lnVoice = (() => {
@@ -96,13 +99,14 @@ func _ready() -> void:
 	multiplayer.peer_disconnected.connect(func(id): _js.drop(id))
 	_button = Button.new()
 	_button.focus_mode = Control.FOCUS_NONE
-	_button.add_theme_font_size_override("font_size", 8)
-	_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_button.offset_left = -112
-	_button.offset_top = -22
-	_button.offset_right = -54
-	_button.offset_bottom = -6
-	_button.tooltip_text = "Nyalakan/matikan mikrofon untuk ngobrol dengan teman (tombol V)"
+	_button.flat = true
+	_button.expand_icon = true
+	_button.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_button.offset_left = -24
+	_button.offset_top = 4
+	_button.offset_right = -6
+	_button.offset_bottom = 22
+	_button.tooltip_text = "Mikrofon: klik atau tombol V untuk nyala/mati"
 	_button.pressed.connect(toggle)
 	add_child(_button)
 	_update_button("off")
@@ -146,5 +150,7 @@ func _signal(json: String) -> void:
 
 func _update_button(state: String) -> void:
 	_on = state == "on"
-	_button.text = {"on": "Mik: ON", "off": "Mik: OFF", "denied": "Mik ditolak"}[state]
-	_button.modulate = Color(0.5, 1, 0.55) if _on else Color(1, 0.55, 0.5) if state == "denied" else Color.WHITE
+	_button.icon = ICON_ON if _on else ICON_OFF
+	_button.modulate = Color(1, 0.5, 0.5) if state == "denied" else Color.WHITE
+	if state == "denied":
+		_button.tooltip_text = "Izin mikrofon ditolak browser"

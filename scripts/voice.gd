@@ -110,6 +110,11 @@ func _ready() -> void:
 	_button.pressed.connect(toggle)
 	add_child(_button)
 	_update_button("off")
+	get_tree().create_timer(3.0).timeout.connect(func():  # DIAG sementara
+		JavaScriptBridge.eval("window.lnVoiceBtn = %s" % JSON.stringify({"pos": str(_button.global_position), "size": str(_button.size),
+			"vis": _button.is_visible_in_tree(), "icon": _button.icon != null, "vp": str(get_viewport().get_visible_rect()),
+			"anchors": str([_button.anchor_left, _button.anchor_right]), "offsets": str([_button.offset_left, _button.offset_right]),
+			"inside": _button.is_inside_tree(), "parent": str(_button.get_parent().name), "layer": layer})))
 
 
 ## Dipanggil main di awal wave 1 (semua peer sudah memuat game): id kecil menawarkan ke id besar.
